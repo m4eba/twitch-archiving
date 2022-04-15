@@ -1,6 +1,5 @@
 import WebSocket from 'ws';
 import pino, { Logger } from 'pino';
-import { EventEmitter } from 'events';
 
 const logger: Logger = pino({level:'debug'}).child({module:'websocket'});
 
@@ -9,7 +8,11 @@ enum Status {
   OPEN,
 }
 
-export abstract class WebSocketConnection extends EventEmitter {
+export interface MessageListener {
+  message: (data: string)=>void;
+}
+
+export abstract class WebSocketConnection {
   private status: Status = Status.CLOSE;
   protected id: string = 'ws';
   protected url: string = '';
@@ -18,9 +21,14 @@ export abstract class WebSocketConnection extends EventEmitter {
   private pingInt: NodeJS.Timeout | null = null;
   private pingTimeout: NodeJS.Timer | null = null;
 
+  private listeners: MessageListener[] = [];
+
   public constructor(url: string) {
-    super();
     this.url = url;
+  }
+
+  public addListener(listener: MessageListener): void {
+    this.listeners.push(listener);
   }
 
   public open(): void {
@@ -71,6 +79,7 @@ export abstract class WebSocketConnection extends EventEmitter {
       clearInterval(this.pingTimeout);
       this.pingTimeout = null;
     }
+    this.listeners.forEach(l=>l.message(data.toString().trim()));
     this.onMessage(data);
   }
 

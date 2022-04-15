@@ -1,14 +1,17 @@
-/// <reference types="node" />
 import WebSocket from 'ws';
-import { EventEmitter } from 'events';
-export declare abstract class WebSocketConnection extends EventEmitter {
+export interface MessageListener {
+    message: (data: string) => void;
+}
+export declare abstract class WebSocketConnection {
     private status;
     protected id: string;
     protected url: string;
     protected ws: WebSocket | null;
     private pingInt;
     private pingTimeout;
+    private listeners;
     constructor(url: string);
+    addListener(listener: MessageListener): void;
     open(): void;
     close(): void;
     private wsOpen;

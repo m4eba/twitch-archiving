@@ -8,6 +8,10 @@ export const KafkaConfigOpt = {
         multiple: true,
     },
 };
+export const TwitchConfigOpt = {
+    twitchClientId: { type: String },
+    twitchClientSecret: { type: String },
+};
 export const PostgresConfigOpt = {
     pgHost: { type: String, defaultValue: 'localhost' },
     pgPort: { type: Number, defaultValue: 5432 },

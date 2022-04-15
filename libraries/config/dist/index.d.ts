@@ -4,6 +4,11 @@ export interface KafkaConfig {
     kafkaBroker: string[];
 }
 export declare const KafkaConfigOpt: ArgumentConfig<KafkaConfig>;
+export interface TwitchConfig {
+    twitchClientId: string;
+    twitchClientSecret: string;
+}
+export declare const TwitchConfigOpt: ArgumentConfig<TwitchConfig>;
 export interface PostgresConfig {
     pgHost: string;
     pgPort: number;

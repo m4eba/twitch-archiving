@@ -1,22 +1,24 @@
 import WebSocket from 'ws';
 import pino from 'pino';
-import { EventEmitter } from 'events';
 const logger = pino({ level: 'debug' }).child({ module: 'websocket' });
 var Status;
 (function (Status) {
     Status[Status["CLOSE"] = 0] = "CLOSE";
     Status[Status["OPEN"] = 1] = "OPEN";
 })(Status || (Status = {}));
-export class WebSocketConnection extends EventEmitter {
+export class WebSocketConnection {
     constructor(url) {
-        super();
         this.status = Status.CLOSE;
         this.id = 'ws';
         this.url = '';
         this.ws = null;
         this.pingInt = null;
         this.pingTimeout = null;
+        this.listeners = [];
         this.url = url;
+    }
+    addListener(listener) {
+        this.listeners.push(listener);
     }
     open() {
         logger.debug({ id: this.id, url: this.url, status: this.status }, 'open');
@@ -62,6 +64,7 @@ export class WebSocketConnection extends EventEmitter {
             clearInterval(this.pingTimeout);
             this.pingTimeout = null;
         }
+        this.listeners.forEach(l => l.message(data.toString().trim()));
         this.onMessage(data);
     }
     wsClose() {
