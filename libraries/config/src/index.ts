@@ -16,6 +16,17 @@ export const KafkaConfigOpt: ArgumentConfig<KafkaConfig> = {
   },
 };
 
+export interface TwitchConfig {
+  twitchClientId: string;
+  twitchClientSecret: string;
+}
+
+export const TwitchConfigOpt: ArgumentConfig<TwitchConfig> = {
+  twitchClientId: { type: String },
+  twitchClientSecret: { type: String },
+};
+
+
 export interface PostgresConfig {
   pgHost: string;
   pgPort: number;
