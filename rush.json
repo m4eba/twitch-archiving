@@ -457,5 +457,24 @@
     //   "projectFolder": "tools/my-toolchain",
     //   "reviewCategory": "tools"
     // }
+    {
+      "packageName": "@twitch-archiving/kafka-messages",
+      "projectFolder": "libraries/kafka-messages",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/websocket",
+      "projectFolder": "libraries/websocket",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/config",
+      "projectFolder": "libraries/config",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/node-rig",
+      "projectFolder": "rigs/node-rig"
+    }
   ]
 }
