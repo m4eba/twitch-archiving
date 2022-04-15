@@ -1,8 +1,6 @@
 import WebSocket from 'ws';
 import pino, { Logger } from 'pino';
 import { EventEmitter } from 'events';
-import type { Producer, TopicMessages } from 'kafkajs';
-import type { WebsocketMessage } from '@twitch-archiving/kafka-messages'
 
 const logger: Logger = pino({level:'debug'}).child({module:'websocket'});
 
@@ -15,17 +13,14 @@ export abstract class WebSocketConnection extends EventEmitter {
   private status: Status = Status.CLOSE;
   protected id: string = 'ws';
   protected url: string = '';
-  protected topics: string[] = [];
-  protected producer: Producer;
+  
   protected ws: WebSocket | null = null;
   private pingInt: NodeJS.Timeout | null = null;
   private pingTimeout: NodeJS.Timer | null = null;
 
-  public constructor(url: string, producer: Producer, topics: string[]) {
+  public constructor(url: string) {
     super();
     this.url = url;
-    this.topics = topics;
-    this.producer = producer;
   }
 
   public open(): void {
@@ -76,13 +71,7 @@ export abstract class WebSocketConnection extends EventEmitter {
       clearInterval(this.pingTimeout);
       this.pingTimeout = null;
     }
-    this.writeData(data)
-    .catch(((e:Error)=>{
-      logger.debug({id:this.id,status:this.status,error:e},'unable to writeDate');
-    }).bind(this))
-    .finally((() =>{
-      this.onMessage(data);
-    }).bind(this));    
+    this.onMessage(data);
   }
 
   private wsClose():void {
@@ -95,29 +84,7 @@ export abstract class WebSocketConnection extends EventEmitter {
     this.onClose();
   }
 
-  private async writeData(data: WebSocket.Data):Promise<void> {    
-    const time: Date = new Date();
-    const messages: TopicMessages[] = [];
-    for (let i: number = 0; i < this.topics.length; ++i) {
-      const value: WebsocketMessage = {
-        id: this.id,
-        data: data.toString().trim()
-      };
-      const topicMessage: TopicMessages = {
-        topic: this.topics[i],
-        messages: [
-          {
-            key: this.id,
-            value: JSON.stringify(value),
-            timestamp: time.getTime().toString(),
-          },
-        ],
-      };
-      messages.push(topicMessage);
-    }
-    logger.debug({ id:this.id, size: messages.length }, 'sending batch');
-    await this.producer.sendBatch({ topicMessages: messages });
-  }
+  
   
   protected abstract ping(): void;
   protected abstract isPong(data: WebSocket.Data): boolean;
