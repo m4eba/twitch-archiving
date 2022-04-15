@@ -8,18 +8,15 @@ var Status;
     Status[Status["OPEN"] = 1] = "OPEN";
 })(Status || (Status = {}));
 export class WebSocketConnection extends EventEmitter {
-    constructor(url, producer, topics) {
+    constructor(url) {
         super();
         this.status = Status.CLOSE;
         this.id = 'ws';
         this.url = '';
-        this.topics = [];
         this.ws = null;
         this.pingInt = null;
         this.pingTimeout = null;
         this.url = url;
-        this.topics = topics;
-        this.producer = producer;
     }
     open() {
         logger.debug({ id: this.id, url: this.url, status: this.status }, 'open');
@@ -65,13 +62,7 @@ export class WebSocketConnection extends EventEmitter {
             clearInterval(this.pingTimeout);
             this.pingTimeout = null;
         }
-        this.writeData(data)
-            .catch(((e) => {
-            logger.debug({ id: this.id, status: this.status, error: e }, 'unable to writeDate');
-        }).bind(this))
-            .finally((() => {
-            this.onMessage(data);
-        }).bind(this));
+        this.onMessage(data);
     }
     wsClose() {
         if (this.status === Status.CLOSE)
@@ -81,29 +72,6 @@ export class WebSocketConnection extends EventEmitter {
             this.open();
         }, 5 * 1000);
         this.onClose();
-    }
-    async writeData(data) {
-        const time = new Date();
-        const messages = [];
-        for (let i = 0; i < this.topics.length; ++i) {
-            const value = {
-                id: this.id,
-                data: data.toString().trim()
-            };
-            const topicMessage = {
-                topic: this.topics[i],
-                messages: [
-                    {
-                        key: this.id,
-                        value: JSON.stringify(value),
-                        timestamp: time.getTime().toString(),
-                    },
-                ],
-            };
-            messages.push(topicMessage);
-        }
-        logger.debug({ id: this.id, size: messages.length }, 'sending batch');
-        await this.producer.sendBatch({ topicMessages: messages });
     }
     onOpen() { }
     onClose() { }
