@@ -67,4 +67,4 @@ common/autoinstallers/*/.npmrc
 # Heft
 .heft
 
-**/temp/*
+temp
