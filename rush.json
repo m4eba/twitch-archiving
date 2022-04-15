@@ -473,6 +473,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/pubsub",
+      "projectFolder": "libraries/pubsub",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
