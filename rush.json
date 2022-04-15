@@ -458,8 +458,8 @@
     //   "reviewCategory": "tools"
     // }
     {
-      "packageName": "@twitch-archiving/kafka-messages",
-      "projectFolder": "libraries/kafka-messages",
+      "packageName": "@twitch-archiving/messages",
+      "projectFolder": "libraries/messages",
       "shouldPublish": true
     },
     {
