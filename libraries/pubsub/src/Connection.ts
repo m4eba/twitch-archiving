@@ -31,10 +31,10 @@ export class Connection extends WebSocketConnection {
       this.ws.send(
         JSON.stringify({
           type: 'LISTEN',
-          nonce: `NONCE${Math.round(Math.random() * 1312323)}`,
+          nonce: `${Math.round(Math.random() * 1312)}${this.topics[i]}`,
           data: {
             auth_token: this.token,
-            topics: [this.topics],
+            topics: [this.topics[i]],
           },
         })
       );
