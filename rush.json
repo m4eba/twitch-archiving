@@ -478,6 +478,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-pubsub-client",
+      "projectFolder": "microservices/ms-pubsub-client",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
