@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import pino, { Logger } from 'pino';
 
-const logger: Logger = pino({level:'debug'}).child({module:'websocket'});
+const logger: Logger = pino({ level: 'debug' }).child({ module: 'websocket' });
 
 enum Status {
   CLOSE,
@@ -9,14 +9,14 @@ enum Status {
 }
 
 export interface MessageListener {
-  message: (data: string)=>void;
+  message: (data: string) => void;
 }
 
 export abstract class WebSocketConnection {
   private status: Status = Status.CLOSE;
   protected id: string = 'ws';
   protected url: string = '';
-  
+
   protected ws: WebSocket | null = null;
   private pingInt: NodeJS.Timeout | null = null;
   private pingTimeout: NodeJS.Timer | null = null;
@@ -32,7 +32,7 @@ export abstract class WebSocketConnection {
   }
 
   public open(): void {
-    logger.debug({id:this.id,url:this.url,status:this.status},'open');
+    logger.debug({ id: this.id, url: this.url, status: this.status }, 'open');
     this.ws = new WebSocket(this.url);
     this.status = Status.OPEN;
 
@@ -72,20 +72,23 @@ export abstract class WebSocketConnection {
     this.onOpen();
   }
 
-  private wsError():void {}
+  private wsError(): void {}
 
-  private wsMessage(data: WebSocket.Data):void {
+  private wsMessage(data: WebSocket.Data): void {
     if (this.isPong(data) && this.pingTimeout) {
       clearInterval(this.pingTimeout);
       this.pingTimeout = null;
     }
-    this.listeners.forEach(l=>l.message(data.toString().trim()));
+    this.listeners.forEach((l) => l.message(data.toString().trim()));
     this.onMessage(data);
   }
 
-  private wsClose():void {
+  private wsClose(): void {
     if (this.status === Status.CLOSE) return;
-    logger.debug({id:this.id,status:this.status},'ws disconnected, reconnect in 5 seconds');
+    logger.debug(
+      { id: this.id, status: this.status },
+      'ws disconnected, reconnect in 5 seconds'
+    );
     setTimeout(() => {
       this.open();
     }, 5 * 1000);
@@ -93,8 +96,6 @@ export abstract class WebSocketConnection {
     this.onClose();
   }
 
-  
-  
   protected abstract ping(): void;
   protected abstract isPong(data: WebSocket.Data): boolean;
 
@@ -105,7 +106,7 @@ export abstract class WebSocketConnection {
   protected onMessage(data: WebSocket.Data): void {}
 
   private timeout(): void {
-    logger.debug({id:this.id,status:this.status},'ping timeout');
+    logger.debug({ id: this.id, status: this.status }, 'ping timeout');
     if (!this.ws) return;
     this.ws.close();
   }

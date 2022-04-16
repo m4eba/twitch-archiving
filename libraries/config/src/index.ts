@@ -1,4 +1,4 @@
-import type { ArgumentConfig } from "ts-command-line-args";
+import type { ArgumentConfig } from 'ts-command-line-args';
 
 export interface KafkaConfig {
   kafkaClientId: string;
@@ -25,7 +25,6 @@ export const TwitchConfigOpt: ArgumentConfig<TwitchConfig> = {
   twitchClientId: { type: String },
   twitchClientSecret: { type: String },
 };
-
 
 export interface PostgresConfig {
   pgHost: string;

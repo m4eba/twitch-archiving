@@ -2,13 +2,15 @@ import type WebSocket from 'ws';
 import pino, { Logger } from 'pino';
 import { WebSocketConnection } from '@twitch-archiving/websocket';
 
-const logger: Logger = pino({level:'debug'}).child({module:'events-connection'});
+const logger: Logger = pino({ level: 'debug' }).child({
+  module: 'events-connection',
+});
 
 export class Connection extends WebSocketConnection {
   protected topics: string[] = [];
   protected token: string;
-  
-  public constructor(token: string, topics:string[]){
+
+  public constructor(token: string, topics: string[]) {
     super('wss://pubsub-edge.twitch.tv/v1');
     this.token = token;
     this.topics = topics;
@@ -25,11 +27,11 @@ export class Connection extends WebSocketConnection {
   protected listen(): void {
     if (!this.ws) return;
     if (!this.token) return;
-    for(let i=0;i<this.topics.length;++i) {
+    for (let i = 0; i < this.topics.length; ++i) {
       this.ws.send(
         JSON.stringify({
           type: 'LISTEN',
-          nonce: `NONCE${Math.round(Math.random()*1312323)}`,
+          nonce: `NONCE${Math.round(Math.random() * 1312323)}`,
           data: {
             auth_token: this.token,
             topics: [this.topics],
