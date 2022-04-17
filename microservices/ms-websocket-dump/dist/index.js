@@ -1,4 +1,4 @@
-import { KafkaConfigOpt, FileConfigOpt } from '@twitch-archiving/config';
+import { KafkaConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
 import path from 'path';
 import pino from 'pino';
 import { Kafka } from 'kafkajs';
@@ -15,7 +15,9 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({ module: 'websocket-dump' });
+const logger = pino({ level: 'debug' }).child({
+    module: 'websocket-dump',
+});
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,

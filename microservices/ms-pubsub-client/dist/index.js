@@ -1,14 +1,14 @@
-import { KafkaConfigOpt, TwitchConfigOpt, FileConfigOpt } from '@twitch-archiving/config';
+import { KafkaConfigOpt, TwitchConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
 import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
-import { ClientCredentialsAuthProvider } from '@twurple/auth';
+import { ClientCredentialsAuthProvider, } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 import { Connection } from '@twitch-archiving/pubsub';
 const PubsubConfigOpt = {
     topics: { type: String, multiple: true },
     channels: { type: String, multiple: true },
-    kafkaTopics: { type: String, multiple: true }
+    kafkaTopics: { type: String, multiple: true },
 };
 const config = parse({
     ...KafkaConfigOpt,
@@ -18,7 +18,9 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({ module: 'pubsub-client' });
+const logger = pino({ level: 'debug' }).child({
+    module: 'pubsub-client',
+});
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
@@ -36,14 +38,14 @@ for (let i = 0; i < config.channels.length; ++i) {
     const user = await twitch.users.getUserByName(config.channels[i]);
     if (user === null)
         continue;
-    const topics = config.topics.map(t => t + user.id);
+    const topics = config.topics.map((t) => t.replace('$ID', user.id));
     const connection = new Connection(token.accessToken, topics);
     connection.addListener({
         message: (data) => {
-            sendData(user.name, data).catch(e => {
+            sendData(user.name, data).catch((e) => {
                 logger.debug({ error: e }, 'error while sending');
             });
-        }
+        },
     });
 }
 async function sendData(user, data) {
@@ -52,7 +54,7 @@ async function sendData(user, data) {
     for (let i = 0; i < config.kafkaTopics.length; ++i) {
         const value = {
             id: user,
-            data: data.toString().trim()
+            data: data.toString().trim(),
         };
         const topicMessage = {
             topic: config.kafkaTopics[i],
