@@ -35,10 +35,12 @@ if (token === null) {
     process.exit(1);
 }
 for (let i = 0; i < config.channels.length; ++i) {
+    logger.debug({ channel: config.channels[i] }, 'create new connection');
     const user = await twitch.users.getUserByName(config.channels[i]);
     if (user === null)
         continue;
     const topics = config.topics.map((t) => t.replace('$ID', user.id));
+    logger.debug({ topics: topics }, 'channel topics');
     const connection = new Connection(token.accessToken, topics);
     connection.addListener({
         message: (data) => {
@@ -47,21 +49,18 @@ for (let i = 0; i < config.channels.length; ++i) {
             });
         },
     });
+    connection.open();
 }
 async function sendData(user, data) {
     const time = new Date();
     const messages = [];
     for (let i = 0; i < config.kafkaTopics.length; ++i) {
-        const value = {
-            id: user,
-            data: data.toString().trim(),
-        };
         const topicMessage = {
             topic: config.kafkaTopics[i],
             messages: [
                 {
                     key: user,
-                    value: JSON.stringify(value),
+                    value: data,
                     timestamp: time.getTime().toString(),
                 },
             ],
