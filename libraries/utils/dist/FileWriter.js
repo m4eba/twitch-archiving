@@ -5,7 +5,7 @@ export class FileWriter {
         this.folder = '';
         this.out = undefined;
         this.fileIsOpening = false;
-        this.currentDay = 0;
+        this.lastDay = '';
         this.buffer = [];
         this.folder = folder;
     }
@@ -13,46 +13,48 @@ export class FileWriter {
         if (this.out === undefined) {
             this.buffer.push({ timestamp, data });
             if (!this.fileIsOpening)
-                this.openStream();
+                this.openStream(timestamp);
             return;
         }
-        const tsDay = parseInt(timestamp.substring(8, 10));
-        if (tsDay !== this.currentDay) {
+        const tsDay = timestamp.substring(8, 10);
+        if (tsDay !== this.lastDay) {
             this.buffer.push({ timestamp, data });
             if (!this.fileIsOpening) {
                 this.out.close();
                 this.out = undefined;
-                this.openStream();
+                this.openStream(timestamp);
             }
             return;
         }
         if (this.buffer.length > 0) {
-            for (let i = 0; i < this.buffer.length; ++i) {
-                this.out.write(this.buffer[i].timestamp);
-                this.out.write(' ');
-                this.out.write(this.buffer[i].data);
-                this.out.write('\n');
-            }
+            const buf2 = [...this.buffer];
             this.buffer = [];
+            for (let i = 0; i < buf2.length; ++i) {
+                this.write(buf2[i].timestamp, buf2[i].data);
+            }
         }
         this.out.write(timestamp);
         this.out.write(' ');
         this.out.write(data);
         this.out.write('\n');
     }
-    openStream() {
+    openStream(timestamp) {
         this.fileIsOpening = true;
-        const time = new Date();
-        const year = time.getFullYear().toString();
-        const month = (time.getMonth() + 1).toString().padStart(2, '0');
-        const day = time.getDate().toString().padStart(2, '0');
-        this.currentDay = time.getDate();
-        const outd = path.join(this.folder, time.getFullYear().toString(), month);
-        fs.promises.mkdir(outd, { recursive: true }).then((() => {
+        const year = timestamp.substring(0, 4);
+        const month = timestamp.substring(5, 7);
+        const day = timestamp.substring(8, 10);
+        this.lastDay = day;
+        const outd = path.join(this.folder, year, month);
+        fs.promises
+            .mkdir(outd, { recursive: true })
+            .then((() => {
             const filename = `${year}${month}${day}.txt`;
-            this.out = fs.createWriteStream(path.join(outd, filename), { flags: 'a' });
+            this.out = fs.createWriteStream(path.join(outd, filename), {
+                flags: 'a',
+            });
             this.fileIsOpening = false;
-        }).bind(this)).catch(() => {
+        }).bind(this))
+            .catch(() => {
             this.fileIsOpening = false;
             throw new Error('unable to create output folder');
         });

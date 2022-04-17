@@ -1,6 +1,8 @@
 import pino from 'pino';
 import { WebSocketConnection } from '@twitch-archiving/websocket';
-const logger = pino({ level: 'debug' }).child({ module: 'events-connection' });
+const logger = pino({ level: 'debug' }).child({
+    module: 'events-connection',
+});
 export class Connection extends WebSocketConnection {
     constructor(token, topics) {
         super('wss://pubsub-edge.twitch.tv/v1');
@@ -22,10 +24,10 @@ export class Connection extends WebSocketConnection {
         for (let i = 0; i < this.topics.length; ++i) {
             this.ws.send(JSON.stringify({
                 type: 'LISTEN',
-                nonce: `NONCE${Math.round(Math.random() * 1312323)}`,
+                nonce: `${Math.round(Math.random() * 1312)}${this.topics[i]}`,
                 data: {
                     auth_token: this.token,
-                    topics: [this.topics],
+                    topics: [this.topics[i]],
                 },
             }));
         }

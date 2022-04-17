@@ -1,4 +1,4 @@
-import type { ArgumentConfig } from "ts-command-line-args";
+import type { ArgumentConfig } from 'ts-command-line-args';
 export interface KafkaConfig {
     kafkaClientId: string;
     kafkaBroker: string[];
