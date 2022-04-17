@@ -73,7 +73,7 @@ for (let i: number = 0; i < config.channels.length; ++i) {
     config.channels[i]
   );
   if (user === null) continue;
-  const topics: string[] = config.topics.map((t) => t + user.id);
+  const topics: string[] = config.topics.map((t) => t.replace('$ID', user.id));
   const connection: Connection = new Connection(token.accessToken, topics);
   connection.addListener({
     message: (data: string) => {
