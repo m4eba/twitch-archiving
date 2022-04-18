@@ -1,8 +1,8 @@
 import WebSocket from 'ws';
-export interface MessageListener {
-    message: (data: string) => void;
+export interface MessageListener<IMessage> {
+    message: (data: IMessage) => void;
 }
-export declare abstract class WebSocketConnection {
+export declare abstract class WebSocketConnection<IMessage> {
     private status;
     protected id: string;
     protected url: string;
@@ -12,7 +12,7 @@ export declare abstract class WebSocketConnection {
     private listeners;
     constructor(url: string);
     protected send(data: string): Promise<void>;
-    addListener(listener: MessageListener): void;
+    addListener(listener: MessageListener<IMessage>): void;
     open(): void;
     close(): void;
     private wsOpen;
@@ -23,6 +23,6 @@ export declare abstract class WebSocketConnection {
     protected abstract isPong(data: WebSocket.Data): boolean;
     protected onOpen(): void;
     protected onClose(): void;
-    protected onMessage(data: WebSocket.Data): void;
+    protected onMessage(data: WebSocket.Data): IMessage;
     private timeout;
 }

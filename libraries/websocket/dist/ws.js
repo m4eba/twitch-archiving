@@ -75,8 +75,8 @@ export class WebSocketConnection {
             clearInterval(this.pingTimeout);
             this.pingTimeout = null;
         }
-        this.listeners.forEach((l) => l.message(data.toString().trim()));
-        this.onMessage(data);
+        const msg = this.onMessage(data);
+        this.listeners.forEach((l) => l.message(msg));
     }
     wsClose() {
         if (this.status === Status.CLOSE)

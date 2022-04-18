@@ -8,11 +8,11 @@ enum Status {
   OPEN,
 }
 
-export interface MessageListener {
-  message: (data: string) => void;
+export interface MessageListener<IMessage> {
+  message: (data: IMessage) => void;
 }
 
-export abstract class WebSocketConnection {
+export abstract class WebSocketConnection<IMessage> {
   private status: Status = Status.CLOSE;
   protected id: string = 'ws';
   protected url: string = '';
@@ -21,7 +21,7 @@ export abstract class WebSocketConnection {
   private pingInt: NodeJS.Timeout | null = null;
   private pingTimeout: NodeJS.Timer | null = null;
 
-  private listeners: MessageListener[] = [];
+  private listeners: MessageListener<IMessage>[] = [];
 
   public constructor(url: string) {
     this.url = url;
@@ -44,7 +44,7 @@ export abstract class WebSocketConnection {
     );
   }
 
-  public addListener(listener: MessageListener): void {
+  public addListener(listener: MessageListener<IMessage>): void {
     this.listeners.push(listener);
   }
 
@@ -96,8 +96,8 @@ export abstract class WebSocketConnection {
       clearInterval(this.pingTimeout);
       this.pingTimeout = null;
     }
-    this.listeners.forEach((l) => l.message(data.toString().trim()));
-    this.onMessage(data);
+    const msg: IMessage = this.onMessage(data);
+    this.listeners.forEach((l) => l.message(msg));
   }
 
   private wsClose(): void {
@@ -120,7 +120,7 @@ export abstract class WebSocketConnection {
   protected onClose(): void {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // @ts-ignore: no-unused-vars
-  protected onMessage(data: WebSocket.Data): void {}
+  protected onMessage(data: WebSocket.Data): IMessage {}
 
   private timeout(): void {
     logger.debug({ id: this.id, status: this.status }, 'ping timeout');
