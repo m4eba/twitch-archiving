@@ -11,6 +11,7 @@ export declare abstract class WebSocketConnection {
     private pingTimeout;
     private listeners;
     constructor(url: string);
+    protected send(data: string): Promise<void>;
     addListener(listener: MessageListener): void;
     open(): void;
     close(): void;

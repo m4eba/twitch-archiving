@@ -27,6 +27,23 @@ export abstract class WebSocketConnection {
     this.url = url;
   }
 
+  protected async send(data: string): Promise<void> {
+    return new Promise(
+      (
+        resolve: (value: void | PromiseLike<void>) => void,
+        reject: (reason?: string) => void
+      ) => {
+        if (!this.ws) {
+          reject('no websocket open');
+          return;
+        }
+        this.ws.send(data, () => {
+          resolve();
+        });
+      }
+    );
+  }
+
   public addListener(listener: MessageListener): void {
     this.listeners.push(listener);
   }

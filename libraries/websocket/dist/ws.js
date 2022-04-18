@@ -17,6 +17,17 @@ export class WebSocketConnection {
         this.listeners = [];
         this.url = url;
     }
+    async send(data) {
+        return new Promise((resolve, reject) => {
+            if (!this.ws) {
+                reject('no websocket open');
+                return;
+            }
+            this.ws.send(data, () => {
+                resolve();
+            });
+        });
+    }
     addListener(listener) {
         this.listeners.push(listener);
     }
