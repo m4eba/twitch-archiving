@@ -115,12 +115,12 @@ export abstract class WebSocketConnection<IMessage> {
 
   protected abstract ping(): void;
   protected abstract isPong(data: WebSocket.Data): boolean;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore: no-unused-vars
+  protected abstract onMessage(data: WebSocket.Data): IMessage {}
 
   protected onOpen(): void {}
   protected onClose(): void {}
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // @ts-ignore: no-unused-vars
-  protected onMessage(data: WebSocket.Data): IMessage {}
 
   private timeout(): void {
     logger.debug({ id: this.id, status: this.status }, 'ping timeout');

@@ -87,11 +87,11 @@ export class WebSocketConnection {
         }, 5 * 1000);
         this.onClose();
     }
-    onOpen() { }
-    onClose() { }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     // @ts-ignore: no-unused-vars
     onMessage(data) { }
+    onOpen() { }
+    onClose() { }
     timeout() {
         logger.debug({ id: this.id, status: this.status }, 'ping timeout');
         if (!this.ws)

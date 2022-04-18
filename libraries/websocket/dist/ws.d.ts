@@ -21,8 +21,8 @@ export declare abstract class WebSocketConnection<IMessage> {
     private wsClose;
     protected abstract ping(): void;
     protected abstract isPong(data: WebSocket.Data): boolean;
+    protected abstract onMessage(data: WebSocket.Data): IMessage;
     protected onOpen(): void;
     protected onClose(): void;
-    protected onMessage(data: WebSocket.Data): IMessage;
     private timeout;
 }
