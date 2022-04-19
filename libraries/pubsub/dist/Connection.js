@@ -14,7 +14,7 @@ export class Connection extends WebSocketConnection {
         this.listen();
     }
     onMessage(data) {
-        console.log(data);
+        return data.toString();
     }
     listen() {
         if (!this.ws)

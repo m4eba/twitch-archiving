@@ -6,7 +6,7 @@ const logger: Logger = pino({ level: 'debug' }).child({
   module: 'events-connection',
 });
 
-export class Connection extends WebSocketConnection {
+export class Connection extends WebSocketConnection<string> {
   protected topics: string[] = [];
   protected token: string;
 
@@ -20,8 +20,8 @@ export class Connection extends WebSocketConnection {
     this.listen();
   }
 
-  protected override onMessage(data: WebSocket.Data): void {
-    console.log(data);
+  protected override onMessage(data: WebSocket.Data): string {
+    return data.toString();
   }
 
   protected listen(): void {
