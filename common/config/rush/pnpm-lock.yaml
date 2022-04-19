@@ -5,6 +5,37 @@ importers:
   .:
     specifiers: {}
 
+  ../../libraries/chat:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/websocket': workspace:*
+      '@types/heft-jest': ~1.0.2
+      '@types/node': ~17.0.18
+      '@types/ws': ~8.5.3
+      eslint: ~8.10.0
+      irc-message-ts: ~3.0.6
+      pino: ~7.10.0
+      typescript: ~4.5.5
+      ws: ~8.5.0
+    dependencies:
+      '@twitch-archiving/messages': link:../messages
+      '@twitch-archiving/websocket': link:../websocket
+      '@types/ws': 8.5.3
+      irc-message-ts: 3.0.6
+      pino: 7.10.0
+      typescript: 4.5.5
+      ws: 8.5.0
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
   ../../libraries/config:
     specifiers:
       '@rushstack/eslint-config': ~2.5.1
@@ -115,6 +146,72 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
       '@rushstack/heft': 0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
+  ../../microservices/ms-chat-client:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/chat': workspace:*
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@types/heft-jest': ~1.0.2
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      kafkajs: ~1.16.0
+      pino: ~7.10.0
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/chat': link:../../libraries/chat
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/messages': link:../../libraries/messages
+      kafkajs: 1.16.0
+      pino: 7.10.0
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
+  ../../microservices/ms-chat-dump:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/utils': workspace:*
+      '@types/heft-jest': ~1.0.2
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      kafkajs: ~1.16.0
+      pino: ~7.10.0
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/messages': link:../../libraries/messages
+      '@twitch-archiving/utils': link:../../libraries/utils
+      kafkajs: 1.16.0
+      pino: 7.10.0
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
       '@twitch-archiving/node-rig': link:../../rigs/node-rig
       '@types/heft-jest': 1.0.2
       '@types/node': 17.0.24
@@ -2626,6 +2723,12 @@ packages:
       has: 1.0.3
       side-channel: 1.0.4
 
+  /irc-message-ts/3.0.6:
+    resolution: {integrity: sha512-osQ8eq5nHXaE7PwLyqxDS3C/z21VAAquHgpttQMCnzOamnszEehzbZZkfb/cxLJ89mP2Y7h1elJWI50WhcYpSw==}
+    dependencies:
+      through2: 4.0.2
+    dev: false
+
   /is-arguments/1.1.1:
     resolution: {integrity: sha512-8Q7EARjzEnKpt/PCD7e1cgUS0a6X8u5tdSiMqXhojOdoV9TsMsiO+9VLC5vAmO8N7/GmXn7yjR8qnA6bVAEzfA==}
     engines: {node: '>= 0.4'}
@@ -4189,6 +4292,12 @@ packages:
   /throat/6.0.1:
     resolution: {integrity: sha512-8hmiGIJMDlwjg7dlJ4yKGLK8EsYqKgPWbG3b4wjJddKNwc7N7Dpn08Df4szr/sZdMVeOstrdYSsqzX6BYbcB+w==}
     dev: true
+
+  /through2/4.0.2:
+    resolution: {integrity: sha512-iOqSav00cVxEEICeD7TjLB1sueEL+81Wpzp2bY17uZjZN0pWZPuo4suZ/61VujxmqSGFfgOcNuTZ85QJwNZQpw==}
+    dependencies:
+      readable-stream: 3.6.0
+    dev: false
 
   /timsort/0.3.0:
     resolution: {integrity: sha1-QFQRqOfmM5/mTbmiNN4R3DHgK9Q=}

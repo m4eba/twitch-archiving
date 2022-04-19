@@ -473,6 +473,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/chat",
+      "projectFolder": "libraries/chat",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/utils",
       "projectFolder": "libraries/utils",
       "shouldPublish": true
@@ -485,6 +490,16 @@
     {
       "packageName": "@twitch-archiving/ms-websocket-dump",
       "projectFolder": "microservices/ms-websocket-dump",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-chat-client",
+      "projectFolder": "microservices/ms-chat-client",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-chat-dump",
+      "projectFolder": "microservices/ms-chat-dump",
       "shouldPublish": true
     },
     {
