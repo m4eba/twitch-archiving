@@ -503,6 +503,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-kafka-multiply",
+      "projectFolder": "microservices/ms-kafka-multiply",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
