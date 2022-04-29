@@ -483,6 +483,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/twitch",
+      "projectFolder": "libraries/twitch",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/ms-pubsub-client",
       "projectFolder": "microservices/ms-pubsub-client",
       "shouldPublish": true
