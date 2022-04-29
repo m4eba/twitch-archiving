@@ -508,6 +508,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-pubsub-filter",
+      "projectFolder": "microservices/ms-pubsub-filter",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
