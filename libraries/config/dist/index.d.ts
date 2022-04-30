@@ -17,6 +17,10 @@ export interface PostgresConfig {
     pgPassword: string;
 }
 export declare const PostgresConfigOpt: ArgumentConfig<PostgresConfig>;
+export interface RedisConfig {
+    redisUrl: string;
+}
+export declare const RedisConfigOpt: ArgumentConfig<RedisConfig>;
 export interface FileConfig {
     config?: string;
 }

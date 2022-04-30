@@ -42,6 +42,14 @@ export const PostgresConfigOpt: ArgumentConfig<PostgresConfig> = {
   pgPassword: { type: String },
 };
 
+export interface RedisConfig {
+  redisUrl: string;
+}
+
+export const RedisConfigOpt: ArgumentConfig<RedisConfig> = {
+  redisUrl: { type: String, defaultValue: 'redis://localhost:6379' },
+};
+
 export interface FileConfig {
   config?: string;
 }

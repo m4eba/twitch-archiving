@@ -19,6 +19,9 @@ export const PostgresConfigOpt = {
     pgUser: { type: String, defaultValue: 'postgres' },
     pgPassword: { type: String },
 };
+export const RedisConfigOpt = {
+    redisUrl: { type: String, defaultValue: 'redis://localhost:6379' },
+};
 export const FileConfigOpt = {
     config: { type: String, optional: true },
 };
