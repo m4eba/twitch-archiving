@@ -62,11 +62,13 @@ importers:
       '@rushstack/eslint-config': ~2.5.1
       '@rushstack/heft': ~0.44.2
       '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/twitch': workspace:*
       '@types/heft-jest': ~1.0.2
       '@types/node': ~17.0.18
       eslint: ~8.10.0
       typescript: ~4.5.5
     dependencies:
+      '@twitch-archiving/twitch': link:../twitch
       typescript: 4.5.5
     devDependencies:
       '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
@@ -266,6 +268,45 @@ importers:
       '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
       '@twitch-archiving/node-rig': link:../../rigs/node-rig
       '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
+  ../../microservices/ms-playlist-live:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/twitch': workspace:*
+      '@types/heft-jest': ~1.0.2
+      '@types/hls-parser': ~0.8.3
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      hls-parser: ~0.10.4
+      kafkajs: ~1.16.0
+      pino: ~7.10.0
+      redis: ~4.0.6
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/messages': link:../../libraries/messages
+      '@twitch-archiving/twitch': link:../../libraries/twitch
+      hls-parser: 0.10.4
+      kafkajs: 1.16.0
+      pino: 7.10.0
+      redis: 4.0.6
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/hls-parser': 0.8.3
       '@types/node': 17.0.24
       eslint: 8.10.0
 
@@ -1078,6 +1119,56 @@ packages:
     resolution: {integrity: sha512-6Wci+Tp3CgPt/B9B0a3J4s3yMgLNSku6w5TV6mN+61C71UqsRBv2FUibBf3tPGlNxebgPHMEUzKpb1ggE8KCKw==}
     dev: true
 
+  /@node-redis/bloom/1.0.1_@node-redis+client@1.0.5:
+    resolution: {integrity: sha512-mXEBvEIgF4tUzdIN89LiYsbi6//EdpFA7L8M+DHCvePXg+bfHWi+ct5VI6nHUFQE5+ohm/9wmgihCH3HSkeKsw==}
+    peerDependencies:
+      '@node-redis/client': ^1.0.0
+    dependencies:
+      '@node-redis/client': 1.0.5
+    dev: false
+
+  /@node-redis/client/1.0.5:
+    resolution: {integrity: sha512-ESZ3bd1f+od62h4MaBLKum+klVJfA4wAeLHcVQBkoXa1l0viFesOWnakLQqKg+UyrlJhZmXJWtu0Y9v7iTMrig==}
+    engines: {node: '>=12'}
+    dependencies:
+      cluster-key-slot: 1.1.0
+      generic-pool: 3.8.2
+      redis-parser: 3.0.0
+      yallist: 4.0.0
+    dev: false
+
+  /@node-redis/graph/1.0.0_@node-redis+client@1.0.5:
+    resolution: {integrity: sha512-mRSo8jEGC0cf+Rm7q8mWMKKKqkn6EAnA9IA2S3JvUv/gaWW/73vil7GLNwion2ihTptAm05I9LkepzfIXUKX5g==}
+    peerDependencies:
+      '@node-redis/client': ^1.0.0
+    dependencies:
+      '@node-redis/client': 1.0.5
+    dev: false
+
+  /@node-redis/json/1.0.2_@node-redis+client@1.0.5:
+    resolution: {integrity: sha512-qVRgn8WfG46QQ08CghSbY4VhHFgaTY71WjpwRBGEuqGPfWwfRcIf3OqSpR7Q/45X+v3xd8mvYjywqh0wqJ8T+g==}
+    peerDependencies:
+      '@node-redis/client': ^1.0.0
+    dependencies:
+      '@node-redis/client': 1.0.5
+    dev: false
+
+  /@node-redis/search/1.0.5_@node-redis+client@1.0.5:
+    resolution: {integrity: sha512-MCOL8iCKq4v+3HgEQv8zGlSkZyXSXtERgrAJ4TSryIG/eLFy84b57KmNNa/V7M1Q2Wd2hgn2nPCGNcQtk1R1OQ==}
+    peerDependencies:
+      '@node-redis/client': ^1.0.0
+    dependencies:
+      '@node-redis/client': 1.0.5
+    dev: false
+
+  /@node-redis/time-series/1.0.2_@node-redis+client@1.0.5:
+    resolution: {integrity: sha512-HGQ8YooJ8Mx7l28tD7XjtB3ImLEjlUxG1wC1PAjxu6hPJqjPshUZxAICzDqDjtIbhDTf48WXXUcx8TQJB1XTKA==}
+    peerDependencies:
+      '@node-redis/client': ^1.0.0
+    dependencies:
+      '@node-redis/client': 1.0.5
+    dev: false
+
   /@nodelib/fs.scandir/2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -1386,6 +1477,12 @@ packages:
     resolution: {integrity: sha512-HabX0JO8Pk+a3gTm2DQwTMrfZjqP6VxDnn8kIXAP6uZbmy4bkKuFRi9T9BV9K6LhwHrmcgq5kk2YikYHy4LJeg==}
     dependencies:
       '@types/jest': 27.4.1
+    dev: true
+
+  /@types/hls-parser/0.8.3:
+    resolution: {integrity: sha512-dGDgo+gN1wLJU3lClOeUlaGLtzI6Nu1+MtXjxh6+wAIyaWlpSSzihw12MDd2yIkN2pDhBci5fDrdfT2/hyGGGg==}
+    dependencies:
+      '@types/node': 17.0.24
     dev: true
 
   /@types/istanbul-lib-coverage/2.0.4:
@@ -1911,6 +2008,11 @@ packages:
   /cjs-module-lexer/1.2.2:
     resolution: {integrity: sha512-cOU9usZw8/dXIXKtwa8pM0OTJQuJkxMN6w30csNRUerHfeQ5R6U3kkU/FtJeIf3M202OHfY2U8ccInBG7/xogA==}
     dev: true
+
+  /cluster-key-slot/1.1.0:
+    resolution: {integrity: sha512-2Nii8p3RwAPiFwsnZvukotvow2rIHM+yQ6ZcBXGHdniadkYGZYiGmkHJIbZPIV9nfv7m/U1IPMVVcAhoWFeklw==}
+    engines: {node: '>=0.10.0'}
+    dev: false
 
   /co/4.6.0:
     resolution: {integrity: sha1-bqa989hTrlTMuOR7+gvz+QMfsYQ=}
@@ -2611,6 +2713,11 @@ packages:
     resolution: {integrity: sha512-bLgc3asbWdwPbx2mNk2S49kmJCuQeu0nfmaOgbs8WIyzzkw3r4htszdIi9Q9EMezDPTYuJx2wvjZ/EwgAthpnA==}
     dev: true
 
+  /generic-pool/3.8.2:
+    resolution: {integrity: sha512-nGToKy6p3PAbYQ7p1UlWl6vSPwfwU6TMSWK7TTu+WUY4ZjyZQGniGGt2oNVvyNSpyZYSB43zMXVLcBm08MTMkg==}
+    engines: {node: '>= 4'}
+    dev: false
+
   /gensync/1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
@@ -2740,6 +2847,10 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: 1.1.1
+
+  /hls-parser/0.10.4:
+    resolution: {integrity: sha512-YAQyeoaDg7G88Vl2Bc5+UP55ROz1nPPYwZ69vTqHx3p7+mKwh0gHYTEIVFB6MZL/npB4XeZ0h9GaH/olps0zeA==}
+    dev: false
 
   /html-encoding-sniffer/2.0.1:
     resolution: {integrity: sha512-D5JbOMBIR/TVZkubHT+OyT2705QvogUW4IBn6nHd756OwieSF9aDYFj4dv6HHEVGYbHaLETa3WggZYWWMyy3ZQ==}
@@ -4081,6 +4192,29 @@ packages:
     engines: {node: '>= 12.13.0'}
     dev: false
 
+  /redis-errors/1.2.0:
+    resolution: {integrity: sha1-62LSrbFeTq9GEMBK/hUpOEJQq60=}
+    engines: {node: '>=4'}
+    dev: false
+
+  /redis-parser/3.0.0:
+    resolution: {integrity: sha1-tm2CjNyv5rS4pCin3vTGvKwxyLQ=}
+    engines: {node: '>=4'}
+    dependencies:
+      redis-errors: 1.2.0
+    dev: false
+
+  /redis/4.0.6:
+    resolution: {integrity: sha512-IaPAxgF5dV0jx+A9l6yd6R9/PAChZIoAskDVRzUODeLDNhsMlq7OLLTmu0AwAr0xjrJ1bibW5xdpRwqIQ8Q0Xg==}
+    dependencies:
+      '@node-redis/bloom': 1.0.1_@node-redis+client@1.0.5
+      '@node-redis/client': 1.0.5
+      '@node-redis/graph': 1.0.0_@node-redis+client@1.0.5
+      '@node-redis/json': 1.0.2_@node-redis+client@1.0.5
+      '@node-redis/search': 1.0.5_@node-redis+client@1.0.5
+      '@node-redis/time-series': 1.0.2_@node-redis+client@1.0.5
+    dev: false
+
   /reduce-flatten/2.0.0:
     resolution: {integrity: sha512-EJ4UNY/U1t2P/2k6oqotuX2Cc3T6nxJwsM0N0asT7dhrtH1ltUxDn4NalSYmPE2rCkVpcf/X6R0wDwcFpzhd4w==}
     engines: {node: '>=6'}
@@ -4738,7 +4872,6 @@ packages:
 
   /yallist/4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
-    dev: true
 
   /z-schema/5.0.3:
     resolution: {integrity: sha512-sGvEcBOTNum68x9jCpCVGPFJ6mWnkD0YxOcddDlJHRx3tKdB2q8pCHExMVZo/AV/6geuVJXG7hljDaWG8+5GDw==}

@@ -518,6 +518,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-playlist-live",
+      "projectFolder": "microservices/ms-playlist-live",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }

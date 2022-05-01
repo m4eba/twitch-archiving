@@ -1,0 +1,176 @@
+import {
+  KafkaConfig,
+  KafkaConfigOpt,
+  RedisConfig,
+  RedisConfigOpt,
+  FileConfig,
+  FileConfigOpt,
+} from '@twitch-archiving/config';
+import pino, { Logger } from 'pino';
+import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
+import { ArgumentConfig, parse } from 'ts-command-line-args';
+import HLS from 'hls-parser';
+import { createClient } from 'redis';
+import {
+  getLivePlaylist,
+  getAccessToken,
+  AccessToken,
+} from '@twitch-archiving/twitch';
+import { PlaylistMessage, PlaylistType } from '@twitch-archiving/messages';
+
+interface PlaylistConfig {
+  inputTopic: string;
+  outputTopic: string[];
+  oauthVideo: string;
+  redisPrefix: string;
+  redisSetName: string;
+}
+
+const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
+  inputTopic: { type: String, multiple: true },
+  outputTopic: { type: String, multiple: true },
+  oauthVideo: { type: String, defaultValue: '' },
+  redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
+  redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
+};
+
+interface Config extends PlaylistConfig, KafkaConfig, RedisConfig, FileConfig {}
+
+const config: Config = parse<Config>(
+  {
+    ...KafkaConfigOpt,
+    ...PlaylistConfigOpt,
+    ...RedisConfigOpt,
+    ...FileConfigOpt,
+  },
+  {
+    loadFromFileArg: 'config',
+  }
+);
+
+const logger: Logger = pino({ level: 'debug' }).child({
+  module: 'paylist-live',
+});
+
+const kafka: Kafka = new Kafka({
+  clientId: config.kafkaClientId,
+  brokers: config.kafkaBroker,
+});
+
+const redis: ReturnType<typeof createClient> = createClient({
+  url: config.redisUrl,
+});
+
+await redis.connect();
+
+logger.info({ topic: config.inputTopic }, 'subscribe');
+
+const consumer: Consumer = kafka.consumer({ groupId: 'websocket-dump' });
+await consumer.connect();
+await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
+
+const producer: Producer = kafka.producer();
+await producer.connect();
+
+await consumer.run({
+  eachMessage: async ({ message }) => {
+    if (!message.key) return;
+    const user = message.key.toString();
+    let init = false;
+    if (message.value) {
+      const event: {
+        forceReload?: boolean;
+        topic?: string;
+        message?: string;
+      } = JSON.parse(message.value.toString());
+      if (event.forceReload !== undefined && event.forceReload === true)
+        logger.debug('forceReload message', { user, msg: event });
+      init = true;
+      if (
+        event.topic !== undefined &&
+        event.message !== undefined &&
+        event.topic.toString().startsWith('video-playback-by-id')
+      ) {
+        const msg: { type?: string } = JSON.parse(event.message);
+        if (msg.type !== undefined && msg.type === 'stream-up') {
+          logger.debug('stream-up msesage', { user, msg: event });
+          init = true;
+        }
+      }
+    }
+    if (!(await redis.sIsMember(config.redisSetName, user))) {
+      logger.debug('member not in redis', { user });
+      init = true;
+    }
+    if (init) {
+      await initStream(user);
+    }
+  },
+});
+
+async function initStream(user: string): Promise<void> {
+  const token: AccessToken = await getAccessToken(
+    {
+      isLive: true,
+      isVod: false,
+      login: user,
+      playerType: '',
+      vodID: '',
+    },
+    config.oauthVideo
+  );
+  const playlist = await getLivePlaylist(user, token);
+
+  const reg = /BROADCAST-ID="(.*?)"/;
+  let id = '';
+  const regResult = reg.exec(playlist);
+  if (regResult) {
+    id = regResult[1].toString();
+  } else {
+    id = 'jinny-' + new Date().toISOString();
+  }
+
+  const list: HLS.types.MasterPlaylist = HLS.parse(
+    playlist
+  ) as HLS.types.MasterPlaylist;
+
+  const best: HLS.types.Variant = list.variants.reduce((prev, curr) => {
+    let result = prev;
+    if (prev.bandwidth < curr.bandwidth) {
+      result = curr;
+    }
+    logger.debug('best format', { user, url: result });
+    return result;
+  });
+  const data: PlaylistMessage = {
+    user,
+    id,
+    type: PlaylistType.LIVE,
+    playlist,
+    token,
+    url: best.uri,
+  };
+
+  logger.debug('playlist', { user, playlistMessage: data });
+  const msg = JSON.stringify(data);
+  await sendData(config.outputTopic, {
+    key: user,
+    value: msg,
+    timestamp: new Date().toString(),
+  });
+  await redis.set(config.redisPrefix + user, msg);
+  await redis.sAdd(config.redisSetName, user);
+}
+
+async function sendData(topic: string[], msg: Message): Promise<void> {
+  const messages: TopicMessages[] = [];
+  for (let i: number = 0; i < topic.length; ++i) {
+    const topicMessage: TopicMessages = {
+      topic: topic[i],
+      messages: [msg],
+    };
+    messages.push(topicMessage);
+  }
+  logger.debug({ topic: topic, size: messages.length }, 'sending batch');
+  await producer.sendBatch({ topicMessages: messages });
+}
