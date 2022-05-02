@@ -24,3 +24,13 @@ export interface PlaylistMessage {
   token: AccessToken;
   url: string;
 }
+
+export interface PlaylistSegmentMessage {
+  user: string;
+  id: string;
+  type: PlaylistType;
+  sequenceNumber: number;
+  duration: number;
+  time: string;
+  url: string;
+}
