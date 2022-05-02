@@ -523,6 +523,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-playlist-update",
+      "projectFolder": "microservices/ms-playlist-update",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
