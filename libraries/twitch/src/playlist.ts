@@ -29,3 +29,10 @@ export async function getLivePlaylist(
     token
   );
 }
+
+export async function getVodPlaylist(
+  vodId: string,
+  token: AccessToken
+): Promise<string> {
+  return getMainPlaylist(`https://usher.ttvnw.net/vod/${vodId}.m3u8`, token);
+}

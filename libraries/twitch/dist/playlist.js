@@ -16,3 +16,6 @@ export async function getMainPlaylist(endpoint, token) {
 export async function getLivePlaylist(channel, token) {
     return getMainPlaylist(`https://usher.ttvnw.net/api/channel/hls/${channel}.m3u8`, token);
 }
+export async function getVodPlaylist(vodId, token) {
+    return getMainPlaylist(`https://usher.ttvnw.net/vod/${vodId}.m3u8`, token);
+}
