@@ -488,6 +488,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/database",
+      "projectFolder": "libraries/database",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/ms-pubsub-client",
       "projectFolder": "microservices/ms-pubsub-client",
       "shouldPublish": true
@@ -525,6 +530,11 @@
     {
       "packageName": "@twitch-archiving/ms-playlist-update",
       "projectFolder": "microservices/ms-playlist-update",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-segment-download",
+      "projectFolder": "microservices/ms-segment-download",
       "shouldPublish": true
     },
     {
