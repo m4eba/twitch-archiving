@@ -1,7 +1,7 @@
 import type { Pool } from 'pg';
 import { getPool } from './init.js';
 
-export async function createTable(): Promise<void> {
+export async function createTableDownload(): Promise<void> {
   const pool: Pool | undefined = getPool();
   if (pool === undefined) {
     throw new Error('database not initialized');
@@ -50,7 +50,7 @@ export async function createTable(): Promise<void> {
   }
 }
 
-export async function start(
+export async function startRecording(
   time: Date,
   channel: string,
   site_id: string
@@ -64,7 +64,10 @@ export async function start(
   return result.rows[0].id;
 }
 
-export async function stop(time: Date, recordingId: number): Promise<void> {
+export async function stopRecording(
+  time: Date,
+  recordingId: number
+): Promise<void> {
   const pool = getPool();
   if (pool === undefined) throw new Error('database not initialized');
   await pool.query('UPDATE recording SET stop=$1 WHERE  id = $2', [

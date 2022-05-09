@@ -1,5 +1,5 @@
 import { getPool } from './init.js';
-export async function createTable() {
+export async function createTableDownload() {
     const pool = getPool();
     if (pool === undefined) {
         throw new Error('database not initialized');
@@ -46,14 +46,14 @@ export async function createTable() {
     `);
     }
 }
-export async function start(time, channel, site_id) {
+export async function startRecording(time, channel, site_id) {
     const pool = getPool();
     if (pool === undefined)
         throw new Error('database not initialized');
     const result = await pool.query('INSERT into recording VALUES (DEFAULT, $1, null, $2, $3) RETURNING id', [time, channel, site_id]);
     return result.rows[0].id;
 }
-export async function stop(time, recordingId) {
+export async function stopRecording(time, recordingId) {
     const pool = getPool();
     if (pool === undefined)
         throw new Error('database not initialized');
