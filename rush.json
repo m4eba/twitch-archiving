@@ -533,6 +533,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-playlist-update-timer",
+      "projectFolder": "microservices/ms-playlist-update-timer",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/ms-segment-download",
       "projectFolder": "microservices/ms-segment-download",
       "shouldPublish": true
