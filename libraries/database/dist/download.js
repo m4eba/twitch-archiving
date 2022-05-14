@@ -13,7 +13,7 @@ export async function createTableDownload() {
     if (!tabletest.rows[0].exists) {
         await pool.query(`
     create table recording (
-      id SERIAL primary key,
+      id BIGSERIAL primary key,
       start timestamptz not null,
       stop timestamptz,
       channel text not null,
@@ -27,7 +27,7 @@ export async function createTableDownload() {
 
     create type file_status as enum ('downloading', 'error', 'done'); 
     create table file (
-      id SERIAL primary key,
+      id BIGSERIAL primary key,
       recording_id integer not null,
       name text not null,
       seq integer not null,          
@@ -61,6 +61,16 @@ export async function stopRecording(time, recordingId) {
         time,
         recordingId,
     ]);
+}
+export async function getRecordingId(site_id) {
+    const pool = getPool();
+    if (pool === undefined)
+        throw new Error('database not initialized');
+    const result = await pool.query('SELECT id FROM recording WHERE site_id = $1', [site_id]);
+    if (result.rows.length === 0) {
+        return '';
+    }
+    return result.rows[0].id;
 }
 export async function updateSiteId(recordingId, siteId) {
     const pool = getPool();
