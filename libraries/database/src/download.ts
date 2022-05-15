@@ -54,7 +54,7 @@ export async function startRecording(
   time: Date,
   channel: string,
   site_id: string
-): Promise<number> {
+): Promise<string> {
   const pool = getPool();
   if (pool === undefined) throw new Error('database not initialized');
   const result = await pool.query(
@@ -66,7 +66,7 @@ export async function startRecording(
 
 export async function stopRecording(
   time: Date,
-  recordingId: number
+  recordingId: string
 ): Promise<void> {
   const pool = getPool();
   if (pool === undefined) throw new Error('database not initialized');
@@ -90,7 +90,7 @@ export async function getRecordingId(site_id: string): Promise<string> {
 }
 
 export async function updateSiteId(
-  recordingId: number,
+  recordingId: string,
   siteId: string
 ): Promise<void> {
   const pool = getPool();
@@ -102,7 +102,7 @@ export async function updateSiteId(
 }
 
 export async function startFile(
-  recordingId: number,
+  recordingId: string,
   name: string,
   seq: number,
   duration: number,
@@ -118,7 +118,7 @@ export async function startFile(
 }
 
 export async function updateFileSize(
-  recordingId: number,
+  recordingId: string,
   name: string,
   size: number
 ): Promise<void> {
@@ -131,7 +131,7 @@ export async function updateFileSize(
 }
 
 export async function updateFileDownloadSize(
-  recordingId: number,
+  recordingId: string,
   name: string,
   size: number
 ): Promise<void> {
@@ -144,7 +144,7 @@ export async function updateFileDownloadSize(
 }
 
 export async function updateFileStatus(
-  recordingId: number,
+  recordingId: string,
   name: string,
   status: string
 ): Promise<void> {
