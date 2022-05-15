@@ -1,4 +1,4 @@
-import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
+import { KafkaConfigOpt, RedisConfigOpt, PostgresConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
 import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
@@ -6,6 +6,7 @@ import HLS from 'hls-parser';
 import { createClient } from 'redis';
 import { getLivePlaylist, getAccessToken, } from '@twitch-archiving/twitch';
 import { PlaylistType } from '@twitch-archiving/messages';
+import { init, startRecording } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, multiple: true },
     outputTopic: { type: String, multiple: true },
@@ -17,6 +18,7 @@ const config = parse({
     ...KafkaConfigOpt,
     ...PlaylistConfigOpt,
     ...RedisConfigOpt,
+    ...PostgresConfigOpt,
     ...FileConfigOpt,
 }, {
     loadFromFileArg: 'config',
@@ -31,6 +33,7 @@ const kafka = new Kafka({
 const redis = createClient({
     url: config.redisUrl,
 });
+await init(config);
 await redis.connect();
 logger.info({ topic: config.inputTopic }, 'subscribe');
 const consumer = kafka.consumer({ groupId: 'websocket-dump' });
@@ -84,7 +87,7 @@ async function initStream(user) {
         id = regResult[1].toString();
     }
     else {
-        id = 'jinny-' + new Date().toISOString();
+        id = user + '-' + new Date().toISOString();
     }
     const list = HLS.parse(playlist);
     const best = list.variants.reduce((prev, curr) => {
@@ -105,13 +108,15 @@ async function initStream(user) {
     };
     logger.debug('playlist', { user, playlistMessage: data });
     const msg = JSON.stringify(data);
+    const recordingId = await startRecording(new Date(), user, 'live-' + id);
+    await redis.set(config.redisPrefix + user, msg);
+    await redis.set(config.redisPrefix + user + '-recordingId', recordingId);
+    await redis.sAdd(config.redisSetName, user);
     await sendData(config.outputTopic, {
         key: user,
         value: msg,
         timestamp: new Date().toString(),
     });
-    await redis.set(config.redisPrefix + user, msg);
-    await redis.sAdd(config.redisSetName, user);
 }
 async function sendData(topic, msg) {
     const messages = [];
