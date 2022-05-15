@@ -17,6 +17,7 @@ import {
   AccessToken,
 } from '@twitch-archiving/twitch';
 import { PlaylistMessage, PlaylistType } from '@twitch-archiving/messages';
+import { startRecording } from '@twitch-archiving/database';
 
 interface PlaylistConfig {
   inputTopic: string;
@@ -127,7 +128,7 @@ async function initStream(user: string): Promise<void> {
   if (regResult) {
     id = regResult[1].toString();
   } else {
-    id = 'jinny-' + new Date().toISOString();
+    id = user + '-' + new Date().toISOString();
   }
 
   const list: HLS.types.MasterPlaylist = HLS.parse(
@@ -142,6 +143,7 @@ async function initStream(user: string): Promise<void> {
     logger.debug('best format', { user, url: result });
     return result;
   });
+
   const data: PlaylistMessage = {
     user,
     id,
@@ -153,13 +155,18 @@ async function initStream(user: string): Promise<void> {
 
   logger.debug('playlist', { user, playlistMessage: data });
   const msg = JSON.stringify(data);
+
+  const recordingId = await startRecording(new Date(), user, 'live-' + id);
+
+  await redis.set(config.redisPrefix + user, msg);
+  await redis.set(config.redisPrefix + user + '-recordingId', recordingId);
+  await redis.sAdd(config.redisSetName, user);
+
   await sendData(config.outputTopic, {
     key: user,
     value: msg,
     timestamp: new Date().toString(),
   });
-  await redis.set(config.redisPrefix + user, msg);
-  await redis.sAdd(config.redisSetName, user);
 }
 
 async function sendData(topic: string[], msg: Message): Promise<void> {

@@ -27,6 +27,7 @@
     "ts-command-line-args": "~2.2.1",
     "hls-parser": "~0.10.4",
     "@twitch-archiving/twitch": "workspace:*",
-    "redis": "~4.0.6"
+    "redis": "~4.0.6",
+    "@twitch-archiving/database": "workspace:*"
   }
 }
