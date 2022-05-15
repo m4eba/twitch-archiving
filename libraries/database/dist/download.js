@@ -27,19 +27,20 @@ export async function createTableDownload() {
 
     create type file_status as enum ('downloading', 'error', 'done'); 
     create table file (
-      id BIGSERIAL primary key,
       recording_id integer not null,
       name text not null,
       seq integer not null,          
+      retries smallint not null,
       duration decimal not null,
       datetime timestamptz not null,
       size integer not null,
       downloaded integer not null,
       hash text not null,
-      status file_status
+      status file_status,
+      PRIMARY KEY(recording_id, name)
     );
 
-    create index file_recording_id_idx on file(recording_id);
+    create index file_recording_id on file(recording_id);
     create index file_name_idx on file (name);
     create index file_seq_idx on file (seq);
     create index file_status on file (status);
@@ -85,8 +86,7 @@ export async function startFile(recordingId, name, seq, duration, time) {
     const pool = getPool();
     if (pool === undefined)
         throw new Error('database not initialized');
-    const result = await pool.query('INSERT into file (recording_id,name,seq,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,$4,$5,0,0,$6,$7) RETURNING id', [recordingId, name, seq, duration, time, '', 'downloading']);
-    return result.rows[0].id;
+    await pool.query('INSERT into file (recording_id,name,seq,retries,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,0,$4,$5,0,0,$6,$7)', [recordingId, name, seq, duration, time, '', 'downloading']);
 }
 export async function updateFileSize(recordingId, name, size) {
     const pool = getPool();
@@ -105,4 +105,10 @@ export async function updateFileStatus(recordingId, name, status) {
     if (pool === undefined)
         throw new Error('database not initialized');
     await pool.query('UPDATE file SET status=$1 WHERE recording_id = $2 AND name = $3', [status, recordingId, name]);
+}
+export async function incrementFileRetries(recordingId, name) {
+    const pool = getPool();
+    if (pool === undefined)
+        throw new Error('database not initialized');
+    await pool.query('UPDATE file SET retries=retires+1 WHERE recording_id = $1 AND name = $2', [recordingId, name]);
 }
