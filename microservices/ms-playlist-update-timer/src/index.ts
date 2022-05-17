@@ -6,10 +6,11 @@ import {
   FileConfig,
   FileConfigOpt,
 } from '@twitch-archiving/config';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Producer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { createClient } from 'redis';
+import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistUpdateTimerConfig {
   interval: number;
@@ -42,9 +43,7 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'playlist-update',
-});
+const logger: Logger = initLogger('playlist-update-time');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,

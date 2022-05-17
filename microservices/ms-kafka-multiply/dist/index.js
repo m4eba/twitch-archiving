@@ -1,7 +1,7 @@
 import { KafkaConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
-import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
+import { initLogger } from '@twitch-archiving/utils';
 const MultiConfigOpt = {
     inputTopic: { type: String },
     outputTopic: { type: String, multiple: true },
@@ -13,9 +13,7 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({
-    module: 'kafka-multi',
-});
+const logger = initLogger('kafka-multi');
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,

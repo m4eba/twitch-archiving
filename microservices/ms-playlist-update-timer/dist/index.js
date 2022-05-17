@@ -1,8 +1,8 @@
 import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
-import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { createClient } from 'redis';
+import { initLogger } from '@twitch-archiving/utils';
 const PlaylistUpdateTimerConfigOpt = {
     interval: { type: Number, defaultValue: 2000 },
     outputTopic: { type: String, multiple: true },
@@ -16,9 +16,7 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({
-    module: 'playlist-update',
-});
+const logger = initLogger('playlist-update-time');
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,

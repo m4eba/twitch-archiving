@@ -5,10 +5,10 @@ import {
   FileConfigOpt,
 } from '@twitch-archiving/config';
 import path from 'path';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Consumer } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
-import { FileWriter } from '@twitch-archiving/utils';
+import { FileWriter, initLogger } from '@twitch-archiving/utils';
 
 interface DumpConfig {
   topic: string;
@@ -33,9 +33,7 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'websocket-dump',
-});
+const logger: Logger = initLogger('websocket-dump');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,

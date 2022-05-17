@@ -6,7 +6,7 @@ import {
   FileConfig,
   FileConfigOpt,
 } from '@twitch-archiving/config';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import fetch from 'node-fetch';
@@ -16,6 +16,7 @@ import type {
   PlaylistMessage,
   PlaylistSegmentMessage,
 } from '@twitch-archiving/messages';
+import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
   inputTopic: string;
@@ -43,9 +44,7 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'playlist-update',
-});
+const logger: Logger = initLogger('playlist-update');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,
@@ -60,7 +59,7 @@ await redis.connect();
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 
-const consumer: Consumer = kafka.consumer({ groupId: 'websocket-dump' });
+const consumer: Consumer = kafka.consumer({ groupId: 'playlist-update' });
 await consumer.connect();
 await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 

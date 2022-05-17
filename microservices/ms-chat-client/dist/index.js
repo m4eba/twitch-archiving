@@ -1,8 +1,8 @@
 import { KafkaConfigOpt, TwitchConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
-import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { Connection } from '@twitch-archiving/chat';
+import { initLogger } from '@twitch-archiving/utils';
 import fs from 'fs';
 const ChatConfigOpt = {
     username: { type: String },
@@ -18,9 +18,7 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({
-    module: 'chat-client',
-});
+const logger = initLogger('chat-client');
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,

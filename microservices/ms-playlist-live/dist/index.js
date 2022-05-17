@@ -1,5 +1,4 @@
 import { KafkaConfigOpt, RedisConfigOpt, PostgresConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
-import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
@@ -7,6 +6,7 @@ import { createClient } from 'redis';
 import { getLivePlaylist, getAccessToken, } from '@twitch-archiving/twitch';
 import { PlaylistType } from '@twitch-archiving/messages';
 import { init, startRecording } from '@twitch-archiving/database';
+import { initLogger } from '@twitch-archiving/utils';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, multiple: true },
     outputTopic: { type: String, multiple: true },
@@ -23,9 +23,7 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({
-    module: 'paylist-live',
-});
+const logger = initLogger('paylist-live');
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,

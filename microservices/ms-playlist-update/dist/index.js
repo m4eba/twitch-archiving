@@ -1,10 +1,10 @@
 import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
-import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import fetch from 'node-fetch';
 import HLS from 'hls-parser';
 import { createClient } from 'redis';
+import { initLogger } from '@twitch-archiving/utils';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, multiple: true },
     outputTopic: { type: String, multiple: true },
@@ -18,9 +18,7 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({
-    module: 'playlist-update',
-});
+const logger = initLogger('playlist-update');
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
@@ -30,7 +28,7 @@ const redis = createClient({
 });
 await redis.connect();
 logger.info({ topic: config.inputTopic }, 'subscribe');
-const consumer = kafka.consumer({ groupId: 'websocket-dump' });
+const consumer = kafka.consumer({ groupId: 'playlist-update' });
 await consumer.connect();
 await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 const producer = kafka.producer();

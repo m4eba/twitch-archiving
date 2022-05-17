@@ -4,9 +4,10 @@ import {
   FileConfig,
   FileConfigOpt,
 } from '@twitch-archiving/config';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Consumer, Producer, TopicMessages } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
+import { initLogger } from '@twitch-archiving/utils';
 
 interface MultiConfig {
   inputTopic: string;
@@ -31,9 +32,7 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'kafka-multi',
-});
+const logger: Logger = initLogger('kafka-multi');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,

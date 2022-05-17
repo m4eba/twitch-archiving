@@ -8,7 +8,7 @@ import {
   FileConfig,
   FileConfigOpt,
 } from '@twitch-archiving/config';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
@@ -20,6 +20,7 @@ import {
 } from '@twitch-archiving/twitch';
 import { PlaylistMessage, PlaylistType } from '@twitch-archiving/messages';
 import { init, startRecording } from '@twitch-archiving/database';
+import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
   inputTopic: string;
@@ -57,9 +58,7 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'paylist-live',
-});
+const logger: Logger = initLogger('paylist-live');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,

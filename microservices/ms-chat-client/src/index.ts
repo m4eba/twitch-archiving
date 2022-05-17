@@ -6,11 +6,12 @@ import {
   FileConfig,
   FileConfigOpt,
 } from '@twitch-archiving/config';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Producer, TopicMessages } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { Connection } from '@twitch-archiving/chat';
 import type { IRCMessage } from '@twitch-archiving/messages';
+import { initLogger } from '@twitch-archiving/utils';
 import fs from 'fs';
 
 interface ChatConfig {
@@ -41,9 +42,7 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'chat-client',
-});
+const logger: Logger = initLogger('chat-client');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,

@@ -4,10 +4,11 @@ import {
   FileConfig,
   FileConfigOpt,
 } from '@twitch-archiving/config';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import fs from 'fs';
+import { initLogger } from '@twitch-archiving/utils';
 
 interface PubsubFilterFile {
   [key: string]: string[];
@@ -36,16 +37,14 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'pubsub-filter',
-});
+const logger: Logger = initLogger('pubsub-filter');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,
   brokers: config.kafkaBroker,
 });
 logger.info({ topic: config.inputTopic }, 'subscribe');
-const consumer: Consumer = kafka.consumer({ groupId: 'websocket-dump' });
+const consumer: Consumer = kafka.consumer({ groupId: 'pubsub-filter' });
 await consumer.connect();
 await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 

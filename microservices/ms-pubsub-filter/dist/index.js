@@ -1,8 +1,8 @@
 import { KafkaConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
-import pino from 'pino';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import fs from 'fs';
+import { initLogger } from '@twitch-archiving/utils';
 const PubsubFilterConfigOpt = {
     inputTopic: { type: String },
     filterFile: { type: String },
@@ -14,15 +14,13 @@ const config = parse({
 }, {
     loadFromFileArg: 'config',
 });
-const logger = pino({ level: 'debug' }).child({
-    module: 'pubsub-filter',
-});
+const logger = initLogger('pubsub-filter');
 const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
 });
 logger.info({ topic: config.inputTopic }, 'subscribe');
-const consumer = kafka.consumer({ groupId: 'websocket-dump' });
+const consumer = kafka.consumer({ groupId: 'pubsub-filter' });
 await consumer.connect();
 await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 const producer = kafka.producer();

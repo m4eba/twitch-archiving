@@ -22,6 +22,7 @@
     "@twitch-archiving/config": "workspace:*",
     "kafkajs": "~1.16.0",
     "pino": "~7.10.0",
-    "ts-command-line-args": "~2.2.1"
+    "ts-command-line-args": "~2.2.1",
+    "@twitch-archiving/utils": "workspace:*"
   }
 }
