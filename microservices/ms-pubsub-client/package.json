@@ -27,6 +27,7 @@
     "ts-command-line-args": "~2.2.1",
     "@twurple/api": "~5.0.19",
     "@twurple/auth": "~5.0.19",
-    "@twitch-archiving/pubsub": "workspace:*"
+    "@twitch-archiving/pubsub": "workspace:*",
+    "@twitch-archiving/utils": "workspace:*"
   }
 }

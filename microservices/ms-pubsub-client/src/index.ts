@@ -6,7 +6,7 @@ import {
   FileConfig,
   FileConfigOpt,
 } from '@twitch-archiving/config';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { Kafka, Producer, TopicMessages } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@twurple/auth';
 import { ApiClient, HelixUser } from '@twurple/api';
 import { Connection } from '@twitch-archiving/pubsub';
+import { initLogger } from '@twitch-archiving/utils';
 
 interface PubsubConfig {
   topics: string[];
@@ -43,9 +44,7 @@ const config: Config = parse<Config>(
   }
 );
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'pubsub-client',
-});
+const logger: Logger = initLogger('pubsub-client');
 
 const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,
@@ -104,5 +103,6 @@ async function sendData(user: string, data: string): Promise<void> {
     messages.push(topicMessage);
   }
   logger.debug({ id: user, size: messages.length }, 'sending batch');
+  logger.trace({ id: user, messages }, 'sending messages');
   await producer.sendBatch({ topicMessages: messages });
 }
