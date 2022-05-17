@@ -6,7 +6,7 @@ export function initLogger(module) {
     if (level === undefined) {
         level = 'info';
     }
-    return pino({ level: 'debug' }).child({
+    return pino({ level }).child({
         module,
     });
 }
