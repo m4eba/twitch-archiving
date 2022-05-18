@@ -513,11 +513,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@twitch-archiving/ms-kafka-multiply",
-      "projectFolder": "microservices/ms-kafka-multiply",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@twitch-archiving/ms-pubsub-filter",
       "projectFolder": "microservices/ms-pubsub-filter",
       "shouldPublish": true
