@@ -4,7 +4,7 @@ import { parse } from 'ts-command-line-args';
 import fs from 'fs';
 import { initLogger } from '@twitch-archiving/utils';
 const PubsubFilterConfigOpt = {
-    inputTopic: { type: String },
+    inputTopic: { type: String, defaultValue: 'tw-pubsub-events' },
     filterFile: { type: String },
 };
 const config = parse({

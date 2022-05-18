@@ -6,8 +6,8 @@ import HLS from 'hls-parser';
 import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
 const PlaylistConfigOpt = {
-    inputTopic: { type: String },
-    outputTopic: { type: String },
+    inputTopic: { type: String, defaultValue: 'tw-playlist' },
+    outputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 const config = parse({

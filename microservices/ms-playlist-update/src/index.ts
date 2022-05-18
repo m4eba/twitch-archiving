@@ -25,8 +25,8 @@ interface PlaylistConfig {
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
-  inputTopic: { type: String },
-  outputTopic: { type: String },
+  inputTopic: { type: String, defaultValue: 'tw-playlist' },
+  outputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 

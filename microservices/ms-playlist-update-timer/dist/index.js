@@ -5,7 +5,7 @@ import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
 const PlaylistUpdateTimerConfigOpt = {
     interval: { type: Number, defaultValue: 2000 },
-    outputTopic: { type: String },
+    outputTopic: { type: String, defaultValue: 'tw-playlist' },
     redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
 };
 const config = parse({

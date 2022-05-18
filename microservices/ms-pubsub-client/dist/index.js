@@ -8,7 +8,7 @@ import { initLogger } from '@twitch-archiving/utils';
 const PubsubConfigOpt = {
     topics: { type: String, multiple: true },
     channels: { type: String, multiple: true },
-    kafkaTopic: { type: String },
+    kafkaTopic: { type: String, defaultValue: 'tw-pubsub-events' },
 };
 const config = parse({
     ...KafkaConfigOpt,

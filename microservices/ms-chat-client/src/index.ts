@@ -18,14 +18,14 @@ interface ChatConfig {
   username: string;
   oauth: string;
   channelFile: string;
-  kafkaTopic: string;
+  topic: string;
 }
 
 const ChatConfigOpt: ArgumentConfig<ChatConfig> = {
   username: { type: String },
   oauth: { type: String },
   channelFile: { type: String },
-  kafkaTopic: { type: String },
+  topic: { type: String, defaultValue: 'tw-chat' },
 };
 
 interface Config extends ChatConfig, KafkaConfig, TwitchConfig, FileConfig {}
@@ -73,7 +73,7 @@ async function sendData(user: string, data: string): Promise<void> {
   const time: Date = new Date();
   const messages: TopicMessages[] = [];
   const topicMessage: TopicMessages = {
-    topic: config.kafkaTopic,
+    topic: config.topic,
     messages: [
       {
         key: user,

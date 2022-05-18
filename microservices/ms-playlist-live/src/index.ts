@@ -31,8 +31,8 @@ interface PlaylistConfig {
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
-  inputTopic: { type: String },
-  outputTopic: { type: String },
+  inputTopic: { type: String, defaultValue: 'tw-pubsub-events' },
+  outputTopic: { type: String, defaultValue: 'tw-playlist' },
   oauthVideo: { type: String, defaultValue: '' },
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
   redisSetName: { type: String, defaultValue: 'tw-playlist-live' },

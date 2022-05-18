@@ -20,7 +20,7 @@ interface PubsubFilterConfig {
 }
 
 const PubsubFilterConfigOpt: ArgumentConfig<PubsubFilterConfig> = {
-  inputTopic: { type: String },
+  inputTopic: { type: String, defaultValue: 'tw-pubsub-events' },
   filterFile: { type: String },
 };
 

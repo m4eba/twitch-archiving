@@ -27,7 +27,7 @@ interface PubsubConfig {
 const PubsubConfigOpt: ArgumentConfig<PubsubConfig> = {
   topics: { type: String, multiple: true },
   channels: { type: String, multiple: true },
-  kafkaTopic: { type: String },
+  kafkaTopic: { type: String, defaultValue: 'tw-pubsub-events' },
 };
 
 interface Config extends PubsubConfig, KafkaConfig, TwitchConfig, FileConfig {}

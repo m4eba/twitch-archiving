@@ -8,7 +8,7 @@ const ChatConfigOpt = {
     username: { type: String },
     oauth: { type: String },
     channelFile: { type: String },
-    kafkaTopic: { type: String },
+    topic: { type: String, defaultValue: 'tw-chat' },
 };
 const config = parse({
     ...KafkaConfigOpt,
@@ -44,7 +44,7 @@ async function sendData(user, data) {
     const time = new Date();
     const messages = [];
     const topicMessage = {
-        topic: config.kafkaTopic,
+        topic: config.topic,
         messages: [
             {
                 key: user,

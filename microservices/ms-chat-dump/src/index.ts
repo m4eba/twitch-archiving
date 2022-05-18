@@ -18,7 +18,7 @@ interface DumpConfig {
 }
 
 const DumpConfigOpt: ArgumentConfig<DumpConfig> = {
-  topic: { type: String },
+  topic: { type: String, defaultValue: 'tw-chat' },
   path: { type: String },
 };
 

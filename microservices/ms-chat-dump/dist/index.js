@@ -5,7 +5,7 @@ import { parse } from 'ts-command-line-args';
 import { FileWriter } from '@twitch-archiving/utils';
 import { initLogger } from '@twitch-archiving/utils';
 const DumpConfigOpt = {
-    topic: { type: String },
+    topic: { type: String, defaultValue: 'tw-chat' },
     path: { type: String },
 };
 const config = parse({
