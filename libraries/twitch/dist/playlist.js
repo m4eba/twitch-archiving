@@ -10,6 +10,9 @@ export async function getMainPlaylist(endpoint, token) {
     uri.searchParams.append('sig', token.sig);
     uri.searchParams.append('token', token.token);
     const resp = await fetch(uri.toString());
+    if (resp.status !== 200) {
+        return '';
+    }
     const text = await resp.text();
     return text;
 }

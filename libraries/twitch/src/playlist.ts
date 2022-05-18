@@ -16,6 +16,9 @@ export async function getMainPlaylist(
   uri.searchParams.append('token', token.token);
 
   const resp = await fetch(uri.toString());
+  if (resp.status !== 200) {
+    return '';
+  }
   const text = await resp.text();
   return text;
 }
