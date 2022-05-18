@@ -8,7 +8,7 @@ import { initLogger } from '@twitch-archiving/utils';
 const PubsubConfigOpt = {
     topics: { type: String, multiple: true },
     channels: { type: String, multiple: true },
-    kafkaTopics: { type: String, multiple: true },
+    kafkaTopic: { type: String },
 };
 const config = parse({
     ...KafkaConfigOpt,
@@ -52,19 +52,17 @@ for (let i = 0; i < config.channels.length; ++i) {
 async function sendData(user, data) {
     const time = new Date();
     const messages = [];
-    for (let i = 0; i < config.kafkaTopics.length; ++i) {
-        const topicMessage = {
-            topic: config.kafkaTopics[i],
-            messages: [
-                {
-                    key: user,
-                    value: data,
-                    timestamp: time.getTime().toString(),
-                },
-            ],
-        };
-        messages.push(topicMessage);
-    }
+    const topicMessage = {
+        topic: config.kafkaTopic,
+        messages: [
+            {
+                key: user,
+                value: data,
+                timestamp: time.getTime().toString(),
+            },
+        ],
+    };
+    messages.push(topicMessage);
     logger.debug({ id: user, size: messages.length }, 'sending batch');
     logger.trace({ id: user, messages }, 'sending messages');
     await producer.sendBatch({ topicMessages: messages });

@@ -14,14 +14,14 @@ import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistUpdateTimerConfig {
   interval: number;
-  outputTopic: string[];
+  outputTopic: string;
   redisSetName: string;
 }
 
 const PlaylistUpdateTimerConfigOpt: ArgumentConfig<PlaylistUpdateTimerConfig> =
   {
     interval: { type: Number, defaultValue: 2000 },
-    outputTopic: { type: String, multiple: true },
+    outputTopic: { type: String },
     redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
   };
 
@@ -72,15 +72,14 @@ setInterval(async () => {
   await sendData(config.outputTopic, messages);
 }, config.interval);
 
-async function sendData(topic: string[], msg: Message[]): Promise<void> {
+async function sendData(topic: string, msg: Message[]): Promise<void> {
   const messages: TopicMessages[] = [];
-  for (let i: number = 0; i < topic.length; ++i) {
-    const topicMessage: TopicMessages = {
-      topic: topic[i],
-      messages: msg,
-    };
-    messages.push(topicMessage);
-  }
+  const topicMessage: TopicMessages = {
+    topic,
+    messages: msg,
+  };
+  messages.push(topicMessage);
+
   logger.debug({ topic: topic, size: messages.length }, 'sending batch');
   await producer.sendBatch({ topicMessages: messages });
 }

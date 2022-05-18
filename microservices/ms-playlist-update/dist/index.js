@@ -6,8 +6,8 @@ import HLS from 'hls-parser';
 import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
 const PlaylistConfigOpt = {
-    inputTopic: { type: String, multiple: true },
-    outputTopic: { type: String, multiple: true },
+    inputTopic: { type: String },
+    outputTopic: { type: String },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 const config = parse({
@@ -75,13 +75,11 @@ await consumer.run({
 });
 async function sendData(topic, msg) {
     const messages = [];
-    for (let i = 0; i < topic.length; ++i) {
-        const topicMessage = {
-            topic: topic[i],
-            messages: [msg],
-        };
-        messages.push(topicMessage);
-    }
+    const topicMessage = {
+        topic,
+        messages: [msg],
+    };
+    messages.push(topicMessage);
     logger.debug({ topic: topic, size: messages.length }, 'sending batch');
     await producer.sendBatch({ topicMessages: messages });
 }

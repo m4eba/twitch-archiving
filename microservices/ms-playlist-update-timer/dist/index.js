@@ -5,7 +5,7 @@ import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
 const PlaylistUpdateTimerConfigOpt = {
     interval: { type: Number, defaultValue: 2000 },
-    outputTopic: { type: String, multiple: true },
+    outputTopic: { type: String },
     redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
 };
 const config = parse({
@@ -41,13 +41,11 @@ setInterval(async () => {
 }, config.interval);
 async function sendData(topic, msg) {
     const messages = [];
-    for (let i = 0; i < topic.length; ++i) {
-        const topicMessage = {
-            topic: topic[i],
-            messages: msg,
-        };
-        messages.push(topicMessage);
-    }
+    const topicMessage = {
+        topic,
+        messages: msg,
+    };
+    messages.push(topicMessage);
     logger.debug({ topic: topic, size: messages.length }, 'sending batch');
     await producer.sendBatch({ topicMessages: messages });
 }

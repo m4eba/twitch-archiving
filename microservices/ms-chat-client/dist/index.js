@@ -8,7 +8,7 @@ const ChatConfigOpt = {
     username: { type: String },
     oauth: { type: String },
     channelFile: { type: String },
-    kafkaTopics: { type: String, multiple: true },
+    kafkaTopic: { type: String },
 };
 const config = parse({
     ...KafkaConfigOpt,
@@ -43,19 +43,17 @@ fs.watch(config.channelFile, readChannels);
 async function sendData(user, data) {
     const time = new Date();
     const messages = [];
-    for (let i = 0; i < config.kafkaTopics.length; ++i) {
-        const topicMessage = {
-            topic: config.kafkaTopics[i],
-            messages: [
-                {
-                    key: user,
-                    value: data,
-                    timestamp: time.getTime().toString(),
-                },
-            ],
-        };
-        messages.push(topicMessage);
-    }
+    const topicMessage = {
+        topic: config.kafkaTopic,
+        messages: [
+            {
+                key: user,
+                value: data,
+                timestamp: time.getTime().toString(),
+            },
+        ],
+    };
+    messages.push(topicMessage);
     logger.debug({ id: user, size: messages.length }, 'sending batch');
     await producer.sendBatch({ topicMessages: messages });
 }

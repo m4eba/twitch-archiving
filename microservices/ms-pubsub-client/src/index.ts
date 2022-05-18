@@ -21,13 +21,13 @@ import { initLogger } from '@twitch-archiving/utils';
 interface PubsubConfig {
   topics: string[];
   channels: string[];
-  kafkaTopics: string[];
+  kafkaTopic: string;
 }
 
 const PubsubConfigOpt: ArgumentConfig<PubsubConfig> = {
   topics: { type: String, multiple: true },
   channels: { type: String, multiple: true },
-  kafkaTopics: { type: String, multiple: true },
+  kafkaTopic: { type: String },
 };
 
 interface Config extends PubsubConfig, KafkaConfig, TwitchConfig, FileConfig {}
@@ -89,19 +89,18 @@ for (let i: number = 0; i < config.channels.length; ++i) {
 async function sendData(user: string, data: string): Promise<void> {
   const time: Date = new Date();
   const messages: TopicMessages[] = [];
-  for (let i: number = 0; i < config.kafkaTopics.length; ++i) {
-    const topicMessage: TopicMessages = {
-      topic: config.kafkaTopics[i],
-      messages: [
-        {
-          key: user,
-          value: data,
-          timestamp: time.getTime().toString(),
-        },
-      ],
-    };
-    messages.push(topicMessage);
-  }
+  const topicMessage: TopicMessages = {
+    topic: config.kafkaTopic,
+    messages: [
+      {
+        key: user,
+        value: data,
+        timestamp: time.getTime().toString(),
+      },
+    ],
+  };
+  messages.push(topicMessage);
+
   logger.debug({ id: user, size: messages.length }, 'sending batch');
   logger.trace({ id: user, messages }, 'sending messages');
   await producer.sendBatch({ topicMessages: messages });

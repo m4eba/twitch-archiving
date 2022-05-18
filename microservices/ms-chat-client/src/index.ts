@@ -18,14 +18,14 @@ interface ChatConfig {
   username: string;
   oauth: string;
   channelFile: string;
-  kafkaTopics: string[];
+  kafkaTopic: string;
 }
 
 const ChatConfigOpt: ArgumentConfig<ChatConfig> = {
   username: { type: String },
   oauth: { type: String },
   channelFile: { type: String },
-  kafkaTopics: { type: String, multiple: true },
+  kafkaTopic: { type: String },
 };
 
 interface Config extends ChatConfig, KafkaConfig, TwitchConfig, FileConfig {}
@@ -72,19 +72,18 @@ fs.watch(config.channelFile, readChannels);
 async function sendData(user: string, data: string): Promise<void> {
   const time: Date = new Date();
   const messages: TopicMessages[] = [];
-  for (let i: number = 0; i < config.kafkaTopics.length; ++i) {
-    const topicMessage: TopicMessages = {
-      topic: config.kafkaTopics[i],
-      messages: [
-        {
-          key: user,
-          value: data,
-          timestamp: time.getTime().toString(),
-        },
-      ],
-    };
-    messages.push(topicMessage);
-  }
+  const topicMessage: TopicMessages = {
+    topic: config.kafkaTopic,
+    messages: [
+      {
+        key: user,
+        value: data,
+        timestamp: time.getTime().toString(),
+      },
+    ],
+  };
+  messages.push(topicMessage);
+
   logger.debug({ id: user, size: messages.length }, 'sending batch');
   await producer.sendBatch({ topicMessages: messages });
 }

@@ -20,13 +20,13 @@ import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
   inputTopic: string;
-  outputTopic: string[];
+  outputTopic: string;
   redisPrefix: string;
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
-  inputTopic: { type: String, multiple: true },
-  outputTopic: { type: String, multiple: true },
+  inputTopic: { type: String },
+  outputTopic: { type: String },
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 
@@ -108,15 +108,14 @@ await consumer.run({
   },
 });
 
-async function sendData(topic: string[], msg: Message): Promise<void> {
+async function sendData(topic: string, msg: Message): Promise<void> {
   const messages: TopicMessages[] = [];
-  for (let i: number = 0; i < topic.length; ++i) {
-    const topicMessage: TopicMessages = {
-      topic: topic[i],
-      messages: [msg],
-    };
-    messages.push(topicMessage);
-  }
+  const topicMessage: TopicMessages = {
+    topic,
+    messages: [msg],
+  };
+  messages.push(topicMessage);
+
   logger.debug({ topic: topic, size: messages.length }, 'sending batch');
   await producer.sendBatch({ topicMessages: messages });
 }

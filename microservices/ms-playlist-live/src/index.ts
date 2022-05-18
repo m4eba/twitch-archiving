@@ -24,15 +24,15 @@ import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
   inputTopic: string;
-  outputTopic: string[];
+  outputTopic: string;
   oauthVideo: string;
   redisPrefix: string;
   redisSetName: string;
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
-  inputTopic: { type: String, multiple: true },
-  outputTopic: { type: String, multiple: true },
+  inputTopic: { type: String },
+  outputTopic: { type: String },
   oauthVideo: { type: String, defaultValue: '' },
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
   redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
@@ -74,7 +74,7 @@ await redis.connect();
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 
-const consumer: Consumer = kafka.consumer({ groupId: 'websocket-dump' });
+const consumer: Consumer = kafka.consumer({ groupId: 'paylist-live' });
 await consumer.connect();
 await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 
@@ -177,15 +177,15 @@ async function initStream(user: string): Promise<void> {
   });
 }
 
-async function sendData(topic: string[], msg: Message): Promise<void> {
+async function sendData(topic: string, msg: Message): Promise<void> {
   const messages: TopicMessages[] = [];
-  for (let i: number = 0; i < topic.length; ++i) {
-    const topicMessage: TopicMessages = {
-      topic: topic[i],
-      messages: [msg],
-    };
-    messages.push(topicMessage);
-  }
+
+  const topicMessage: TopicMessages = {
+    topic,
+    messages: [msg],
+  };
+  messages.push(topicMessage);
+
   logger.debug({ topic: topic, size: messages.length }, 'sending batch');
   await producer.sendBatch({ topicMessages: messages });
 }
