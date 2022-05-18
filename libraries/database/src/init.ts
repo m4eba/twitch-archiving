@@ -1,5 +1,6 @@
 import type { PostgresConfig } from '@twitch-archiving/config';
-import { Pool } from 'pg';
+import type { Pool } from 'pg';
+import pg from 'pg';
 
 let pool: Pool | undefined = undefined;
 
@@ -11,7 +12,7 @@ export async function init(config: PostgresConfig): Promise<void> {
   let p: Pool | undefined = undefined;
 
   try {
-    p = new Pool({
+    p = new pg.Pool({
       host: config.pgHost,
       user: config.pgUser,
       password: config.pgPassword,
@@ -28,7 +29,7 @@ export async function init(config: PostgresConfig): Promise<void> {
       e.toString() === `error: database "${config.pgDatabase}" does not exist`
     ) {
       console.log('create database');
-      p = new Pool({
+      p = new pg.Pool({
         host: config.pgHost,
         user: config.pgUser,
         password: config.pgPassword,
@@ -36,7 +37,7 @@ export async function init(config: PostgresConfig): Promise<void> {
       });
       await p.query(`CREATE DATABASE ${config.pgDatabase}`);
       await p.end();
-      p = new Pool({
+      p = new pg.Pool({
         host: config.pgHost,
         user: config.pgUser,
         password: config.pgPassword,

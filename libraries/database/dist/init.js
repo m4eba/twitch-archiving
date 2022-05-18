@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import pg from 'pg';
 let pool = undefined;
 export function getPool() {
     return pool;
@@ -6,7 +6,7 @@ export function getPool() {
 export async function init(config) {
     let p = undefined;
     try {
-        p = new Pool({
+        p = new pg.Pool({
             host: config.pgHost,
             user: config.pgUser,
             password: config.pgPassword,
@@ -21,7 +21,7 @@ export async function init(config) {
         p = undefined;
         if (e.toString() === `error: database "${config.pgDatabase}" does not exist`) {
             console.log('create database');
-            p = new Pool({
+            p = new pg.Pool({
                 host: config.pgHost,
                 user: config.pgUser,
                 password: config.pgPassword,
@@ -29,7 +29,7 @@ export async function init(config) {
             });
             await p.query(`CREATE DATABASE ${config.pgDatabase}`);
             await p.end();
-            p = new Pool({
+            p = new pg.Pool({
                 host: config.pgHost,
                 user: config.pgUser,
                 password: config.pgPassword,
