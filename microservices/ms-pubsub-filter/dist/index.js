@@ -26,12 +26,17 @@ await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 const producer = kafka.producer();
 await producer.connect();
 const filter = JSON.parse(await fs.promises.readFile(config.filterFile, { encoding: 'utf8' }));
+logger.debug({ filter }, 'filter');
 await consumer.run({
     eachMessage: async ({ message }) => {
         if (message.value) {
             const event = JSON.parse(message.value.toString());
+            logger.trace({ event }, 'event received');
             for (const key in filter) {
-                if (event.topic.startsWith(key)) {
+                if (event.data &&
+                    event.data.topic &&
+                    event.data.topic.startsWith(key)) {
+                    logger.trace({ key, target: filter[key] }, 'sending event');
                     await sendData(filter[key], message);
                 }
             }
