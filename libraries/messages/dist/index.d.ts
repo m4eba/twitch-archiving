@@ -30,3 +30,10 @@ export interface PlaylistSegmentMessage {
     time: string;
     url: string;
 }
+export interface SegmentDownloadedMessage {
+    user: string;
+    id: string;
+    sequenceNumber: number;
+    filename: string;
+    path: string;
+}
