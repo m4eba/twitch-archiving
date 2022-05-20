@@ -63,15 +63,21 @@ export async function stopRecording(time, recordingId) {
         recordingId,
     ]);
 }
-export async function getRecordingId(site_id) {
+export async function getRecording(site_id) {
     const pool = getPool();
     if (pool === undefined)
         throw new Error('database not initialized');
-    const result = await pool.query('SELECT id FROM recording WHERE site_id = $1', [site_id]);
+    const result = await pool.query('SELECT * FROM recording WHERE site_id = $1', [site_id]);
     if (result.rows.length === 0) {
-        return '';
+        return undefined;
     }
-    return result.rows[0].id;
+    return {
+        id: result.rows[0].id,
+        start: result.rows[0].start,
+        stop: result.rows[0].stop,
+        channel: result.rows[0].channel,
+        site_id: result.rows[0].site_id,
+    };
 }
 export async function updateSiteId(recordingId, siteId) {
     const pool = getPool();
@@ -87,6 +93,27 @@ export async function startFile(recordingId, name, seq, duration, time) {
     if (pool === undefined)
         throw new Error('database not initialized');
     await pool.query('INSERT into file (recording_id,name,seq,retries,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,0,$4,$5,0,0,$6,$7)', [recordingId, name, seq, duration, time, '', 'downloading']);
+}
+export async function getFile(recordingId, name) {
+    const pool = getPool();
+    if (pool === undefined)
+        throw new Error('database not initialized');
+    const result = await pool.query('SELECT * FROM file WHERE recording_id = $1 AND name = $2', [recordingId, name]);
+    if (result.rows.length === 0) {
+        return undefined;
+    }
+    return {
+        recording_id: result.rows[0].recording_id,
+        name: result.rows[0].name,
+        seq: result.rows[0].seq,
+        retries: result.rows[0].retries,
+        duration: result.rows[0].duration,
+        datetime: result.rows[0].datetime,
+        size: result.rows[0].size,
+        downloaded: result.rows[0].downloaded,
+        hash: result.rows[0].hash,
+        status: result.rows[0].status,
+    };
 }
 export async function updateFileSize(recordingId, name, size) {
     const pool = getPool();

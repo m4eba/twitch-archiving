@@ -1,6 +1,27 @@
 import type { Pool } from 'pg';
 import { getPool } from './init.js';
 
+export interface Recording {
+  id: string;
+  start: Date;
+  stop: Date | undefined;
+  channel: string;
+  site_id: string;
+}
+
+export interface File {
+  recording_id: string;
+  name: string;
+  seq: number;
+  retries: number;
+  duration: number;
+  datetime: Date;
+  size: number;
+  downloaded: number;
+  hash: string;
+  status: string;
+}
+
 export async function createTableDownload(): Promise<void> {
   const pool: Pool | undefined = getPool();
   if (pool === undefined) {
@@ -77,17 +98,25 @@ export async function stopRecording(
   ]);
 }
 
-export async function getRecordingId(site_id: string): Promise<string> {
+export async function getRecording(
+  site_id: string
+): Promise<Recording | undefined> {
   const pool = getPool();
   if (pool === undefined) throw new Error('database not initialized');
   const result = await pool.query(
-    'SELECT id FROM recording WHERE site_id = $1',
+    'SELECT * FROM recording WHERE site_id = $1',
     [site_id]
   );
   if (result.rows.length === 0) {
-    return '';
+    return undefined;
   }
-  return result.rows[0].id;
+  return {
+    id: result.rows[0].id,
+    start: result.rows[0].start,
+    stop: result.rows[0].stop,
+    channel: result.rows[0].channel,
+    site_id: result.rows[0].site_id,
+  };
 }
 
 export async function updateSiteId(
@@ -115,6 +144,33 @@ export async function startFile(
     'INSERT into file (recording_id,name,seq,retries,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,0,$4,$5,0,0,$6,$7)',
     [recordingId, name, seq, duration, time, '', 'downloading']
   );
+}
+
+export async function getFile(
+  recordingId: string,
+  name: string
+): Promise<File | undefined> {
+  const pool = getPool();
+  if (pool === undefined) throw new Error('database not initialized');
+  const result = await pool.query(
+    'SELECT * FROM file WHERE recording_id = $1 AND name = $2',
+    [recordingId, name]
+  );
+  if (result.rows.length === 0) {
+    return undefined;
+  }
+  return {
+    recording_id: result.rows[0].recording_id,
+    name: result.rows[0].name,
+    seq: result.rows[0].seq,
+    retries: result.rows[0].retries,
+    duration: result.rows[0].duration,
+    datetime: result.rows[0].datetime,
+    size: result.rows[0].size,
+    downloaded: result.rows[0].downloaded,
+    hash: result.rows[0].hash,
+    status: result.rows[0].status,
+  };
 }
 
 export async function updateFileSize(
