@@ -1,3 +1,4 @@
+import type { PlaylistMessage } from '@twitch-archiving/messages';
 export interface Recording {
     id: string;
     start: Date;
@@ -18,11 +19,19 @@ export interface File {
     status: string;
 }
 export declare function createTableDownload(): Promise<void>;
+export declare function setPlaylistMessage(data: PlaylistMessage): Promise<void>;
+export declare function getPlaylistMessage(user: string): Promise<PlaylistMessage | undefined>;
+export declare function setPlaylistEnding(recordingId: string): Promise<void>;
+export declare function isPlaylistEnding(recordingId: string): Promise<boolean>;
 export declare function startRecording(time: Date, channel: string, site_id: string): Promise<string>;
 export declare function stopRecording(time: Date, recordingId: string): Promise<void>;
-export declare function getRecording(site_id: string): Promise<Recording | undefined>;
+export declare function isRecording(channel: string): Promise<boolean>;
+export declare function getRecordingId(channel: string): Promise<string>;
+export declare function getRecording(id: string): Promise<Recording | undefined>;
 export declare function updateSiteId(recordingId: string, siteId: string): Promise<void>;
 export declare function startFile(recordingId: string, name: string, seq: number, duration: number, time: Date): Promise<void>;
+export declare function addSegment(recordingId: string, sequenceNumber: number): Promise<void>;
+export declare function finishedFile(recordingId: string, sequenceNumber: number): Promise<void>;
 export declare function getFile(recordingId: string, name: string): Promise<File | undefined>;
 export declare function updateFileSize(recordingId: string, name: string, size: number): Promise<void>;
 export declare function updateFileDownloadSize(recordingId: string, name: string, size: number): Promise<void>;

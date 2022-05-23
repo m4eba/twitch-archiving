@@ -34,7 +34,7 @@ setInterval(async () => {
         messages.push({
             key: channels[i],
             value: null,
-            timestamp: new Date().toString(),
+            timestamp: new Date().getTime().toString(),
         });
     }
     await sendData(config.outputTopic, messages);

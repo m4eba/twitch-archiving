@@ -1,4 +1,4 @@
-import { getPool } from './init.js';
+import { getPool, getRedis, getRedisPrefix } from './init.js';
 export async function createTableDownload() {
     const pool = getPool();
     if (pool === undefined) {
@@ -47,27 +47,93 @@ export async function createTableDownload() {
     `);
     }
 }
-export async function startRecording(time, channel, site_id) {
+function getPR() {
     const pool = getPool();
     if (pool === undefined)
         throw new Error('database not initialized');
+    const redis = getRedis();
+    if (redis === undefined)
+        throw new Error('redis not initialized');
+    return {
+        pool,
+        redis,
+        prefix: getRedisPrefix(),
+    };
+}
+function getR() {
+    const redis = getRedis();
+    if (redis === undefined)
+        throw new Error('redis not initialized');
+    return {
+        redis,
+        prefix: getRedisPrefix(),
+    };
+}
+function getP() {
+    const pool = getPool();
+    if (pool === undefined)
+        throw new Error('database not initialized');
+    return {
+        pool,
+    };
+}
+export async function setPlaylistMessage(data) {
+    const { redis, prefix } = getR();
+    await redis.set(prefix + '-stream-' + data.user, JSON.stringify(data));
+}
+export async function getPlaylistMessage(user) {
+    const { redis, prefix } = getR();
+    const data = await redis.get(prefix + '-stream-' + user);
+    if (data === null)
+        return undefined;
+    return JSON.parse(data);
+}
+export async function setPlaylistEnding(recordingId) {
+    const { redis, prefix } = getR();
+    await redis.set(prefix + recordingId + '-playlist-ending', 1);
+}
+export async function isPlaylistEnding(recordingId) {
+    const { redis, prefix } = getR();
+    return (await redis.get(prefix + recordingId + '-playlist-ending')) !== null;
+}
+export async function startRecording(time, channel, site_id) {
+    const { pool, redis, prefix } = getPR();
     const result = await pool.query('INSERT into recording VALUES (DEFAULT, $1, null, $2, $3) RETURNING id', [time, channel, site_id]);
-    return result.rows[0].id;
+    const id = result.rows[0].id;
+    await redis.set(prefix + channel + '-recordingId', id);
+    await redis.sAdd(prefix + '-streams', channel);
+    return id;
 }
 export async function stopRecording(time, recordingId) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool, redis, prefix } = getPR();
+    const recording = await getRecording(recordingId);
+    if (!recording)
+        return;
+    const channel = recording.channel;
     await pool.query('UPDATE recording SET stop=$1 WHERE  id = $2', [
         time,
         recordingId,
     ]);
+    await redis.del(prefix + channel + '-recordingId');
+    await redis.sRem(prefix + '-streams', channel);
+    await redis.del(prefix + channel + '-playlist-ending');
 }
-export async function getRecording(site_id) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
-    const result = await pool.query('SELECT * FROM recording WHERE site_id = $1', [site_id]);
+export async function isRecording(channel) {
+    const { redis, prefix } = getR();
+    return await redis.sIsMember(prefix + '-streams', channel);
+}
+export async function getRecordingId(channel) {
+    const { redis, prefix } = getR();
+    const id = await redis.get(prefix + channel + '-recordingId');
+    if (!id)
+        return '';
+    return id;
+}
+export async function getRecording(id) {
+    const { pool } = getP();
+    const result = await pool.query('SELECT * FROM recording WHERE id = $1', [
+        id,
+    ]);
     if (result.rows.length === 0) {
         return undefined;
     }
@@ -80,24 +146,30 @@ export async function getRecording(site_id) {
     };
 }
 export async function updateSiteId(recordingId, siteId) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool } = getP();
     await pool.query('UPDATE recording SET site_id=$1 WHERE id = $2', [
         siteId,
         recordingId,
     ]);
 }
 export async function startFile(recordingId, name, seq, duration, time) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool } = getP();
     await pool.query('INSERT into file (recording_id,name,seq,retries,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,0,$4,$5,0,0,$6,$7)', [recordingId, name, seq, duration, time, '', 'downloading']);
 }
+export async function addSegment(recordingId, sequenceNumber) {
+    const { redis, prefix } = getR();
+    await redis.sAdd(prefix + recordingId + '-segments', sequenceNumber.toString());
+}
+export async function finishedFile(recordingId, sequenceNumber) {
+    const { redis, prefix } = getR();
+    await redis.sRem(prefix + recordingId + '-segments', sequenceNumber.toString());
+    if ((await isPlaylistEnding(recordingId)) &&
+        (await redis.sCard(prefix + recordingId + '-segments')) === 0) {
+        await stopRecording(new Date(), recordingId);
+    }
+}
 export async function getFile(recordingId, name) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool } = getP();
     const result = await pool.query('SELECT * FROM file WHERE recording_id = $1 AND name = $2', [recordingId, name]);
     if (result.rows.length === 0) {
         return undefined;
@@ -116,26 +188,18 @@ export async function getFile(recordingId, name) {
     };
 }
 export async function updateFileSize(recordingId, name, size) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool } = getP();
     await pool.query('UPDATE file SET size=$1 WHERE recording_id = $2 AND name = $3', [size, recordingId, name]);
 }
 export async function updateFileDownloadSize(recordingId, name, size) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool } = getP();
     await pool.query('UPDATE file SET downloaded=$1 WHERE recording_id = $2 AND name = $3', [size, recordingId, name]);
 }
 export async function updateFileStatus(recordingId, name, status) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool } = getP();
     await pool.query('UPDATE file SET status=$1 WHERE recording_id = $2 AND name = $3', [status, recordingId, name]);
 }
 export async function incrementFileRetries(recordingId, name) {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
+    const { pool } = getP();
     await pool.query('UPDATE file SET retries=retires+1 WHERE recording_id = $1 AND name = $2', [recordingId, name]);
 }

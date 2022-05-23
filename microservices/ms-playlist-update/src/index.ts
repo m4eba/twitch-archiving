@@ -11,12 +11,17 @@ import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import fetch from 'node-fetch';
 import HLS from 'hls-parser';
-import { createClient } from 'redis';
 import type {
   PlaylistMessage,
   PlaylistSegmentMessage,
 } from '@twitch-archiving/messages';
 import { initLogger } from '@twitch-archiving/utils';
+import {
+  initRedis,
+  getPlaylistMessage,
+  setPlaylistEnding,
+  getRecordingId,
+} from '@twitch-archiving/database';
 
 interface PlaylistConfig {
   inputTopic: string;
@@ -51,11 +56,7 @@ const kafka: Kafka = new Kafka({
   brokers: config.kafkaBroker,
 });
 
-const redis: ReturnType<typeof createClient> = createClient({
-  url: config.redisUrl,
-});
-
-await redis.connect();
+await initRedis(config, config.redisPrefix);
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 
@@ -70,15 +71,20 @@ await consumer.run({
   eachMessage: async ({ message }) => {
     if (!message.key) return;
     const user = message.key.toString();
-    const playlistData = await redis.get(config.redisPrefix + user);
-    if (playlistData === null) return;
-    const playlist: PlaylistMessage = JSON.parse(playlistData);
-    if (playlist === null) return;
+    const playlist: PlaylistMessage | undefined = await getPlaylistMessage(
+      user
+    );
+    if (playlist === undefined) return;
     const resp = await fetch(playlist.url);
     const data = await resp.text();
     const list: HLS.types.MediaPlaylist = HLS.parse(
       data
     ) as HLS.types.MediaPlaylist;
+
+    if (list.endlist) {
+      const recordingId = await getRecordingId(user);
+      await setPlaylistEnding(recordingId);
+    }
 
     for (let i = 0; i < list.segments.length; ++i) {
       const seg = list.segments[i];
@@ -102,7 +108,7 @@ await consumer.run({
       await sendData(config.outputTopic, {
         key: user,
         value: JSON.stringify(msg),
-        timestamp: new Date().toString(),
+        timestamp: new Date().getTime().toString(),
       });
     }
   },

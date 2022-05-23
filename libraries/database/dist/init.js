@@ -1,9 +1,18 @@
 import pg from 'pg';
+import { createClient } from 'redis';
 let pool = undefined;
+let redis = undefined;
+let redisPrefix = '';
 export function getPool() {
     return pool;
 }
-export async function init(config) {
+export function getRedis() {
+    return redis;
+}
+export function getRedisPrefix() {
+    return redisPrefix;
+}
+export async function initPostgres(config) {
     let p = undefined;
     try {
         p = new pg.Pool({
@@ -39,4 +48,11 @@ export async function init(config) {
         }
     } //catch block
     pool = p;
+}
+export async function initRedis(config, prefix) {
+    redisPrefix = prefix;
+    redis = createClient({
+        url: config.redisUrl,
+    });
+    await redis.connect();
 }

@@ -20,6 +20,8 @@
     "typescript": "~4.5.5",
     "pino": "~7.11.0",
     "pg": "~8.7.3",
-    "@twitch-archiving/config": "workspace:*"
+    "@twitch-archiving/config": "workspace:*",
+    "redis": "~4.1.0",
+    "@twitch-archiving/messages": "workspace:*"
   }
 }

@@ -3,8 +3,8 @@ import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import fetch from 'node-fetch';
 import HLS from 'hls-parser';
-import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
+import { initRedis, getPlaylistMessage, setPlaylistEnding, getRecordingId, } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist' },
     outputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
@@ -23,10 +23,7 @@ const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
 });
-const redis = createClient({
-    url: config.redisUrl,
-});
-await redis.connect();
+await initRedis(config, config.redisPrefix);
 logger.info({ topic: config.inputTopic }, 'subscribe');
 const consumer = kafka.consumer({ groupId: 'playlist-update' });
 await consumer.connect();
@@ -38,15 +35,16 @@ await consumer.run({
         if (!message.key)
             return;
         const user = message.key.toString();
-        const playlistData = await redis.get(config.redisPrefix + user);
-        if (playlistData === null)
-            return;
-        const playlist = JSON.parse(playlistData);
-        if (playlist === null)
+        const playlist = await getPlaylistMessage(user);
+        if (playlist === undefined)
             return;
         const resp = await fetch(playlist.url);
         const data = await resp.text();
         const list = HLS.parse(data);
+        if (list.endlist) {
+            const recordingId = await getRecordingId(user);
+            await setPlaylistEnding(recordingId);
+        }
         for (let i = 0; i < list.segments.length; ++i) {
             const seg = list.segments[i];
             let time = '';
@@ -68,7 +66,7 @@ await consumer.run({
             await sendData(config.outputTopic, {
                 key: user,
                 value: JSON.stringify(msg),
-                timestamp: new Date().toString(),
+                timestamp: new Date().getTime().toString(),
             });
         }
     },

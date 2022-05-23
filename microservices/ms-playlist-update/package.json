@@ -28,6 +28,7 @@
     "hls-parser": "~0.10.4",
     "redis": "~4.0.6",
     "node-fetch": "~3.2.4",
-    "@twitch-archiving/utils": "workspace:*"
+    "@twitch-archiving/utils": "workspace:*",
+    "@twitch-archiving/database": "workspace:*"
   }
 }

@@ -1,14 +1,27 @@
-import type { PostgresConfig } from '@twitch-archiving/config';
+import type { PostgresConfig, RedisConfig } from '@twitch-archiving/config';
 import type { Pool } from 'pg';
 import pg from 'pg';
+import { createClient } from 'redis';
+
+export type RedisClient = ReturnType<typeof createClient>;
 
 let pool: Pool | undefined = undefined;
+let redis: RedisClient | undefined = undefined;
+let redisPrefix: string = '';
 
 export function getPool(): Pool | undefined {
   return pool;
 }
 
-export async function init(config: PostgresConfig): Promise<void> {
+export function getRedis(): RedisClient | undefined {
+  return redis;
+}
+
+export function getRedisPrefix(): string {
+  return redisPrefix;
+}
+
+export async function initPostgres(config: PostgresConfig): Promise<void> {
   let p: Pool | undefined = undefined;
 
   try {
@@ -48,4 +61,15 @@ export async function init(config: PostgresConfig): Promise<void> {
   } //catch block
 
   pool = p;
+}
+
+export async function initRedis(
+  config: RedisConfig,
+  prefix: string
+): Promise<void> {
+  redisPrefix = prefix;
+  redis = createClient({
+    url: config.redisUrl,
+  });
+  await redis.connect();
 }
