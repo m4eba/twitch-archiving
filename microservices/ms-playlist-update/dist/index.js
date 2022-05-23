@@ -40,6 +40,9 @@ await consumer.run({
             return;
         const resp = await fetch(playlist.url);
         const data = await resp.text();
+        if (resp.status !== 200)
+            return;
+        logger.trace({ data }, 'playlist text');
         const list = HLS.parse(data);
         if (list.endlist) {
             const recordingId = await getRecordingId(user);

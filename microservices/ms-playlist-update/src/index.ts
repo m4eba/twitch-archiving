@@ -77,6 +77,8 @@ await consumer.run({
     if (playlist === undefined) return;
     const resp = await fetch(playlist.url);
     const data = await resp.text();
+    if (resp.status !== 200) return;
+    logger.trace({ data }, 'playlist text');
     const list: HLS.types.MediaPlaylist = HLS.parse(
       data
     ) as HLS.types.MediaPlaylist;
