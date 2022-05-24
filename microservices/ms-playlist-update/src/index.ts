@@ -21,6 +21,8 @@ import {
   getPlaylistMessage,
   setPlaylistEnding,
   getRecordingId,
+  testSegment,
+  addSegment,
 } from '@twitch-archiving/database';
 
 interface PlaylistConfig {
@@ -83,13 +85,15 @@ await consumer.run({
       data
     ) as HLS.types.MediaPlaylist;
 
+    const recordingId = await getRecordingId(user);
     if (list.endlist) {
-      const recordingId = await getRecordingId(user);
       await setPlaylistEnding(recordingId);
     }
 
     for (let i = 0; i < list.segments.length; ++i) {
       const seg = list.segments[i];
+      if (await testSegment(recordingId, seg.mediaSequenceNumber)) continue;
+      await addSegment(recordingId, seg.mediaSequenceNumber);
       let time = '';
       if (seg.programDateTime) {
         time = seg.programDateTime.toISOString();

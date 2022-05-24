@@ -1,4 +1,6 @@
 import { getPool, getRedis, getRedisPrefix } from './init.js';
+import { initLogger } from '@twitch-archiving/utils';
+const logger = initLogger('database-download');
 export async function createTableDownload() {
     const pool = getPool();
     if (pool === undefined) {
@@ -117,6 +119,9 @@ export async function stopRecording(time, recordingId) {
     await redis.del(prefix + channel + '-recordingId');
     await redis.sRem(prefix + '-streams', channel);
     await redis.del(prefix + channel + '-playlist-ending');
+    await redis.del(prefix + recordingId + '-segments-waiting');
+    await redis.del(prefix + recordingId + '-segments-running');
+    await redis.del(prefix + recordingId + '-segments-done');
 }
 export async function getRecordedChannels() {
     const { redis, prefix } = getR();
@@ -158,18 +163,39 @@ export async function updateSiteId(recordingId, siteId) {
     ]);
 }
 export async function startFile(recordingId, name, seq, duration, time) {
-    const { pool } = getP();
+    const { pool, redis, prefix } = getPR();
     await pool.query('INSERT into file (recording_id,name,seq,retries,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,0,$4,$5,0,0,$6,$7)', [recordingId, name, seq, duration, time, '', 'downloading']);
+    await redis.sAdd(prefix + recordingId + '-segments-running', seq.toString());
+    await redis.sRem(prefix + recordingId + '-segments-waiting', seq.toString());
 }
 export async function addSegment(recordingId, sequenceNumber) {
     const { redis, prefix } = getR();
-    await redis.sAdd(prefix + recordingId + '-segments', sequenceNumber.toString());
+    await redis.sAdd(prefix + recordingId + '-segments-waiting', sequenceNumber.toString());
+}
+export async function testSegment(recordingId, sequenceNumber) {
+    const { redis, prefix } = getR();
+    const wait = await redis.sIsMember(prefix + recordingId + '-segments-waiting', sequenceNumber.toString());
+    if (wait)
+        return true;
+    const done = await redis.sIsMember(prefix + recordingId + '-segments-done', sequenceNumber.toString());
+    if (done)
+        return true;
+    const running = await redis.sIsMember(prefix + recordingId + '-segments-running', sequenceNumber.toString());
+    return running;
 }
 export async function finishedFile(recordingId, sequenceNumber) {
     const { redis, prefix } = getR();
-    await redis.sRem(prefix + recordingId + '-segments', sequenceNumber.toString());
+    await redis.sRem(prefix + recordingId + '-segments-running', sequenceNumber.toString());
+    await redis.sAdd(prefix + recordingId + '-segments-done', sequenceNumber.toString());
+    const wait = await redis.sMembers(prefix + recordingId + '-segments-waiting');
+    const running = await redis.sMembers(prefix + recordingId + '-segments-running');
+    const done = await redis.sMembers(prefix + recordingId + '-segments-done');
+    logger.trace({ wait, running, done }, 'segments');
+    const ending = await isPlaylistEnding(recordingId);
+    logger.trace({ ending }, 'meta end');
     if ((await isPlaylistEnding(recordingId)) &&
-        (await redis.sCard(prefix + recordingId + '-segments')) === 0) {
+        (await redis.sCard(prefix + recordingId + '-segments-running')) === 0 &&
+        (await redis.sCard(prefix + recordingId + '-segments-waiting')) === 0) {
         await stopRecording(new Date(), recordingId);
     }
 }

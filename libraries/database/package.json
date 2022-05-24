@@ -22,6 +22,7 @@
     "pg": "~8.7.3",
     "@twitch-archiving/config": "workspace:*",
     "redis": "~4.1.0",
-    "@twitch-archiving/messages": "workspace:*"
+    "@twitch-archiving/messages": "workspace:*",
+    "@twitch-archiving/utils": "workspace:*"
   }
 }
