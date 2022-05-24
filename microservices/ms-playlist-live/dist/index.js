@@ -134,9 +134,13 @@ async function initStream(user, newStream) {
     logger.trace({ user, id, site_id }, 'site_id');
     if (playlistMessage !== undefined && newStream) {
         const recordingId = await getRecordingId(user);
-        await stopRecording(new Date(), recordingId);
+        if (recordingId.length !== 0) {
+            logger.debug({ recordingId, user }, 'stop running recording');
+            await stopRecording(new Date(), recordingId);
+        }
     }
     if (playlistMessage === undefined || newStream) {
+        logger.debug({ data, user }, 'start new recording');
         await startRecording(new Date(), user, site_id);
     }
     await sendData(config.outputTopic, {
