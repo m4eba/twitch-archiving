@@ -373,6 +373,7 @@ importers:
       '@rushstack/heft': ~0.44.2
       '@rushstack/heft-node-rig': ~1.8.0
       '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/database': workspace:*
       '@twitch-archiving/messages': workspace:*
       '@twitch-archiving/node-rig': workspace:*
       '@twitch-archiving/utils': workspace:*
@@ -386,6 +387,7 @@ importers:
       typescript: ~4.5.5
     dependencies:
       '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/database': link:../../libraries/database
       '@twitch-archiving/messages': link:../../libraries/messages
       '@twitch-archiving/utils': link:../../libraries/utils
       kafkajs: 1.16.0

@@ -9,20 +9,20 @@ import {
 import type { Logger } from 'pino';
 import { Kafka, Producer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
-import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
+import { initRedis, getRecordedChannels } from '@twitch-archiving/database';
 
 interface PlaylistUpdateTimerConfig {
   interval: number;
   outputTopic: string;
-  redisSetName: string;
+  redisPrefix: string;
 }
 
 const PlaylistUpdateTimerConfigOpt: ArgumentConfig<PlaylistUpdateTimerConfig> =
   {
     interval: { type: Number, defaultValue: 2000 },
     outputTopic: { type: String, defaultValue: 'tw-playlist' },
-    redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
+    redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
   };
 
 interface Config
@@ -50,17 +50,13 @@ const kafka: Kafka = new Kafka({
   brokers: config.kafkaBroker,
 });
 
-const redis: ReturnType<typeof createClient> = createClient({
-  url: config.redisUrl,
-});
-
-await redis.connect();
+await initRedis(config, config.redisPrefix);
 
 const producer: Producer = kafka.producer();
 await producer.connect();
 
 setInterval(async () => {
-  const channels = await redis.sMembers(config.redisSetName);
+  const channels = await getRecordedChannels();
   const messages: Message[] = [];
   for (let i = 0; i < channels.length; ++i) {
     messages.push({

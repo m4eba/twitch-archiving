@@ -52,7 +52,7 @@ export async function createTableDownload(): Promise<void> {
 
     create type file_status as enum ('downloading', 'error', 'done'); 
     create table file (
-      recording_id integer not null,
+      recording_id bigint not null,
       name text not null,
       seq integer not null,          
       retries smallint not null,
@@ -161,6 +161,12 @@ export async function stopRecording(
   await redis.del(prefix + channel + '-recordingId');
   await redis.sRem(prefix + '-streams', channel);
   await redis.del(prefix + channel + '-playlist-ending');
+}
+
+export async function getRecordedChannels(): Promise<string[]> {
+  const { redis, prefix } = getR();
+  const channels = await redis.sMembers(prefix + '-streams');
+  return channels;
 }
 
 export async function isRecording(channel: string): Promise<boolean> {

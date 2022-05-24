@@ -25,6 +25,7 @@ export declare function setPlaylistEnding(recordingId: string): Promise<void>;
 export declare function isPlaylistEnding(recordingId: string): Promise<boolean>;
 export declare function startRecording(time: Date, channel: string, site_id: string): Promise<string>;
 export declare function stopRecording(time: Date, recordingId: string): Promise<void>;
+export declare function getRecordedChannels(): Promise<string[]>;
 export declare function isRecording(channel: string): Promise<boolean>;
 export declare function getRecordingId(channel: string): Promise<string>;
 export declare function getRecording(id: string): Promise<Recording | undefined>;
