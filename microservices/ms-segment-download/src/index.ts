@@ -160,6 +160,7 @@ await consumer.run({
         user: seg.user,
         id: seg.id,
         sequenceNumber: seg.sequenceNumber,
+        duration: seg.duration,
         filename,
         path: name,
       };

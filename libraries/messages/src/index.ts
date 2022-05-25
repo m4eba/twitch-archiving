@@ -39,6 +39,7 @@ export interface SegmentDownloadedMessage {
   user: string;
   id: string;
   sequenceNumber: number;
+  duration: number;
   filename: string;
   path: string;
 }
