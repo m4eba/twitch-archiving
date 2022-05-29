@@ -22,7 +22,6 @@ import {
 } from '@twitch-archiving/messages';
 import {
   getFile,
-  getRecordingId,
   initPostgres,
   initRedis,
   startFile,
@@ -103,7 +102,7 @@ await consumer.run({
 
     const filename = seg.sequenceNumber.toString().padStart(5, '0') + '.ts';
 
-    const recordingId = await getRecordingId(seg.user);
+    const recordingId = seg.recordingId;
     if (recordingId.length === 0) {
       logger.error({ seg }, 'recordingId not found');
       return;
@@ -159,6 +158,7 @@ await consumer.run({
       const msg: SegmentDownloadedMessage = {
         user: seg.user,
         id: seg.id,
+        recordingId,
         sequenceNumber: seg.sequenceNumber,
         duration: seg.duration,
         filename,

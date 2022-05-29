@@ -6,7 +6,7 @@ import path from 'path';
 import { downloadSegment, initLogger } from '@twitch-archiving/utils';
 import { createClient } from 'redis';
 import { PlaylistType, } from '@twitch-archiving/messages';
-import { getFile, getRecordingId, initPostgres, initRedis, startFile, updateFileDownloadSize, updateFileSize, updateFileStatus, incrementFileRetries, finishedFile, } from '@twitch-archiving/database';
+import { getFile, initPostgres, initRedis, startFile, updateFileDownloadSize, updateFileSize, updateFileStatus, incrementFileRetries, finishedFile, } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
     outputTopic: { type: String, defaultValue: 'tw-segment' },
@@ -49,7 +49,7 @@ await consumer.run({
         const seg = JSON.parse(message.value.toString());
         logger.trace({ seg }, 'segment download');
         const filename = seg.sequenceNumber.toString().padStart(5, '0') + '.ts';
-        const recordingId = await getRecordingId(seg.user);
+        const recordingId = seg.recordingId;
         if (recordingId.length === 0) {
             logger.error({ seg }, 'recordingId not found');
             return;
@@ -89,6 +89,7 @@ await consumer.run({
             const msg = {
                 user: seg.user,
                 id: seg.id,
+                recordingId,
                 sequenceNumber: seg.sequenceNumber,
                 duration: seg.duration,
                 filename,

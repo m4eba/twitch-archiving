@@ -5,7 +5,7 @@ import HLS from 'hls-parser';
 import { createClient } from 'redis';
 import { getLivePlaylist, getAccessToken, } from '@twitch-archiving/twitch';
 import { PlaylistType, } from '@twitch-archiving/messages';
-import { initPostgres, initRedis, startRecording, createTableDownload, isRecording, setPlaylistMessage, getPlaylistMessage, stopRecording, getRecordingId, } from '@twitch-archiving/database';
+import { initPostgres, initRedis, startRecording, createTableDownload, isRecording, setPlaylistMessage, getPlaylistMessage, stopRecording, } from '@twitch-archiving/database';
 import { initLogger } from '@twitch-archiving/utils';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-live' },
@@ -123,18 +123,17 @@ async function initStream(user, newStream) {
     const data = {
         user,
         id,
+        recordingId: '',
         type: PlaylistType.LIVE,
         playlist,
         token,
         url: best.uri,
     };
-    await setPlaylistMessage(data);
-    logger.debug('playlist', { user, playlistMessage: data });
-    const msg = JSON.stringify(data);
+    let recordingId = '';
     const site_id = 'live-' + id;
     logger.trace({ user, id, site_id }, 'site_id');
     if (playlistMessage !== undefined && newStream) {
-        const recordingId = await getRecordingId(user);
+        recordingId = playlistMessage.recordingId;
         if (recordingId.length !== 0) {
             logger.debug({ recordingId, user }, 'stop running recording');
             await stopRecording(new Date(), recordingId);
@@ -142,7 +141,8 @@ async function initStream(user, newStream) {
     }
     if (playlistMessage === undefined || newStream) {
         logger.debug({ data, user }, 'start new recording');
-        const recordingId = await startRecording(new Date(), user, site_id);
+        recordingId = await startRecording(new Date(), user, site_id);
+        data.recordingId = recordingId;
         const recMsg = {
             user,
             id,
@@ -155,6 +155,9 @@ async function initStream(user, newStream) {
             timestamp: new Date().getTime().toString(),
         });
     }
+    await setPlaylistMessage(data);
+    logger.debug('playlist', { user, playlistMessage: data });
+    const msg = JSON.stringify(data);
     await sendData(config.playlistOutputTopic, {
         key: user,
         value: msg,

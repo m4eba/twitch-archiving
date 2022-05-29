@@ -27,6 +27,7 @@ export interface RecordingStartedMessage {
 export interface PlaylistMessage {
   user: string;
   id: string;
+  recordingId: string;
   type: PlaylistType;
   playlist: string;
   token: AccessToken;
@@ -36,6 +37,7 @@ export interface PlaylistMessage {
 export interface PlaylistSegmentMessage {
   user: string;
   id: string;
+  recordingId: string;
   type: PlaylistType;
   sequenceNumber: number;
   duration: number;
@@ -46,6 +48,7 @@ export interface PlaylistSegmentMessage {
 export interface SegmentDownloadedMessage {
   user: string;
   id: string;
+  recordingId: string;
   sequenceNumber: number;
   duration: number;
   filename: string;

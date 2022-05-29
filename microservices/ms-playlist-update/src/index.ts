@@ -20,7 +20,6 @@ import {
   initRedis,
   getPlaylistMessage,
   setPlaylistEnding,
-  getRecordingId,
   testSegment,
   addSegment,
 } from '@twitch-archiving/database';
@@ -85,15 +84,15 @@ await consumer.run({
       data
     ) as HLS.types.MediaPlaylist;
 
-    const recordingId = await getRecordingId(user);
     if (list.endlist) {
-      await setPlaylistEnding(recordingId);
+      await setPlaylistEnding(playlist.recordingId);
     }
 
     for (let i = 0; i < list.segments.length; ++i) {
       const seg = list.segments[i];
-      if (await testSegment(recordingId, seg.mediaSequenceNumber)) continue;
-      await addSegment(recordingId, seg.mediaSequenceNumber);
+      if (await testSegment(playlist.recordingId, seg.mediaSequenceNumber))
+        continue;
+      await addSegment(playlist.recordingId, seg.mediaSequenceNumber);
       let time = '';
       if (seg.programDateTime) {
         time = seg.programDateTime.toISOString();
@@ -104,6 +103,7 @@ await consumer.run({
       const msg: PlaylistSegmentMessage = {
         user,
         id: playlist.id,
+        recordingId: playlist.recordingId,
         type: playlist.type,
         sequenceNumber: seg.mediaSequenceNumber,
         duration: seg.duration,
