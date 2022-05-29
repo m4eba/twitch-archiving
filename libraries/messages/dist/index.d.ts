@@ -13,6 +13,12 @@ export declare enum PlaylistType {
     LIVE = 0,
     VOD = 1
 }
+export interface RecordingStartedMessage {
+    user: string;
+    id: string;
+    recordingId: string;
+    type: PlaylistType;
+}
 export interface PlaylistMessage {
     user: string;
     id: string;

@@ -18,7 +18,11 @@ import {
   getAccessToken,
   AccessToken,
 } from '@twitch-archiving/twitch';
-import { PlaylistMessage, PlaylistType } from '@twitch-archiving/messages';
+import {
+  PlaylistMessage,
+  PlaylistType,
+  RecordingStartedMessage,
+} from '@twitch-archiving/messages';
 import {
   initPostgres,
   initRedis,
@@ -34,7 +38,8 @@ import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
   inputTopic: string;
-  outputTopic: string;
+  playlistOutputTopic: string;
+  recordingOutputTopic: string;
   oauthVideo: string;
   redisPrefix: string;
   redisSetName: string;
@@ -42,7 +47,8 @@ interface PlaylistConfig {
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
   inputTopic: { type: String, defaultValue: 'tw-live' },
-  outputTopic: { type: String, defaultValue: 'tw-playlist' },
+  playlistOutputTopic: { type: String, defaultValue: 'tw-playlist' },
+  recordingOutputTopic: { type: String, defaultValue: 'tw-recording' },
   oauthVideo: { type: String, defaultValue: '' },
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
   redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
@@ -214,10 +220,21 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
   }
   if (playlistMessage === undefined || newStream) {
     logger.debug({ data, user }, 'start new recording');
-    await startRecording(new Date(), user, site_id);
+    const recordingId = await startRecording(new Date(), user, site_id);
+    const recMsg: RecordingStartedMessage = {
+      user,
+      id,
+      recordingId,
+      type: data.type,
+    };
+    await sendData(config.recordingOutputTopic, {
+      key: user,
+      value: JSON.stringify(recMsg),
+      timestamp: new Date().getTime().toString(),
+    });
   }
 
-  await sendData(config.outputTopic, {
+  await sendData(config.playlistOutputTopic, {
     key: user,
     value: msg,
     timestamp: new Date().getTime().toString(),

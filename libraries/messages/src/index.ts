@@ -16,6 +16,14 @@ export enum PlaylistType {
   LIVE,
   VOD,
 }
+
+export interface RecordingStartedMessage {
+  user: string;
+  id: string;
+  recordingId: string;
+  type: PlaylistType;
+}
+
 export interface PlaylistMessage {
   user: string;
   id: string;
