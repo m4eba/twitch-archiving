@@ -9,7 +9,8 @@ import { PlaylistType, } from '@twitch-archiving/messages';
 import { getFile, initPostgres, initRedis, startFile, updateFileDownloadSize, updateFileSize, updateFileStatus, incrementFileRetries, finishedFile, } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
-    outputTopic: { type: String, defaultValue: 'tw-segment' },
+    segmentOutputTopic: { type: String, defaultValue: 'tw-segment-ended' },
+    recordingOutputTopic: { type: String, defaultValue: 'tw-recording-ended' },
     outputPath: { type: String },
     maxFileRetries: { type: Number, defaultValue: 3 },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
@@ -95,7 +96,7 @@ await consumer.run({
                 filename,
                 path: name,
             };
-            await sendData(config.outputTopic, {
+            await sendData(config.segmentOutputTopic, {
                 key: seg.user,
                 value: JSON.stringify(msg),
                 timestamp: new Date().getTime().toString(),
@@ -105,7 +106,18 @@ await consumer.run({
             logger.debug('unable to download segement', { seg });
             await updateFileStatus(recordingId, filename, 'error');
         }
-        await finishedFile(recordingId, seg.sequenceNumber);
+        if (await finishedFile(recordingId, seg.sequenceNumber)) {
+            const msg = {
+                user: seg.user,
+                id: seg.id,
+                recordingId: seg.recordingId,
+            };
+            await sendData(config.recordingOutputTopic, {
+                key: seg.user,
+                value: JSON.stringify(msg),
+                timestamp: new Date().getTime().toString(),
+            });
+        }
     },
 });
 async function sendData(topic, msg) {

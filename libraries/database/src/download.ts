@@ -274,7 +274,7 @@ export async function testSegment(
 export async function finishedFile(
   recordingId: string,
   sequenceNumber: number
-): Promise<void> {
+): Promise<boolean> {
   const { redis, prefix } = getR();
 
   await redis.sRem(
@@ -301,7 +301,9 @@ export async function finishedFile(
     (await redis.sCard(prefix + recordingId + '-segments-waiting')) === 0
   ) {
     await stopRecording(new Date(), recordingId);
+    return true;
   }
+  return false;
 }
 
 export async function getFile(

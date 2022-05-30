@@ -19,6 +19,11 @@ export interface RecordingStartedMessage {
     recordingId: string;
     type: PlaylistType;
 }
+export interface RecordingEndedMessage {
+    user: string;
+    id: string;
+    recordingId: string;
+}
 export interface PlaylistMessage {
     user: string;
     id: string;

@@ -197,7 +197,9 @@ export async function finishedFile(recordingId, sequenceNumber) {
         (await redis.sCard(prefix + recordingId + '-segments-running')) === 0 &&
         (await redis.sCard(prefix + recordingId + '-segments-waiting')) === 0) {
         await stopRecording(new Date(), recordingId);
+        return true;
     }
+    return false;
 }
 export async function getFile(recordingId, name) {
     const { pool } = getP();

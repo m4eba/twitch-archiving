@@ -33,7 +33,7 @@ export declare function updateSiteId(recordingId: string, siteId: string): Promi
 export declare function startFile(recordingId: string, name: string, seq: number, duration: number, time: Date): Promise<void>;
 export declare function addSegment(recordingId: string, sequenceNumber: number): Promise<void>;
 export declare function testSegment(recordingId: string, sequenceNumber: number): Promise<boolean>;
-export declare function finishedFile(recordingId: string, sequenceNumber: number): Promise<void>;
+export declare function finishedFile(recordingId: string, sequenceNumber: number): Promise<boolean>;
 export declare function getFile(recordingId: string, name: string): Promise<File | undefined>;
 export declare function updateFileSize(recordingId: string, name: string, size: number): Promise<void>;
 export declare function updateFileDownloadSize(recordingId: string, name: string, size: number): Promise<void>;
