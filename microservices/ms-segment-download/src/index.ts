@@ -20,6 +20,7 @@ import {
   PlaylistType,
   RecordingEndedMessage,
   SegmentDownloadedMessage,
+  SegmentDownloadedStatus,
 } from '@twitch-archiving/messages';
 import {
   getFile,
@@ -137,6 +138,8 @@ await consumer.run({
       seg.duration,
       new Date(seg.time)
     );
+    let status: SegmentDownloadedStatus = SegmentDownloadedStatus.DONE;
+
     try {
       let downloadSize: number = 0;
       logger.debug({ name }, 'download');
@@ -157,26 +160,30 @@ await consumer.run({
       logger.debug({ name, downloadSize }, 'filesize');
       await updateFileDownloadSize(recordingId, filename, downloadSize);
       await updateFileStatus(recordingId, filename, 'done');
-
-      const msg: SegmentDownloadedMessage = {
-        user: seg.user,
-        id: seg.id,
-        recordingId,
-        sequenceNumber: seg.sequenceNumber,
-        duration: seg.duration,
-        filename,
-        path: name,
-      };
-
-      await sendData(config.segmentOutputTopic, {
-        key: seg.user,
-        value: JSON.stringify(msg),
-        timestamp: new Date().getTime().toString(),
-      });
+      status = SegmentDownloadedStatus.DONE;
     } catch (e) {
       logger.debug('unable to download segement', { seg });
       await updateFileStatus(recordingId, filename, 'error');
+      status = SegmentDownloadedStatus.ERROR;
     }
+
+    const msg: SegmentDownloadedMessage = {
+      user: seg.user,
+      id: seg.id,
+      recordingId,
+      sequenceNumber: seg.sequenceNumber,
+      duration: seg.duration,
+      filename,
+      path: name,
+      status,
+    };
+
+    await sendData(config.segmentOutputTopic, {
+      key: seg.user,
+      value: JSON.stringify(msg),
+      timestamp: new Date().getTime().toString(),
+    });
+
     if (await finishedFile(recordingId, seg.sequenceNumber)) {
       const msg: RecordingEndedMessage = {
         user: seg.user,

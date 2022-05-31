@@ -51,6 +51,10 @@ export interface PlaylistSegmentMessage {
   url: string;
 }
 
+export enum SegmentDownloadedStatus {
+  DONE,
+  ERROR,
+}
 export interface SegmentDownloadedMessage {
   user: string;
   id: string;
@@ -59,4 +63,5 @@ export interface SegmentDownloadedMessage {
   duration: number;
   filename: string;
   path: string;
+  status: SegmentDownloadedStatus;
 }
