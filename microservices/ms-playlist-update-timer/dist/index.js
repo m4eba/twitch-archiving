@@ -2,7 +2,7 @@ import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, } from '@twitch-archivin
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, getRecordedChannels } from '@twitch-archiving/database';
+import { initRedis, download as dl } from '@twitch-archiving/database';
 const PlaylistUpdateTimerConfigOpt = {
     interval: { type: Number, defaultValue: 2000 },
     outputTopic: { type: String, defaultValue: 'tw-playlist' },
@@ -25,7 +25,7 @@ await initRedis(config, config.redisPrefix);
 const producer = kafka.producer();
 await producer.connect();
 setInterval(async () => {
-    const channels = await getRecordedChannels();
+    const channels = await dl.getRecordedChannels();
     const messages = [];
     for (let i = 0; i < channels.length; ++i) {
         messages.push({

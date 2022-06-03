@@ -4,7 +4,7 @@ import { parse } from 'ts-command-line-args';
 import fetch from 'node-fetch';
 import HLS from 'hls-parser';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, getPlaylistMessage, setPlaylistEnding, testSegment, addSegment, } from '@twitch-archiving/database';
+import { initRedis, download as dl } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist' },
     outputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
@@ -35,7 +35,7 @@ await consumer.run({
         if (!message.key)
             return;
         const user = message.key.toString();
-        const playlist = await getPlaylistMessage(user);
+        const playlist = await dl.getPlaylistMessage(user);
         if (playlist === undefined)
             return;
         const resp = await fetch(playlist.url);
@@ -45,13 +45,13 @@ await consumer.run({
         logger.trace({ data }, 'playlist text');
         const list = HLS.parse(data);
         if (list.endlist) {
-            await setPlaylistEnding(playlist.recordingId);
+            await dl.setPlaylistEnding(playlist.recordingId);
         }
         for (let i = 0; i < list.segments.length; ++i) {
             const seg = list.segments[i];
-            if (await testSegment(playlist.recordingId, seg.mediaSequenceNumber))
+            if (await dl.testSegment(playlist.recordingId, seg.mediaSequenceNumber))
                 continue;
-            await addSegment(playlist.recordingId, seg.mediaSequenceNumber);
+            await dl.addSegment(playlist.recordingId, seg.mediaSequenceNumber);
             let time = '';
             if (seg.programDateTime) {
                 time = seg.programDateTime.toISOString();

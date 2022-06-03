@@ -6,7 +6,7 @@ import path from 'path';
 import { downloadSegment, initLogger } from '@twitch-archiving/utils';
 import { createClient } from 'redis';
 import { PlaylistType, SegmentDownloadedStatus, } from '@twitch-archiving/messages';
-import { getFile, initPostgres, initRedis, startFile, updateFileDownloadSize, updateFileSize, updateFileStatus, incrementFileRetries, finishedFile, } from '@twitch-archiving/database';
+import { initPostgres, initRedis, download as dl, } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
     segmentOutputTopic: { type: String, defaultValue: 'tw-segment-ended' },
@@ -55,11 +55,11 @@ await consumer.run({
             logger.error({ seg }, 'recordingId not found');
             return;
         }
-        const file = await getFile(recordingId, filename);
+        const file = await dl.getFile(recordingId, filename);
         if (file !== undefined) {
             if (file.status === 'error' && file.retries < config.maxFileRetries) {
                 logger.debug({ recordingId, filename }, 'retry');
-                await incrementFileRetries(recordingId, filename);
+                await dl.incrementFileRetries(recordingId, filename);
             }
             else {
                 logger.debug({ recordingId, filename, status: file.status }, 'stop download');
@@ -70,7 +70,7 @@ await consumer.run({
         const dir = path.join(config.outputPath, seg.user, type, seg.id);
         await fs.promises.mkdir(dir, { recursive: true });
         const name = path.join(dir, filename);
-        await startFile(recordingId, filename, seg.sequenceNumber, seg.duration, new Date(seg.time));
+        await dl.startFile(recordingId, filename, seg.sequenceNumber, seg.duration, new Date(seg.time));
         let status = SegmentDownloadedStatus.DONE;
         try {
             let downloadSize = 0;
@@ -82,17 +82,17 @@ await consumer.run({
                 },
                 updateFilesize: async (_, filename, __, totalSize) => {
                     logger.debug({ recordingId, filename, totalSize }, 'update file size');
-                    await updateFileSize(recordingId, filename, totalSize);
+                    await dl.updateFileSize(recordingId, filename, totalSize);
                 },
             });
             logger.debug({ name, downloadSize }, 'filesize');
-            await updateFileDownloadSize(recordingId, filename, downloadSize);
-            await updateFileStatus(recordingId, filename, 'done');
+            await dl.updateFileDownloadSize(recordingId, filename, downloadSize);
+            await dl.updateFileStatus(recordingId, filename, 'done');
             status = SegmentDownloadedStatus.DONE;
         }
         catch (e) {
             logger.debug('unable to download segement', { seg });
-            await updateFileStatus(recordingId, filename, 'error');
+            await dl.updateFileStatus(recordingId, filename, 'error');
             status = SegmentDownloadedStatus.ERROR;
         }
         const msg = {
@@ -110,7 +110,7 @@ await consumer.run({
             value: JSON.stringify(msg),
             timestamp: new Date().getTime().toString(),
         });
-        if (await finishedFile(recordingId, seg.sequenceNumber)) {
+        if (await dl.finishedFile(recordingId, seg.sequenceNumber)) {
             const msg = {
                 user: seg.user,
                 id: seg.id,

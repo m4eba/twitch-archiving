@@ -16,13 +16,7 @@ import type {
   PlaylistSegmentMessage,
 } from '@twitch-archiving/messages';
 import { initLogger } from '@twitch-archiving/utils';
-import {
-  initRedis,
-  getPlaylistMessage,
-  setPlaylistEnding,
-  testSegment,
-  addSegment,
-} from '@twitch-archiving/database';
+import { initRedis, download as dl } from '@twitch-archiving/database';
 
 interface PlaylistConfig {
   inputTopic: string;
@@ -72,7 +66,7 @@ await consumer.run({
   eachMessage: async ({ message }) => {
     if (!message.key) return;
     const user = message.key.toString();
-    const playlist: PlaylistMessage | undefined = await getPlaylistMessage(
+    const playlist: PlaylistMessage | undefined = await dl.getPlaylistMessage(
       user
     );
     if (playlist === undefined) return;
@@ -85,14 +79,14 @@ await consumer.run({
     ) as HLS.types.MediaPlaylist;
 
     if (list.endlist) {
-      await setPlaylistEnding(playlist.recordingId);
+      await dl.setPlaylistEnding(playlist.recordingId);
     }
 
     for (let i = 0; i < list.segments.length; ++i) {
       const seg = list.segments[i];
-      if (await testSegment(playlist.recordingId, seg.mediaSequenceNumber))
+      if (await dl.testSegment(playlist.recordingId, seg.mediaSequenceNumber))
         continue;
-      await addSegment(playlist.recordingId, seg.mediaSequenceNumber);
+      await dl.addSegment(playlist.recordingId, seg.mediaSequenceNumber);
       let time = '';
       if (seg.programDateTime) {
         time = seg.programDateTime.toISOString();

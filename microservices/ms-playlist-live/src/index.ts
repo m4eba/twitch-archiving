@@ -26,12 +26,7 @@ import {
 import {
   initPostgres,
   initRedis,
-  startRecording,
-  createTableDownload,
-  isRecording,
-  setPlaylistMessage,
-  getPlaylistMessage,
-  stopRecording,
+  download as dl,
 } from '@twitch-archiving/database';
 import { initLogger } from '@twitch-archiving/utils';
 
@@ -86,7 +81,7 @@ const redis: ReturnType<typeof createClient> = createClient({
 
 await initPostgres(config);
 await initRedis(config, config.redisPrefix);
-await createTableDownload();
+await dl.createTableDownload();
 await redis.connect();
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
@@ -130,7 +125,7 @@ await consumer.run({
       }
     }
 
-    if (!(await isRecording(user))) {
+    if (!(await dl.isRecording(user))) {
       logger.debug('member not in redis', { user });
       init = true;
     }
@@ -161,7 +156,7 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
 
   logger.trace({ user, playlist }, 'playlist');
 
-  const playlistMessage = await getPlaylistMessage(user);
+  const playlistMessage = await dl.getPlaylistMessage(user);
 
   const reg = /BROADCAST-ID="(.*?)"/;
   let id = '';
@@ -211,12 +206,12 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
     recordingId = playlistMessage.recordingId;
     if (recordingId.length !== 0) {
       logger.debug({ recordingId, user }, 'stop running recording');
-      await stopRecording(new Date(), recordingId);
+      await dl.stopRecording(new Date(), recordingId);
     }
   }
   if (playlistMessage === undefined || newStream) {
     logger.debug({ data, user }, 'start new recording');
-    recordingId = await startRecording(new Date(), user, site_id);
+    recordingId = await dl.startRecording(new Date(), user, site_id);
     data.recordingId = recordingId;
     const recMsg: RecordingStartedMessage = {
       user,
@@ -231,7 +226,7 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
     });
   }
 
-  await setPlaylistMessage(data);
+  await dl.setPlaylistMessage(data);
 
   logger.debug('playlist', { user, playlistMessage: data });
   const msg = JSON.stringify(data);

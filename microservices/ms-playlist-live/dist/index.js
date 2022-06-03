@@ -5,7 +5,7 @@ import HLS from 'hls-parser';
 import { createClient } from 'redis';
 import { getLivePlaylist, getAccessToken, } from '@twitch-archiving/twitch';
 import { PlaylistType, } from '@twitch-archiving/messages';
-import { initPostgres, initRedis, startRecording, createTableDownload, isRecording, setPlaylistMessage, getPlaylistMessage, stopRecording, } from '@twitch-archiving/database';
+import { initPostgres, initRedis, download as dl, } from '@twitch-archiving/database';
 import { initLogger } from '@twitch-archiving/utils';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-live' },
@@ -34,7 +34,7 @@ const redis = createClient({
 });
 await initPostgres(config);
 await initRedis(config, config.redisPrefix);
-await createTableDownload();
+await dl.createTableDownload();
 await redis.connect();
 logger.info({ topic: config.inputTopic }, 'subscribe');
 const consumer = kafka.consumer({ groupId: 'paylist-live' });
@@ -69,7 +69,7 @@ await consumer.run({
                 }
             }
         }
-        if (!(await isRecording(user))) {
+        if (!(await dl.isRecording(user))) {
             logger.debug('member not in redis', { user });
             init = true;
         }
@@ -92,7 +92,7 @@ async function initStream(user, newStream) {
         return;
     }
     logger.trace({ user, playlist }, 'playlist');
-    const playlistMessage = await getPlaylistMessage(user);
+    const playlistMessage = await dl.getPlaylistMessage(user);
     const reg = /BROADCAST-ID="(.*?)"/;
     let id = '';
     const regResult = reg.exec(playlist);
@@ -136,12 +136,12 @@ async function initStream(user, newStream) {
         recordingId = playlistMessage.recordingId;
         if (recordingId.length !== 0) {
             logger.debug({ recordingId, user }, 'stop running recording');
-            await stopRecording(new Date(), recordingId);
+            await dl.stopRecording(new Date(), recordingId);
         }
     }
     if (playlistMessage === undefined || newStream) {
         logger.debug({ data, user }, 'start new recording');
-        recordingId = await startRecording(new Date(), user, site_id);
+        recordingId = await dl.startRecording(new Date(), user, site_id);
         data.recordingId = recordingId;
         const recMsg = {
             user,
@@ -155,7 +155,7 @@ async function initStream(user, newStream) {
             timestamp: new Date().getTime().toString(),
         });
     }
-    await setPlaylistMessage(data);
+    await dl.setPlaylistMessage(data);
     logger.debug('playlist', { user, playlistMessage: data });
     const msg = JSON.stringify(data);
     await sendData(config.playlistOutputTopic, {

@@ -10,7 +10,7 @@ import type { Logger } from 'pino';
 import { Kafka, Producer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, getRecordedChannels } from '@twitch-archiving/database';
+import { initRedis, download as dl } from '@twitch-archiving/database';
 
 interface PlaylistUpdateTimerConfig {
   interval: number;
@@ -56,7 +56,7 @@ const producer: Producer = kafka.producer();
 await producer.connect();
 
 setInterval(async () => {
-  const channels = await getRecordedChannels();
+  const channels = await dl.getRecordedChannels();
   const messages: Message[] = [];
   for (let i = 0; i < channels.length; ++i) {
     messages.push({
