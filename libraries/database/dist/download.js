@@ -1,4 +1,4 @@
-import { getPool, getRedis, getRedisPrefix } from './init.js';
+import { getPool, getR, getP, getPR } from './init.js';
 import { initLogger } from '@twitch-archiving/utils';
 const logger = initLogger('database-download');
 export async function createTableDownload() {
@@ -48,36 +48,6 @@ export async function createTableDownload() {
     create index file_status on file (status);
     `);
     }
-}
-function getPR() {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
-    const redis = getRedis();
-    if (redis === undefined)
-        throw new Error('redis not initialized');
-    return {
-        pool,
-        redis,
-        prefix: getRedisPrefix(),
-    };
-}
-function getR() {
-    const redis = getRedis();
-    if (redis === undefined)
-        throw new Error('redis not initialized');
-    return {
-        redis,
-        prefix: getRedisPrefix(),
-    };
-}
-function getP() {
-    const pool = getPool();
-    if (pool === undefined)
-        throw new Error('database not initialized');
-    return {
-        pool,
-    };
 }
 export async function setPlaylistMessage(data) {
     const { redis, prefix } = getR();
@@ -187,19 +157,18 @@ export async function finishedFile(recordingId, sequenceNumber) {
     const { redis, prefix } = getR();
     await redis.sRem(prefix + recordingId + '-segments-running', sequenceNumber.toString());
     await redis.sAdd(prefix + recordingId + '-segments-done', sequenceNumber.toString());
+}
+export async function isRecordingDone(recordingId) {
+    const { redis, prefix } = getR();
     const wait = await redis.sMembers(prefix + recordingId + '-segments-waiting');
     const running = await redis.sMembers(prefix + recordingId + '-segments-running');
     const done = await redis.sMembers(prefix + recordingId + '-segments-done');
     logger.trace({ wait, running, done }, 'segments');
     const ending = await isPlaylistEnding(recordingId);
     logger.trace({ ending }, 'meta end');
-    if ((await isPlaylistEnding(recordingId)) &&
+    return (ending &&
         (await redis.sCard(prefix + recordingId + '-segments-running')) === 0 &&
-        (await redis.sCard(prefix + recordingId + '-segments-waiting')) === 0) {
-        await stopRecording(new Date(), recordingId);
-        return true;
-    }
-    return false;
+        (await redis.sCard(prefix + recordingId + '-segments-waiting')) === 0);
 }
 export async function getFile(recordingId, name) {
     const { pool } = getP();

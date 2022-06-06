@@ -110,7 +110,9 @@ await consumer.run({
             value: JSON.stringify(msg),
             timestamp: new Date().getTime().toString(),
         });
-        if (await dl.finishedFile(recordingId, seg.sequenceNumber)) {
+        await dl.finishedFile(recordingId, seg.sequenceNumber);
+        if (await dl.isRecordingDone(recordingId)) {
+            await dl.stopRecording(new Date(), recordingId);
             const msg = {
                 user: seg.user,
                 id: seg.id,

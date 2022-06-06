@@ -14,19 +14,22 @@ import HLS from 'hls-parser';
 import type {
   PlaylistMessage,
   PlaylistSegmentMessage,
+  RecordingEndedMessage,
 } from '@twitch-archiving/messages';
 import { initLogger } from '@twitch-archiving/utils';
 import { initRedis, download as dl } from '@twitch-archiving/database';
 
 interface PlaylistConfig {
   inputTopic: string;
-  outputTopic: string;
+  segmentOutputTopic: string;
+  recordingOutputTopic: string;
   redisPrefix: string;
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
   inputTopic: { type: String, defaultValue: 'tw-playlist' },
-  outputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
+  segmentOutputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
+  recordingOutputTopic: { type: String, defaultValue: 'tw-recording-ended' },
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 
@@ -105,8 +108,26 @@ await consumer.run({
         url: seg.uri,
       };
 
-      await sendData(config.outputTopic, {
+      await sendData(config.segmentOutputTopic, {
         key: user,
+        value: JSON.stringify(msg),
+        timestamp: new Date().getTime().toString(),
+      });
+    }
+
+    // test if all segments are done
+    // this playlist update could have no new segments in it
+    // only the end meta
+    if (await dl.isRecordingDone(playlist.recordingId)) {
+      await dl.stopRecording(new Date(), playlist.recordingId);
+
+      const msg: RecordingEndedMessage = {
+        user: playlist.user,
+        id: playlist.id,
+        recordingId: playlist.recordingId,
+      };
+      await sendData(config.recordingOutputTopic, {
+        key: playlist.user,
         value: JSON.stringify(msg),
         timestamp: new Date().getTime().toString(),
       });

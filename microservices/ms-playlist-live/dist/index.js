@@ -93,6 +93,7 @@ async function initStream(user, newStream) {
     }
     logger.trace({ user, playlist }, 'playlist');
     const playlistMessage = await dl.getPlaylistMessage(user);
+    logger.trace({ playlistMessage, user }, 'existing playlistMessage');
     const reg = /BROADCAST-ID="(.*?)"/;
     let id = '';
     const regResult = reg.exec(playlist);
@@ -117,7 +118,7 @@ async function initStream(user, newStream) {
         if (prev.bandwidth < curr.bandwidth) {
             result = curr;
         }
-        logger.debug('best format', { user, url: result });
+        logger.debug({ user, url: result }, 'best format');
         return result;
     });
     const data = {

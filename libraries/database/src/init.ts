@@ -21,6 +21,35 @@ export function getRedisPrefix(): string {
   return redisPrefix;
 }
 
+export function getPR(): { pool: Pool; redis: RedisClient; prefix: string } {
+  const pool = getPool();
+  if (pool === undefined) throw new Error('database not initialized');
+  const redis = getRedis();
+  if (redis === undefined) throw new Error('redis not initialized');
+  return {
+    pool,
+    redis,
+    prefix: getRedisPrefix(),
+  };
+}
+
+export function getR(): { redis: RedisClient; prefix: string } {
+  const redis = getRedis();
+  if (redis === undefined) throw new Error('redis not initialized');
+  return {
+    redis,
+    prefix: getRedisPrefix(),
+  };
+}
+
+export function getP(): { pool: Pool } {
+  const pool = getPool();
+  if (pool === undefined) throw new Error('database not initialized');
+  return {
+    pool,
+  };
+}
+
 export async function initPostgres(config: PostgresConfig): Promise<void> {
   let p: Pool | undefined = undefined;
 
