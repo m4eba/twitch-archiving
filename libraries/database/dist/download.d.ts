@@ -34,6 +34,7 @@ export declare function getRecording(id: string): Promise<Recording | undefined>
 export declare function updateSiteId(recordingId: string, siteId: string): Promise<void>;
 export declare function startFile(recordingId: string, name: string, seq: number, duration: number, time: Date): Promise<void>;
 export declare function addSegment(recordingId: string, sequenceNumber: number): Promise<void>;
+export declare function getSegmentCount(recordingId: string): Promise<number>;
 export declare function testSegment(recordingId: string, sequenceNumber: number): Promise<boolean>;
 export declare function finishedFile(recordingId: string, sequenceNumber: number): Promise<void>;
 export declare function isRecordingDone(recordingId: string): Promise<boolean>;

@@ -23,6 +23,7 @@ export interface RecordingEndedMessage {
     user: string;
     id: string;
     recordingId: string;
+    segmentCount: number;
 }
 export interface PlaylistMessage {
     user: string;

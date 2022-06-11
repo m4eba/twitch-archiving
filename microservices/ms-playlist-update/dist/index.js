@@ -48,7 +48,6 @@ await consumer.run({
         if (resp.status !== 200) {
             await dl.incPlaylistError(playlist.recordingId);
             await forcePlaylistUpdate(user);
-            await dl.isRecordingDone(playlist.recordingId);
             return;
         }
         logger.trace({ data }, 'playlist text');
@@ -93,11 +92,13 @@ async function isRecordingDone(playlist) {
     // only the end meta
     if (await dl.isRecordingDone(playlist.recordingId)) {
         logger.debug({ recordingId: playlist.recordingId }, 'end recording');
+        const count = await dl.getSegmentCount(playlist.recordingId);
         await dl.stopRecording(new Date(), playlist.recordingId);
         const msg = {
             user: playlist.user,
             id: playlist.id,
             recordingId: playlist.recordingId,
+            segmentCount: count,
         };
         await sendData(config.recordingOutputTopic, {
             key: playlist.user,

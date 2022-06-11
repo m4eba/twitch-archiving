@@ -135,12 +135,14 @@ async function isRecordingDone(playlist: PlaylistMessage): Promise<void> {
   // only the end meta
   if (await dl.isRecordingDone(playlist.recordingId)) {
     logger.debug({ recordingId: playlist.recordingId }, 'end recording');
+    const count = await dl.getSegmentCount(playlist.recordingId);
     await dl.stopRecording(new Date(), playlist.recordingId);
 
     const msg: RecordingEndedMessage = {
       user: playlist.user,
       id: playlist.id,
       recordingId: playlist.recordingId,
+      segmentCount: count,
     };
     await sendData(config.recordingOutputTopic, {
       key: playlist.user,

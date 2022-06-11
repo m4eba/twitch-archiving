@@ -150,11 +150,14 @@ export async function stopRecording(
   ]);
 
   await redis.del(prefix + channel + '-recordingId');
+  await redis.del(prefix + recordingId + '-data');
+  await redis.del(prefix + '-stream-' + channel);
   await redis.sRem(prefix + '-streams', channel);
   await redis.del(prefix + recordingId + '-data');
   await redis.del(prefix + recordingId + '-segments-waiting');
   await redis.del(prefix + recordingId + '-segments-running');
   await redis.del(prefix + recordingId + '-segments-done');
+  await redis.del(prefix + recordingId + '-segment-count');
 }
 
 export async function getRecordedChannels(): Promise<string[]> {
@@ -233,6 +236,15 @@ export async function addSegment(
     prefix + recordingId + '-segments-waiting',
     sequenceNumber.toString()
   );
+  await redis.incr(prefix + recordingId + '-segment-count');
+}
+
+export async function getSegmentCount(recordingId: string): Promise<number> {
+  const { redis, prefix } = getR();
+
+  const value = await redis.get(prefix + recordingId + '-segment-count');
+  if (value === null || value === undefined) return 0;
+  return parseInt(value);
 }
 
 export async function testSegment(

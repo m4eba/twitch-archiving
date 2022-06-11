@@ -112,11 +112,13 @@ await consumer.run({
         });
         await dl.finishedFile(recordingId, seg.sequenceNumber);
         if (await dl.isRecordingDone(recordingId)) {
+            const count = await dl.getSegmentCount(recordingId);
             await dl.stopRecording(new Date(), recordingId);
             const msg = {
                 user: seg.user,
                 id: seg.id,
                 recordingId: seg.recordingId,
+                segmentCount: count,
             };
             await sendData(config.recordingOutputTopic, {
                 key: seg.user,
