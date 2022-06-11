@@ -23,6 +23,8 @@ export declare function setPlaylistMessage(data: PlaylistMessage): Promise<void>
 export declare function getPlaylistMessage(user: string): Promise<PlaylistMessage | undefined>;
 export declare function setPlaylistEnding(recordingId: string): Promise<void>;
 export declare function isPlaylistEnding(recordingId: string): Promise<boolean>;
+export declare function incPlaylistError(recordingId: string): Promise<void>;
+export declare function getPlaylistError(recordingId: string): Promise<number>;
 export declare function startRecording(time: Date, channel: string, site_id: string): Promise<string>;
 export declare function stopRecording(time: Date, recordingId: string): Promise<void>;
 export declare function getRecordedChannels(): Promise<string[]>;

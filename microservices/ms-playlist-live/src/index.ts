@@ -151,6 +151,10 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
   const playlist = await getLivePlaylist(user, token);
 
   if (playlist.length === 0) {
+    const recordingId = await dl.getRecordingId(user);
+    if (recordingId.length > 0) {
+      await dl.stopRecording(new Date(), recordingId);
+    }
     return;
   }
 

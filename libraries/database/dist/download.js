@@ -1,6 +1,7 @@
 import { getPool, getR, getP, getPR } from './init.js';
 import { initLogger } from '@twitch-archiving/utils';
 const logger = initLogger('database-download');
+const MAX_PLAYLIST_ERROR = 3;
 export async function createTableDownload() {
     const pool = getPool();
     if (pool === undefined) {
@@ -62,11 +63,24 @@ export async function getPlaylistMessage(user) {
 }
 export async function setPlaylistEnding(recordingId) {
     const { redis, prefix } = getR();
-    await redis.set(prefix + recordingId + '-playlist-ending', 1);
+    await redis.hSet(prefix + recordingId + '-data', 'ending', '1');
 }
 export async function isPlaylistEnding(recordingId) {
     const { redis, prefix } = getR();
-    return (await redis.get(prefix + recordingId + '-playlist-ending')) !== null;
+    return (await redis.hGet(prefix + recordingId + '-data', 'ending')) === '1';
+}
+export async function incPlaylistError(recordingId) {
+    const { redis, prefix } = getR();
+    let value = await getPlaylistError(recordingId);
+    ++value;
+    await redis.hSet(prefix + recordingId + '-data', 'playlistError', value);
+}
+export async function getPlaylistError(recordingId) {
+    const { redis, prefix } = getR();
+    let value = await redis.hGet(prefix + recordingId + '-data', 'playlistError');
+    if (value === null || value === undefined)
+        value = '0';
+    return parseInt(value);
 }
 export async function startRecording(time, channel, site_id) {
     const { pool, redis, prefix } = getPR();
@@ -88,7 +102,7 @@ export async function stopRecording(time, recordingId) {
     ]);
     await redis.del(prefix + channel + '-recordingId');
     await redis.sRem(prefix + '-streams', channel);
-    await redis.del(prefix + channel + '-playlist-ending');
+    await redis.del(prefix + recordingId + '-data');
     await redis.del(prefix + recordingId + '-segments-waiting');
     await redis.del(prefix + recordingId + '-segments-running');
     await redis.del(prefix + recordingId + '-segments-done');
@@ -165,8 +179,9 @@ export async function isRecordingDone(recordingId) {
     const done = await redis.sMembers(prefix + recordingId + '-segments-done');
     logger.trace({ wait, running, done }, 'segments');
     const ending = await isPlaylistEnding(recordingId);
-    logger.trace({ ending }, 'meta end');
-    return (ending &&
+    const playlistError = await getPlaylistError(recordingId);
+    logger.trace({ ending, playlistError }, 'meta end - playlisterror');
+    return ((ending || playlistError >= MAX_PLAYLIST_ERROR) &&
         (await redis.sCard(prefix + recordingId + '-segments-running')) === 0 &&
         (await redis.sCard(prefix + recordingId + '-segments-waiting')) === 0);
 }

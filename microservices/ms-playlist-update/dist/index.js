@@ -9,6 +9,7 @@ const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist' },
     segmentOutputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
     recordingOutputTopic: { type: String, defaultValue: 'tw-recording-ended' },
+    playlistReloadOutputTopic: { type: String, defaultValue: 'tw-live' },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 const config = parse({
@@ -37,12 +38,19 @@ await consumer.run({
             return;
         const user = message.key.toString();
         const playlist = await dl.getPlaylistMessage(user);
-        if (playlist === undefined)
+        logger.debug({ playlist, user }, 'playlist');
+        if (playlist === undefined) {
+            await forcePlaylistUpdate(user);
             return;
+        }
         const resp = await fetch(playlist.url);
         const data = await resp.text();
-        if (resp.status !== 200)
+        if (resp.status !== 200) {
+            await dl.incPlaylistError(playlist.recordingId);
+            await forcePlaylistUpdate(user);
+            await dl.isRecordingDone(playlist.recordingId);
             return;
+        }
         logger.trace({ data }, 'playlist text');
         const list = HLS.parse(data);
         if (list.endlist) {
@@ -76,24 +84,37 @@ await consumer.run({
                 timestamp: new Date().getTime().toString(),
             });
         }
-        // test if all segments are done
-        // this playlist update could have no new segments in it
-        // only the end meta
-        if (await dl.isRecordingDone(playlist.recordingId)) {
-            await dl.stopRecording(new Date(), playlist.recordingId);
-            const msg = {
-                user: playlist.user,
-                id: playlist.id,
-                recordingId: playlist.recordingId,
-            };
-            await sendData(config.recordingOutputTopic, {
-                key: playlist.user,
-                value: JSON.stringify(msg),
-                timestamp: new Date().getTime().toString(),
-            });
-        }
+        await isRecordingDone(playlist);
     },
 });
+async function isRecordingDone(playlist) {
+    // test if all segments are done
+    // this playlist update could have no new segments in it
+    // only the end meta
+    if (await dl.isRecordingDone(playlist.recordingId)) {
+        logger.debug({ recordingId: playlist.recordingId }, 'end recording');
+        await dl.stopRecording(new Date(), playlist.recordingId);
+        const msg = {
+            user: playlist.user,
+            id: playlist.id,
+            recordingId: playlist.recordingId,
+        };
+        await sendData(config.recordingOutputTopic, {
+            key: playlist.user,
+            value: JSON.stringify(msg),
+            timestamp: new Date().getTime().toString(),
+        });
+    }
+}
+async function forcePlaylistUpdate(user) {
+    await sendData(config.playlistReloadOutputTopic, {
+        key: user,
+        value: JSON.stringify({
+            forceReload: true,
+        }),
+        timestamp: new Date().getTime().toString(),
+    });
+}
 async function sendData(topic, msg) {
     const messages = [];
     const topicMessage = {

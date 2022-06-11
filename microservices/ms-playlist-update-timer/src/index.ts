@@ -57,6 +57,7 @@ await producer.connect();
 
 setInterval(async () => {
   const channels = await dl.getRecordedChannels();
+  logger.trace({ channels }, 'channels');
   const messages: Message[] = [];
   for (let i = 0; i < channels.length; ++i) {
     messages.push({
