@@ -538,6 +538,31 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-ordered-segments",
+      "projectFolder": "microservices/ms-ordered-segments",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-screenshot-init",
+      "projectFolder": "microservices/ms-screenshot-init",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-screenshot",
+      "projectFolder": "microservices/ms-screenshot",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-screenshot-minimize",
+      "projectFolder": "microservices/ms-screenshot-minimize",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-screenshot-storyboard",
+      "projectFolder": "microservices/ms-screenshot-storyboard",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }

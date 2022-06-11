@@ -65,3 +65,17 @@ export interface SegmentDownloadedMessage {
   path: string;
   status: SegmentDownloadedStatus;
 }
+
+export interface ScreenshotMessage {
+  segment: PlaylistSegmentMessage;
+  index: number;
+  offset: number;
+}
+
+export interface ScreenshotDoneMessage {
+  recordingId: string;
+  index: number;
+  offset: number;
+  filename: string;
+  path: string;
+}
