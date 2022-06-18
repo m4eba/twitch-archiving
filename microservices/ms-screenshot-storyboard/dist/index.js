@@ -6,11 +6,12 @@ import path from 'path';
 import child_process from 'child_process';
 import util from 'util';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, storyboard as sb } from '@twitch-archiving/database';
+import { initRedis, storyboard as sb, screenshot as ss, } from '@twitch-archiving/database';
 const exec = util.promisify(child_process.exec);
 const StoryboardConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-screenshot-minimized' },
     outputTopic: { type: String, defaultValue: 'tw-storyboard-done' },
+    folderToRemove: { type: String, multiple: true },
     storyboardFolder: { type: String },
     rows: { type: Number },
     columns: { type: Number },
@@ -83,16 +84,44 @@ await consumer.run({
         await exec(command);
         const outMsg = {
             recordingId: msg.recordingId,
-            index: msg.index,
-            offset: msg.offset,
-            filename: msg.filename,
+            index: sbIndex,
+            count: args.length,
+            rows: config.rows,
+            columns: config.columns,
             path: output,
+            filename,
         };
         await sendData(config.outputTopic, {
             key: message.key,
             value: JSON.stringify(outMsg),
             timestamp: new Date().getTime().toString(),
         });
+        // clear
+        // fist test if all segments are done
+        const totalCount = await ss.getTotalSegmentCount(msg.recordingId);
+        logger.trace({ recordingId: msg.recordingId, totalCount }, 'total segment count');
+        if (totalCount !== undefined) {
+            // get all boards that are done
+            const boardCount = await sb.getBoardCount(msg.recordingId);
+            const left = totalCount - boardCount * filesPerBoard;
+            logger.trace({ recordingId: msg.recordingId, boardCount, left }, 'board count');
+            if (list.length === left) {
+                logger.debug({ recordingId: msg.recordingId }, 'clear all');
+                await clear(msg.recordingId, sbIndex);
+                await sb.clearAll(msg.recordingId);
+                await ss.clearAll(msg.recordingId);
+                for (let i = 0; i < config.folderToRemove.length; ++i) {
+                    await fs.promises.rmdir(path.join(config.folderToRemove[i], msg.recordingId));
+                }
+            }
+        }
+        else {
+            // if we used all minimized images clear them
+            if (list.length === filesPerBoard) {
+                await clear(msg.recordingId, sbIndex);
+                await sb.incBoardCount(msg.recordingId);
+            }
+        }
     },
 });
 async function sendData(topic, msg) {
@@ -104,4 +133,11 @@ async function sendData(topic, msg) {
     messages.push(topicMessage);
     logger.debug({ topic: topic, size: messages.length }, 'sending batch');
     await producer.sendBatch({ topicMessages: messages });
+}
+async function clear(recordingId, sbIndex) {
+    const data = await sb.getAllScreenshots(recordingId, sbIndex);
+    for (let i = 0; i < data.length; ++i) {
+        await fs.promises.rm(path.join(data[i].path, data[i].filename));
+    }
+    await sb.clearScreenshots(recordingId, sbIndex);
 }

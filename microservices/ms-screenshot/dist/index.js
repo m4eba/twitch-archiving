@@ -66,9 +66,6 @@ await consumer.run({
             value: JSON.stringify(doneMsg),
             timestamp: new Date().getTime().toString(),
         });
-        if (await ss.isRecordingDone(msg.recordingId)) {
-            logger.debug({ msg, request }, 'screenshot recording done');
-        }
     },
 });
 async function sendData(topic, msg) {

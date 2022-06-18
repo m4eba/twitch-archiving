@@ -112,6 +112,7 @@ await consumerSegments.run({
                 offset: data.offset,
             };
             await sb.setRequest(msg.recordingId, ss);
+            await sb.incRequests(msg.recordingId);
             data.index++;
         }
         else {
@@ -119,6 +120,10 @@ await consumerSegments.run({
         }
         logger.trace({ msg, data }, 'modified data');
         await sb.setData(msg.recordingId, data);
+        await sb.incSegments(msg.recordingId);
+        if (await sb.isRecordingInitDone(msg.recordingId)) {
+            await sb.clearInit(msg.recordingId);
+        }
     },
 });
 // clean up after recording is done
@@ -127,7 +132,7 @@ const consumerRecordingEnded = kafka.consumer({
 });
 await consumerRecordingEnded.connect();
 await consumerRecordingEnded.subscribe({
-    topic: config.recordingInputTopic,
+    topic: config.recordingEndedInputTopic,
     fromBeginning: true,
 });
 await consumerRecordingEnded.run({
@@ -139,6 +144,12 @@ await consumerRecordingEnded.run({
         const msg = JSON.parse(message.value.toString());
         if (!userSet.has(msg.user))
             return;
-        await sb.endRecording(msg.recordingId);
+        logger.debug({ msg }, 'recording end message');
+        if (msg.segmentCount === undefined)
+            return;
+        await sb.endRecording(msg.recordingId, msg.segmentCount);
+        if (await sb.isRecordingInitDone(msg.recordingId)) {
+            await sb.clearInit(msg.recordingId);
+        }
     },
 });

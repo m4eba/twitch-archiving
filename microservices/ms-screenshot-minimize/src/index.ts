@@ -26,6 +26,7 @@ interface ScreenshotConfig {
   outputTopic: string;
   screenshotFolder: string;
   width: number;
+  deleteSource: boolean;
   redisPrefix: string;
 }
 
@@ -34,6 +35,7 @@ const ScreenshotConfigOpt: ArgumentConfig<ScreenshotConfig> = {
   outputTopic: { type: String, defaultValue: 'tw-screenshot-minimized' },
   screenshotFolder: { type: String },
   width: { type: Number },
+  deleteSource: { type: Boolean, defaultValue: true },
   redisPrefix: { type: String, defaultValue: 'tw-screenshot-' },
 };
 
@@ -94,6 +96,10 @@ await consumer.run({
       config.width.toString(),
       path.join(output, msg.filename),
     ]);
+
+    if (config.deleteSource) {
+      await fs.promises.rm(path.join(msg.path, msg.filename));
+    }
 
     const outMsg: ScreenshotDoneMessage = {
       recordingId: msg.recordingId,

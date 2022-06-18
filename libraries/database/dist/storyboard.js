@@ -27,11 +27,36 @@ export async function createTable() {
 }
 export async function screenshotReady(recordingId, sbIndex, data) {
     const { redis, prefix } = getR();
-    logger.trace({ recordingId, sbIndex, data }, 'screenshotReady');
     const name = prefix + recordingId + sbIndex.toString();
     await redis.lPush(name, JSON.stringify(data));
     const list = await redis.lRange(name, 0, -1);
     const result = list.map((l) => JSON.parse(l));
-    logger.trace({ recordingId, sbIndex, result }, 'screenshotReady result');
     return result;
+}
+export async function getAllScreenshots(recordingId, sbIndex) {
+    const { redis, prefix } = getR();
+    const name = prefix + recordingId + sbIndex.toString();
+    const list = await redis.lRange(name, 0, -1);
+    const result = list.map((l) => JSON.parse(l));
+    return result;
+}
+export async function clearScreenshots(recordingId, sbIndex) {
+    const { redis, prefix } = getR();
+    await redis.del(prefix + recordingId + sbIndex.toString());
+}
+export async function incBoardCount(recordingId) {
+    const { redis, prefix } = getR();
+    return await redis.incr(prefix + recordingId + '-board-count');
+}
+export async function getBoardCount(recordingId) {
+    const { redis, prefix } = getR();
+    const value = await redis.get(prefix + recordingId + '-board-count');
+    if (value === null || value === undefined)
+        return 0;
+    return parseInt(value);
+}
+export async function clearAll(recordingId) {
+    const { redis, prefix } = getR();
+    logger.trace({ recordingId }, 'clear all');
+    await redis.del(prefix + recordingId + '-board-count');
 }
