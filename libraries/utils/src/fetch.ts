@@ -6,7 +6,7 @@ export async function fetchWithTimeoutText(
   url: string,
   retries: number = 5,
   timeout: number = 5000
-): Promise<string> {
+): Promise<{ data: string; resp: Response }> {
   return new Promise((resolve, reject) => {
     const abort = new AbortController();
     const timer = setTimeout(() => {
@@ -18,7 +18,7 @@ export async function fetchWithTimeoutText(
       .then((resp: Response) => {
         resp
           .text()
-          .then(resolve)
+          .then((d) => resolve({ data: d, resp }))
           .catch((e) => {
             if (retries === 0) {
               reject(e);
@@ -27,6 +27,9 @@ export async function fetchWithTimeoutText(
             fetchWithTimeoutText(url, retries - 1, timeout)
               .then(resolve)
               .catch(reject);
+          })
+          .finally(() => {
+            clearTimeout(timer);
           });
       })
       .catch((e) => {

@@ -12,7 +12,7 @@ export async function fetchWithTimeoutText(url, retries = 5, timeout = 5000) {
             .then((resp) => {
             resp
                 .text()
-                .then(resolve)
+                .then((d) => resolve({ data: d, resp }))
                 .catch((e) => {
                 if (retries === 0) {
                     reject(e);
@@ -21,6 +21,9 @@ export async function fetchWithTimeoutText(url, retries = 5, timeout = 5000) {
                 fetchWithTimeoutText(url, retries - 1, timeout)
                     .then(resolve)
                     .catch(reject);
+            })
+                .finally(() => {
+                clearTimeout(timer);
             });
         })
             .catch((e) => {
