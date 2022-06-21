@@ -146,14 +146,14 @@ await consumerSegments.run({
     }
 
     if (data.offset + msg.duration >= config.interval) {
-      data.offset = data.offset + msg.duration - config.interval;
       const ss: sb.ScreenshotData = {
         sequence: data.sequence,
         index: data.index,
-        offset: data.offset,
+        offset: config.interval - data.offset,
       };
       await sb.setRequest(msg.recordingId, ss);
       await sb.incRequests(msg.recordingId);
+      data.offset = data.offset + msg.duration - config.interval;
       data.index++;
     } else {
       data.offset = data.offset + msg.duration;
