@@ -3,7 +3,7 @@ import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
 import { createClient } from 'redis';
-import { getLivePlaylist, getAccessToken, } from '@twitch-archiving/twitch';
+import { getLivePlaylist, getAccessToken } from '@twitch-archiving/twitch';
 import { PlaylistType, } from '@twitch-archiving/messages';
 import { initPostgres, initRedis, download as dl, } from '@twitch-archiving/database';
 import { initLogger } from '@twitch-archiving/utils';
