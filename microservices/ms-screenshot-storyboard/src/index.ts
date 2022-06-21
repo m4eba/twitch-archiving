@@ -203,6 +203,7 @@ async function sendData(topic: string, msg: Message): Promise<void> {
 }
 
 async function clear(recordingId: string, sbIndex: number): Promise<void> {
+  logger.debug({ recordingId, sbIndex }, 'clear');
   const data = await sb.getAllScreenshots(recordingId, sbIndex);
   for (let i = 0; i < data.length; ++i) {
     await fs.promises.rm(path.join(data[i].path, data[i].filename));

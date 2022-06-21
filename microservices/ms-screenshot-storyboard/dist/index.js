@@ -135,6 +135,7 @@ async function sendData(topic, msg) {
     await producer.sendBatch({ topicMessages: messages });
 }
 async function clear(recordingId, sbIndex) {
+    logger.debug({ recordingId, sbIndex }, 'clear');
     const data = await sb.getAllScreenshots(recordingId, sbIndex);
     for (let i = 0; i < data.length; ++i) {
         await fs.promises.rm(path.join(data[i].path, data[i].filename));

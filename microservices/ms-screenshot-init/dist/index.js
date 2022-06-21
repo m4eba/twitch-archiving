@@ -105,10 +105,15 @@ await consumerSegments.run({
             data.sequence = msg.sequenceNumber;
         }
         if (data.offset + msg.duration >= config.interval) {
+            let offset = config.interval - data.offset;
+            // screenshot on last frame doesn't work
+            if (offset > msg.duration - 0.05) {
+                offset = msg.duration - 0.05;
+            }
             const ss = {
                 sequence: data.sequence,
                 index: data.index,
-                offset: config.interval - data.offset,
+                offset: offset,
             };
             await sb.setRequest(msg.recordingId, ss);
             await sb.incRequests(msg.recordingId);
