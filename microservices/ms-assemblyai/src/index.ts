@@ -254,7 +254,7 @@ function openWebSocket(user: string, recordingId: string): WebSocket {
   logger.debug({ user, recordingId, url }, 'connection websocket');
   const ws = new WebSocket(url, undefined, {
     headers: {
-      authorization: '903a00e5d52146568131c62985d8c6ba',
+      authorization: config.token,
     },
   });
 
