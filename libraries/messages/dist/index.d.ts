@@ -1,4 +1,8 @@
-import type { AccessToken } from '@twitch-archiving/twitch';
+export interface AccessToken {
+    token: string;
+    sig: string;
+    expires_at: string;
+}
 export interface WebsocketMessage {
     data: string;
 }
@@ -69,4 +73,13 @@ export interface ScreenshotDoneMessage {
     offset: number;
     filename: string;
     path: string;
+}
+export interface StoryboardDoneMessage {
+    recordingId: string;
+    index: number;
+    count: number;
+    rows: number;
+    columns: number;
+    path: string;
+    filename: string;
 }

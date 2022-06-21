@@ -1,5 +1,6 @@
-import fetch from 'node-fetch';
+import 'node-fetch';
 import url from 'url';
+import { fetchWithTimeoutText } from '@twitch-archiving/utils';
 export async function getMainPlaylist(endpoint, token) {
     const uri = new url.URL(endpoint);
     uri.searchParams.append('player', 'twitchweb');
@@ -9,12 +10,11 @@ export async function getMainPlaylist(endpoint, token) {
     uri.searchParams.append('allow_spectre', 'false');
     uri.searchParams.append('sig', token.sig);
     uri.searchParams.append('token', token.token);
-    const resp = await fetch(uri.toString());
+    const { data, resp } = await fetchWithTimeoutText(uri.toString(), 3, 2000);
     if (resp.status !== 200) {
         return '';
     }
-    const text = await resp.text();
-    return text;
+    return data;
 }
 export async function getLivePlaylist(channel, token) {
     return getMainPlaylist(`https://usher.ttvnw.net/api/channel/hls/${channel}.m3u8`, token);

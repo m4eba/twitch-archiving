@@ -1,15 +1,10 @@
 import fetch from 'node-fetch';
 import pino, { Logger } from 'pino';
+import type { AccessToken } from '@twitch-archiving/messages';
 
 const logger: Logger = pino({ level: 'debug' }).child({
   module: 'twitch',
 });
-
-export interface AccessToken {
-  token: string;
-  sig: string;
-  expires_at: string;
-}
 
 export const DEFAULT_PLAYER_TYPE: string = 'site';
 

@@ -18,6 +18,8 @@
   "dependencies": {
     "typescript": "~4.5.5",
     "node-fetch": "~3.2.4",
-    "pino": "~7.11.0"
+    "pino": "~7.11.0",
+    "@twitch-archiving/utils": "workspace:*",
+    "@twitch-archiving/messages": "workspace:*"
   }
 }

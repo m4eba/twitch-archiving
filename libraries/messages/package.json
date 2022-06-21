@@ -16,7 +16,6 @@
     "eslint": "~8.10.0"
   },
   "dependencies": {
-    "typescript": "~4.5.5",
-    "@twitch-archiving/twitch": "workspace:*"
+    "typescript": "~4.5.5"
   }
 }

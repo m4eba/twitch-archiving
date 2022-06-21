@@ -1,8 +1,4 @@
-export interface AccessToken {
-    token: string;
-    sig: string;
-    expires_at: string;
-}
+import type { AccessToken } from '@twitch-archiving/messages';
 export declare const DEFAULT_PLAYER_TYPE: string;
 export interface AccessTokenParams {
     isLive: boolean;

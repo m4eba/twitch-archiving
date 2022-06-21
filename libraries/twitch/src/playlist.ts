@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import url from 'url';
-import type { AccessToken } from '.';
+import type { AccessToken } from '@twitch-archiving/messages';
+import { fetchWithTimeoutText } from '@twitch-archiving/utils';
 
 export async function getMainPlaylist(
   endpoint: string,
@@ -15,12 +16,11 @@ export async function getMainPlaylist(
   uri.searchParams.append('sig', token.sig);
   uri.searchParams.append('token', token.token);
 
-  const resp = await fetch(uri.toString());
+  const { data, resp } = await fetchWithTimeoutText(uri.toString(), 3, 2000);
   if (resp.status !== 200) {
     return '';
   }
-  const text = await resp.text();
-  return text;
+  return data;
 }
 
 export async function getLivePlaylist(
