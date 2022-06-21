@@ -129,6 +129,7 @@ await consumer.run({
       recordingId,
       filename,
       seg.sequenceNumber,
+      seg.offset,
       seg.duration,
       new Date(seg.time)
     );
@@ -166,6 +167,7 @@ await consumer.run({
       id: seg.id,
       recordingId,
       sequenceNumber: seg.sequenceNumber,
+      offset: seg.offset,
       duration: seg.duration,
       filename,
       path: name,

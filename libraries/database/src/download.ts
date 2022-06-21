@@ -20,8 +20,9 @@ export interface File {
   recording_id: string;
   name: string;
   seq: number;
-  retries: number;
+  time_offset: number;
   duration: number;
+  retries: number;
   datetime: Date;
   size: number;
   downloaded: number;
@@ -60,9 +61,10 @@ export async function createTableDownload(): Promise<void> {
     create table file (
       recording_id bigint not null,
       name text not null,
-      seq integer not null,          
-      retries smallint not null,
+      seq integer not null,                
+      time_offset decimal not null,
       duration decimal not null,
+      retries smallint not null,
       datetime timestamptz not null,
       size integer not null,
       downloaded integer not null,
@@ -151,6 +153,7 @@ export async function stopRecording(
 
   await redis.del(prefix + channel + '-recordingId');
   await redis.del(prefix + recordingId + '-data');
+  await redis.del(prefix + recordingId + '-offset-count');
   await redis.del(prefix + '-stream-' + channel);
   await redis.sRem(prefix + '-streams', channel);
   await redis.del(prefix + recordingId + '-data');
@@ -212,14 +215,15 @@ export async function startFile(
   recordingId: string,
   name: string,
   seq: number,
+  offset: number,
   duration: number,
   time: Date
 ): Promise<void> {
   const { pool, redis, prefix } = getPR();
 
   await pool.query(
-    'INSERT into file (recording_id,name,seq,retries,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,0,$4,$5,0,0,$6,$7)',
-    [recordingId, name, seq, duration, time, '', 'downloading']
+    'INSERT into file (recording_id,name,seq,time_offset,duration,retries,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,$4,$5,0,$6,0,0,$7,$8)',
+    [recordingId, name, seq, offset, duration, time, '', 'downloading']
   );
 
   await redis.sAdd(prefix + recordingId + '-segments-running', seq.toString());
@@ -268,6 +272,33 @@ export async function testSegment(
     sequenceNumber.toString()
   );
   return running;
+}
+
+export async function getOffset(recordingId: string): Promise<number> {
+  const { redis, prefix } = getR();
+  const offset = await redis.get(prefix + recordingId + '-offset-count');
+  if (offset === undefined || offset === null) {
+    return 0;
+  } else {
+    return parseFloat(offset);
+  }
+}
+
+export async function incOffset(
+  recordingId: string,
+  duration: number
+): Promise<void> {
+  const { redis, prefix } = getR();
+  const offset = await redis.get(prefix + recordingId + '-offset-count');
+  let offsetN = 0;
+  logger.trace({ recordingId, offset, duration }, 'incOffset');
+  if (offset !== undefined && offset !== null) {
+    offsetN = parseFloat(offset);
+  }
+  await redis.set(
+    prefix + recordingId + '-offset-count',
+    (offsetN + duration).toString()
+  );
 }
 
 export async function finishedFile(
@@ -323,8 +354,9 @@ export async function getFile(
     recording_id: result.rows[0].recording_id,
     name: result.rows[0].name,
     seq: result.rows[0].seq,
-    retries: result.rows[0].retries,
+    time_offset: result.rows[0].time_offset,
     duration: result.rows[0].duration,
+    retries: result.rows[0].retries,
     datetime: result.rows[0].datetime,
     size: result.rows[0].size,
     downloaded: result.rows[0].downloaded,

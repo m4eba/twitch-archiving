@@ -32,9 +32,10 @@ export async function createTableDownload() {
     create table file (
       recording_id bigint not null,
       name text not null,
-      seq integer not null,          
-      retries smallint not null,
+      seq integer not null,                
+      time_offset decimal not null,
       duration decimal not null,
+      retries smallint not null,
       datetime timestamptz not null,
       size integer not null,
       downloaded integer not null,
@@ -102,6 +103,7 @@ export async function stopRecording(time, recordingId) {
     ]);
     await redis.del(prefix + channel + '-recordingId');
     await redis.del(prefix + recordingId + '-data');
+    await redis.del(prefix + recordingId + '-offset-count');
     await redis.del(prefix + '-stream-' + channel);
     await redis.sRem(prefix + '-streams', channel);
     await redis.del(prefix + recordingId + '-data');
@@ -149,9 +151,9 @@ export async function updateSiteId(recordingId, siteId) {
         recordingId,
     ]);
 }
-export async function startFile(recordingId, name, seq, duration, time) {
+export async function startFile(recordingId, name, seq, offset, duration, time) {
     const { pool, redis, prefix } = getPR();
-    await pool.query('INSERT into file (recording_id,name,seq,retries,duration,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,0,$4,$5,0,0,$6,$7)', [recordingId, name, seq, duration, time, '', 'downloading']);
+    await pool.query('INSERT into file (recording_id,name,seq,time_offset,duration,retries,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,$4,$5,0,$6,0,0,$7,$8)', [recordingId, name, seq, offset, duration, time, '', 'downloading']);
     await redis.sAdd(prefix + recordingId + '-segments-running', seq.toString());
     await redis.sRem(prefix + recordingId + '-segments-waiting', seq.toString());
 }
@@ -177,6 +179,26 @@ export async function testSegment(recordingId, sequenceNumber) {
         return true;
     const running = await redis.sIsMember(prefix + recordingId + '-segments-running', sequenceNumber.toString());
     return running;
+}
+export async function getOffset(recordingId) {
+    const { redis, prefix } = getR();
+    const offset = await redis.get(prefix + recordingId + '-offset-count');
+    if (offset === undefined || offset === null) {
+        return 0;
+    }
+    else {
+        return parseFloat(offset);
+    }
+}
+export async function incOffset(recordingId, duration) {
+    const { redis, prefix } = getR();
+    const offset = await redis.get(prefix + recordingId + '-offset-count');
+    let offsetN = 0;
+    logger.trace({ recordingId, offset, duration }, 'incOffset');
+    if (offset !== undefined && offset !== null) {
+        offsetN = parseFloat(offset);
+    }
+    await redis.set(prefix + recordingId + '-offset-count', (offsetN + duration).toString());
 }
 export async function finishedFile(recordingId, sequenceNumber) {
     const { redis, prefix } = getR();
@@ -206,8 +228,9 @@ export async function getFile(recordingId, name) {
         recording_id: result.rows[0].recording_id,
         name: result.rows[0].name,
         seq: result.rows[0].seq,
-        retries: result.rows[0].retries,
+        time_offset: result.rows[0].time_offset,
         duration: result.rows[0].duration,
+        retries: result.rows[0].retries,
         datetime: result.rows[0].datetime,
         size: result.rows[0].size,
         downloaded: result.rows[0].downloaded,

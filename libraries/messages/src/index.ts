@@ -51,6 +51,7 @@ export interface PlaylistSegmentMessage {
   recordingId: string;
   type: PlaylistType;
   sequenceNumber: number;
+  offset: number;
   duration: number;
   time: string;
   url: string;
@@ -65,6 +66,7 @@ export interface SegmentDownloadedMessage {
   id: string;
   recordingId: string;
   sequenceNumber: number;
+  offset: number;
   duration: number;
   filename: string;
   path: string;

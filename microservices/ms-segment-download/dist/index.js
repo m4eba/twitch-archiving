@@ -70,7 +70,7 @@ await consumer.run({
         const dir = path.join(config.outputPath, seg.user, type, seg.id);
         await fs.promises.mkdir(dir, { recursive: true });
         const name = path.join(dir, filename);
-        await dl.startFile(recordingId, filename, seg.sequenceNumber, seg.duration, new Date(seg.time));
+        await dl.startFile(recordingId, filename, seg.sequenceNumber, seg.offset, seg.duration, new Date(seg.time));
         let status = SegmentDownloadedStatus.DONE;
         try {
             let downloadSize = 0;
@@ -100,6 +100,7 @@ await consumer.run({
             id: seg.id,
             recordingId,
             sequenceNumber: seg.sequenceNumber,
+            offset: seg.offset,
             duration: seg.duration,
             filename,
             path: name,

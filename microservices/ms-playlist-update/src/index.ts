@@ -107,6 +107,9 @@ await consumer.run({
       } else {
         time = new Date().toISOString();
       }
+      const offset = await dl.getOffset(playlist.recordingId);
+      logger.debug({ offset, recordingId: playlist.recordingId }, 'offset');
+      await dl.incOffset(playlist.recordingId, seg.duration);
 
       const msg: PlaylistSegmentMessage = {
         user,
@@ -114,6 +117,7 @@ await consumer.run({
         recordingId: playlist.recordingId,
         type: playlist.type,
         sequenceNumber: seg.mediaSequenceNumber,
+        offset: offset,
         duration: seg.duration,
         time,
         url: seg.uri,
