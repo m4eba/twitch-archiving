@@ -7,7 +7,7 @@ import { execFfmpeg, initLogger } from '@twitch-archiving/utils';
 import { initPostgres, initRedis, assemblyai as ai, } from '@twitch-archiving/database';
 import Ffmpeg from 'fluent-ffmpeg';
 import WebSocket from 'ws';
-const PlaylistConfigOpt = {
+const AssemblyAiConfigOpt = {
     recordingInputTopic: { type: String, defaultValue: 'tw-recording' },
     recordingEndedInputTopic: {
         type: String,
@@ -18,12 +18,11 @@ const PlaylistConfigOpt = {
     user: { type: String, multiple: true },
     token: { type: String },
     tmpFolder: { type: String },
-    logFolder: { type: String, defaultValue: '' },
     redisPrefix: { type: String, defaultValue: 'tw-assemblyai-' },
 };
 const config = parse({
     ...KafkaConfigOpt,
-    ...PlaylistConfigOpt,
+    ...AssemblyAiConfigOpt,
     ...RedisConfigOpt,
     ...PostgresConfigOpt,
     ...FileConfigOpt,
@@ -65,9 +64,6 @@ await consumerRecording.run({
         socketMap.set(msg.user + '-' + msg.recordingId, ws);
         sessionIdMap.set(msg.user + '-' + msg.recordingId, '');
         await fs.promises.mkdir(path.join(config.tmpFolder, msg.user, msg.recordingId), { recursive: true });
-        if (config.logFolder.length > 0) {
-            await fs.promises.mkdir(path.join(config.logFolder, msg.user, msg.recordingId), { recursive: true });
-        }
     },
 });
 // mark segments for screenshots

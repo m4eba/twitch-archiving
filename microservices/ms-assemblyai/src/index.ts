@@ -15,7 +15,6 @@ import { Kafka, Producer, Consumer } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { execFfmpeg, initLogger } from '@twitch-archiving/utils';
 import type {
-  PlaylistSegmentMessage,
   RecordingEndedMessage,
   RecordingStartedMessage,
   SegmentDownloadedMessage,
@@ -23,13 +22,12 @@ import type {
 import {
   initPostgres,
   initRedis,
-  getRedis,
   assemblyai as ai,
 } from '@twitch-archiving/database';
 import Ffmpeg from 'fluent-ffmpeg';
 import WebSocket from 'ws';
 
-interface PlaylistConfig {
+interface AssemblyAiConfig {
   recordingInputTopic: string;
   recordingEndedInputTopic: string;
   segmentsInputTopic: string;
@@ -37,11 +35,10 @@ interface PlaylistConfig {
   user: string[];
   token: string;
   tmpFolder: string;
-  logFolder: string;
   redisPrefix: string;
 }
 
-const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
+const AssemblyAiConfigOpt: ArgumentConfig<AssemblyAiConfig> = {
   recordingInputTopic: { type: String, defaultValue: 'tw-recording' },
   recordingEndedInputTopic: {
     type: String,
@@ -52,12 +49,11 @@ const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
   user: { type: String, multiple: true },
   token: { type: String },
   tmpFolder: { type: String },
-  logFolder: { type: String, defaultValue: '' },
   redisPrefix: { type: String, defaultValue: 'tw-assemblyai-' },
 };
 
 interface Config
-  extends PlaylistConfig,
+  extends AssemblyAiConfig,
     KafkaConfig,
     RedisConfig,
     PostgresConfig,
@@ -66,7 +62,7 @@ interface Config
 const config: Config = parse<Config>(
   {
     ...KafkaConfigOpt,
-    ...PlaylistConfigOpt,
+    ...AssemblyAiConfigOpt,
     ...RedisConfigOpt,
     ...PostgresConfigOpt,
     ...FileConfigOpt,
@@ -120,12 +116,6 @@ await consumerRecording.run({
       path.join(config.tmpFolder, msg.user, msg.recordingId),
       { recursive: true }
     );
-    if (config.logFolder.length > 0) {
-      await fs.promises.mkdir(
-        path.join(config.logFolder, msg.user, msg.recordingId),
-        { recursive: true }
-      );
-    }
   },
 });
 
