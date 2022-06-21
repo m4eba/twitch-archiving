@@ -9,14 +9,13 @@ import {
 import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
-import fetch from 'node-fetch';
 import HLS from 'hls-parser';
 import type {
   PlaylistMessage,
   PlaylistSegmentMessage,
   RecordingEndedMessage,
 } from '@twitch-archiving/messages';
-import { initLogger } from '@twitch-archiving/utils';
+import { initLogger, fetchWithTimeoutText } from '@twitch-archiving/utils';
 import { initRedis, download as dl } from '@twitch-archiving/database';
 
 interface PlaylistConfig {
@@ -79,9 +78,11 @@ await consumer.run({
       await forcePlaylistUpdate(user);
       return;
     }
-    const resp = await fetch(playlist.url);
-    const data = await resp.text();
+    logger.trace({ url: playlist.url, user }, 'fetch playlist');
+    //const resp = await fetch(playlist.url);
+    const { data, resp } = await fetchWithTimeoutText(playlist.url, 3, 2000);
     if (resp.status !== 200) {
+      logger.debug({ code: resp.status }, 'invalid status code');
       await dl.incPlaylistError(playlist.recordingId);
       await forcePlaylistUpdate(user);
       return;
