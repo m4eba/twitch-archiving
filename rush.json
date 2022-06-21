@@ -563,6 +563,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-assemblyai",
+      "projectFolder": "microservices/ms-assemblyai",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
