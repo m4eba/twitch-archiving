@@ -32,6 +32,7 @@
     "@twitch-archiving/database": "workspace:*",
     "fluent-ffmpeg": "~2.1.2",
     "ws": "~8.8.0",
-    "memorystream": "~0.3.1"
+    "memorystream": "~0.3.1",
+    "websocket-as-promised": "~2.0.1"
   }
 }

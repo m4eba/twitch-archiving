@@ -26,20 +26,20 @@ import {
 } from '@twitch-archiving/database';
 import Ffmpeg from 'fluent-ffmpeg';
 import WebSocket from 'ws';
+import WebSocketAsPromised from 'websocket-as-promised';
 
 interface AssemblyAiConfig {
-  recordingInputTopic: string;
   recordingEndedInputTopic: string;
   segmentsInputTopic: string;
   outputTopic: string;
   user: string[];
   token: string;
+  sessionLength: number;
   tmpFolder: string;
   redisPrefix: string;
 }
 
 const AssemblyAiConfigOpt: ArgumentConfig<AssemblyAiConfig> = {
-  recordingInputTopic: { type: String, defaultValue: 'tw-recording' },
   recordingEndedInputTopic: {
     type: String,
     defaultValue: 'tw-recording-ended',
@@ -48,6 +48,7 @@ const AssemblyAiConfigOpt: ArgumentConfig<AssemblyAiConfig> = {
   outputTopic: { type: String, defaultValue: 'tw-assemblyai' },
   user: { type: String, multiple: true },
   token: { type: String },
+  sessionLength: { type: Number, defaultValue: 5 * 60 },
   tmpFolder: { type: String },
   redisPrefix: { type: String, defaultValue: 'tw-assemblyai-' },
 };
@@ -87,39 +88,15 @@ await ai.createTable();
 const userSet = new Set<string>();
 config.user.forEach((u) => userSet.add(u));
 
-const socketMap = new Map<string, WebSocket>();
-const sessionIdMap = new Map<string, string>();
+interface SocketData {
+  socket: WebSocketAsPromised;
+  start: number;
+  terminated: boolean;
+  firstSegment: SegmentDownloadedMessage | undefined;
+  segmentOffset: number;
+}
+const socketMap = new Map<string, SocketData>();
 
-// get notified of new recordings
-const consumerRecording: Consumer = kafka.consumer({
-  groupId: 'assemblyai-recording-start',
-});
-await consumerRecording.connect();
-await consumerRecording.subscribe({
-  topic: config.recordingInputTopic,
-  fromBeginning: true,
-});
-
-await consumerRecording.run({
-  eachMessage: async ({ message }) => {
-    if (!message.key) return;
-    if (!message.value) return;
-    const msg: RecordingStartedMessage = JSON.parse(message.value.toString());
-    if (!userSet.has(msg.user)) return;
-
-    logger.debug({ msg }, 'starting');
-    const ws = openWebSocket(msg.user, msg.recordingId);
-    socketMap.set(msg.user + '-' + msg.recordingId, ws);
-    sessionIdMap.set(msg.user + '-' + msg.recordingId, '');
-
-    await fs.promises.mkdir(
-      path.join(config.tmpFolder, msg.user, msg.recordingId),
-      { recursive: true }
-    );
-  },
-});
-
-// mark segments for screenshots
 const consumerSegments: Consumer = kafka.consumer({
   groupId: 'assemblyai-segments',
 });
@@ -142,44 +119,16 @@ await consumerSegments.run({
     if (!userSet.has(msg.user)) return;
 
     const tmpOutput = path.join(config.tmpFolder, msg.user, msg.recordingId);
-    const command = Ffmpeg()
-      .input(path.join(msg.path))
-      .outputOptions(
-        '-vn',
-        '-acodec',
-        'pcm_s16le',
-        '-ar',
-        '16000',
-        '-ac',
-        '1',
-        '-af',
-        'aresample=async=1000',
-        '-f',
-        'segment',
-        '-segment_time',
-        '1.2'
-      )
-      .output(path.join(tmpOutput, 'out%03d.wav'));
+    await fs.promises.mkdir(tmpOutput, { recursive: true });
 
-    await execFfmpeg(command);
-    const waves = await fs.promises.readdir(tmpOutput);
-    logger.trace({ files: waves }, 'wav files');
-    for (let ii = 0; ii < waves.length; ++ii) {
-      const name = path.join(tmpOutput, waves[ii]);
+    const socketData = await socketReady(msg.user, msg.recordingId, tmpOutput);
+    logger.trace({ recordingId: msg.recordingId }, 'websocket ready');
 
-      const content = await fs.promises.readFile(name);
-      const data = Buffer.from(content).toString('base64');
-
-      logger.trace({ name, size: data.length }, 'sending file');
-      const ws = await socketReady(msg.user, msg.recordingId);
-
-      ws.send(
-        JSON.stringify({
-          audio_data: data,
-        })
-      );
-      await fs.promises.rm(name);
+    if (socketData.firstSegment === undefined) {
+      socketData.firstSegment = msg;
     }
+    await sendSegment(socketData.socket, msg, 0, tmpOutput);
+    await ai.addSegment(msg);
   },
 });
 
@@ -200,92 +149,211 @@ await consumerRecordingEnded.run({
     const msg: RecordingEndedMessage = JSON.parse(message.value.toString());
     if (!userSet.has(msg.user)) return;
 
+    const socketData = socketMap.get(msg.user + '-' + msg.recordingId);
+    if (socketData !== undefined) {
+      const socket = socketData.socket;
+      if (socket !== undefined && socket.isOpened) {
+        socket.sendPacked({
+          terminate_session: true,
+        });
+        socketData.terminated = true;
+      }
+    }
+
     logger.debug({ msg }, 'recording end message');
+    await ai.clear(msg.recordingId);
   },
 });
 
 async function socketReady(
   user: string,
-  recordingId: string
-): Promise<WebSocket> {
-  let socket = socketMap.get(user + '-' + recordingId);
-  if (socket !== undefined && socket.readyState === WebSocket.OPEN)
-    return socket;
-  return new Promise((resolve, reject) => {
-    /*if (tries === 5) {
-      reject('max tries reached');
-      return;
-    }*/
-
-    if (socket !== undefined && socket.readyState !== WebSocket.CONNECTING) {
-      socket.onclose = () => {
-        //tries++;
-        resolve(socketReady(user, recordingId));
-      };
-
-      return;
+  recordingId: string,
+  tmpOutput: string
+): Promise<SocketData> {
+  let socketData = socketMap.get(user + '-' + recordingId);
+  let socket: WebSocketAsPromised | undefined = undefined;
+  if (socketData !== undefined) {
+    if (socketData.start < Date.now() - config.sessionLength * 1000) {
+      logger.debug(
+        { recordingId, start: socketData.start },
+        'start new session'
+      );
+      socketData.socket.close();
+    } else {
+      socket = socketData.socket;
     }
-    let initNew = true;
-    if (socket !== undefined && socket.readyState === WebSocket.CONNECTING) {
-      initNew = false;
+  }
+  if (socketData !== undefined && socket !== undefined) {
+    if (socket.isOpened) {
+      return socketData;
     }
+    logger.debug({ recordingId }, 'socket not open');
+  }
 
-    if (initNew || socket === undefined) {
-      socket = openWebSocket('', '');
-      socketMap.set(user + '-' + recordingId, socket);
+  socket = createWebSocket('');
+
+  socket.onError.addListener((e) => {
+    logger.error({ recordingId, error: e }, 'websocket error');
+    if (socket !== undefined) {
+      socket.close();
     }
-    socket.onopen = () => {
-      console.log('connected');
-      if (socket !== undefined) {
-        resolve(socket);
-      } else {
-        reject();
-      }
-    };
   });
+  socket.onClose.addListener(() => {
+    logger.debug({ recordingId }, 'websocket closed');
+  });
+
+  await socket.open();
+  const msg: { session_id: string } = await socket.waitUnpackedMessage(
+    (data) => data !== undefined && data.session_id !== undefined
+  );
+  socketData = {
+    socket,
+    start: Date.now(),
+    terminated: false,
+    firstSegment: undefined,
+    segmentOffset: 0,
+  };
+  socketMap.set(user + '-' + recordingId, socketData);
+  logger.trace({ recordingId, msg }, 'session started');
+
+  socket.onUnpackedMessage.addListener(async (msg) => {
+    logger.trace({ msg }, 'websocket onMessage');
+    const data = socketMap.get(user + '-' + recordingId);
+    let segment_sequence = 0;
+    let total_start = 0;
+    if (data !== undefined && data.firstSegment !== undefined) {
+      segment_sequence = data.firstSegment.sequenceNumber;
+      total_start = data.firstSegment.offset * 1000 + data.segmentOffset;
+      total_start += msg.audio_start;
+      total_start = Math.round(total_start);
+    }
+    let total_end = total_start + (msg.audio_end - msg.audio_start);
+
+    if (msg.message_type === 'FinalTranscript') {
+      const t: ai.Transcript = {
+        id: '0',
+        recording_id: recordingId,
+        created: new Date(msg.created),
+        transcript: msg.text,
+        total_start,
+        total_end,
+        segment_sequence,
+        audio_start: msg.audio_start,
+        audio_end: msg.audio_end,
+        confidence: msg.confidence,
+        words: msg.words,
+      };
+      await ai.insertTranscript(t);
+
+      if (data !== undefined && data.terminated) return;
+      await ai.setEndTime(recordingId, msg.audio_end);
+    }
+  });
+
+  // pick up unfinished parts
+  const end_time = await ai.getEndTime(recordingId);
+  const segments = await ai.getSegments(recordingId);
+  segments.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+  logger.trace({ end_time, segments }, 'unfinished segments');
+  let count = 0;
+  let idx = -1;
+  let offset = 0;
+  for (let i = 0; i < segments.length; ++i) {
+    const s = segments[i];
+    if (count + s.duration * 1000 >= end_time) {
+      offset = end_time - count;
+      idx = i;
+      break;
+    }
+    count += s.duration * 1000;
+  }
+  if (idx > -1) {
+    socketData.firstSegment = segments[idx];
+    socketData.segmentOffset = offset;
+    for (let i = idx; i < segments.length; ++i) {
+      await sendSegment(socket, segments[i], offset, tmpOutput);
+      offset = 0;
+    }
+  }
+
+  await ai.clear(recordingId);
+
+  return socketData;
 }
 
-function openWebSocket(user: string, recordingId: string): WebSocket {
-  const session_id = sessionIdMap.get(user + '-' + recordingId);
+function createWebSocket(session_id: string): WebSocketAsPromised {
   let url = 'wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000';
   if (session_id !== undefined && session_id.length > 0) {
     url = 'wss://api.assemblyai.com/v2/realtime/ws/' + session_id;
   }
-  logger.debug({ user, recordingId, url }, 'connection websocket');
-  const ws = new WebSocket(url, undefined, {
-    headers: {
-      authorization: config.token,
+  logger.debug({ url, session_id }, 'create websocket');
+  const ws = new WebSocketAsPromised(url, {
+    // @ts-ignore
+    createWebSocket: (url) => {
+      return new WebSocket(url, undefined, {
+        headers: {
+          authorization: config.token,
+        },
+      });
     },
+    extractMessageData: (event) => event,
+    packMessage: (data) => JSON.stringify(data),
+    unpackMessage: (data) => JSON.parse(data.toString()),
   });
 
-  ws.onmessage = async (message) => {
-    //const res = JSON.parse(message.data);
-    //console.log(message.data);
-    const msg = JSON.parse(message.data.toString());
-    logger.trace({ msg }, 'onmessage');
-    if (msg.message_type === 'SessionBegins') {
-      sessionIdMap.set(user + '-' + recordingId, msg.session_id);
-    }
-    if (msg.message_type === 'FinalTranscript') {
-      const t = msg as ai.Transcript;
-      t.recording_id = recordingId;
-      t.created = new Date(msg.created);
-      t.transcript = msg.text;
-      t.audio_start = msg.audio_start;
-      t.audio_end = msg.audio_end;
-      t.confidence = msg.confidence;
-      t.words = msg.words;
-      await ai.insertTranscript(t);
-    }
-  };
-  ws.onerror = (e) => {
-    console.log('error', e);
-    ws.close();
-  };
-
-  ws.onclose = () => {
-    socketMap.delete(user + '-' + recordingId);
-  };
-
   return ws;
+}
+
+async function sendSegment(
+  ws: WebSocketAsPromised,
+  msg: SegmentDownloadedMessage,
+  offset: number,
+  tmpOutput: string
+): Promise<void> {
+  logger.trace({ msg, offset }, 'send segment');
+  let segmentTime = 1.2;
+  if (msg.duration - offset < 1.7) {
+    segmentTime = msg.duration - offset / 1000 + 0.1;
+  }
+  logger.trace(
+    { segmentTime, duration: msg.duration, offset: msg.offset },
+    'segment time'
+  );
+
+  const command = Ffmpeg()
+    .input(path.join(msg.path))
+    .seek(offset / 1000)
+    .outputOptions(
+      '-vn',
+      '-acodec',
+      'pcm_s16le',
+      '-ar',
+      '16000',
+      '-ac',
+      '1',
+      '-af',
+      'aresample=async=1000',
+      '-f',
+      'segment',
+      '-segment_time',
+      segmentTime.toString()
+    )
+    .output(path.join(tmpOutput, 'out%03d.wav'));
+
+  await execFfmpeg(command);
+  const waves = await fs.promises.readdir(tmpOutput);
+  logger.trace({ files: waves }, 'wav files');
+  for (let ii = 0; ii < waves.length; ++ii) {
+    const name = path.join(tmpOutput, waves[ii]);
+
+    const content = await fs.promises.readFile(name);
+    const data = Buffer.from(content).toString('base64');
+
+    logger.trace({ name, size: data.length }, 'sending file');
+
+    ws.sendPacked({
+      audio_data: data,
+    });
+    await fs.promises.rm(name);
+  }
 }

@@ -1,104 +1,105 @@
-import fs from 'fs';
-import path from 'path';
-import { execFfmpeg } from '@twitch-archiving/utils';
-import Ffmpeg from 'fluent-ffmpeg';
 import WebSocket from 'ws';
-import 'memorystream';
-const sleep = (time) => new Promise((res) => setTimeout(res, time, 'done sleeping'));
-const folder = '/home/petschm/dev/twitch/twitch-archiving/example/segments/jinnytty/stream/46461510413';
-const wavfolder = '/home/petschm/dev/twitch/twitch-archiving/example/segments/jinnytty/stream/audio';
-const files = await fs.promises.readdir(folder);
-let socket = undefined;
-let tries = 0;
-let session_id = undefined;
-for (let i = 0; i < files.length; ++i) {
-    const input = files[i];
-    const command = Ffmpeg()
-        .input(path.join(folder, input))
-        .outputOptions('-vn', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', '-f', 'segment', '-segment_time', '1.2')
-        .output(path.join(wavfolder, 'out%03d.wav'));
-    await execFfmpeg(command);
-    const waves = await fs.promises.readdir(wavfolder);
-    for (let ii = 0; ii < waves.length; ++ii) {
-        const name = path.join(wavfolder, waves[ii]);
-        const content = await fs.promises.readFile(name);
-        const data = Buffer.from(content).toString('base64');
-        console.log('send', data.length);
-        const ws = await socketReady();
-        ws.send(JSON.stringify({
-            audio_data: data,
-        }));
-        await sleep(1000);
-        await fs.promises.rm(name);
-    }
-}
-const ws = await socketReady();
-ws.send(JSON.stringify({
-    terminate_session: true,
-}));
-async function socketReady() {
-    if (socket !== undefined && socket.readyState === WebSocket.OPEN)
+import WebSocketAsPromised from 'websocket-as-promised';
+const logger = {
+    debug: console.log,
+    trace: console.log,
+};
+const socketMap = new Map();
+const sessionIdMap = new Map();
+const ws = await socketReady('test', '');
+console.log('ready');
+//ws.close();
+async function socketReady(user, recordingId) {
+    let socket = socketMap.get(user + '-' + recordingId);
+    if (socket !== undefined && socket.isOpened)
         return socket;
-    return new Promise((resolve, reject) => {
-        /*if (tries === 5) {
-          reject('max tries reached');
-          return;
-        }*/
-        if (socket !== undefined && socket.readyState !== WebSocket.CONNECTING) {
-            socket.onclose = () => {
-                tries++;
-                resolve(socketReady());
-            };
-            return;
+    socket = createWebSocket(recordingId);
+    console.log('created');
+    socket.onError.addListener((e) => {
+        console.log('error', e);
+        if (socket !== undefined) {
+            socket.close();
         }
-        let initNew = true;
-        if (socket !== undefined && socket.readyState === WebSocket.CONNECTING) {
-            initNew = false;
-        }
-        if (initNew || socket === undefined) {
-            socket = openWebSocket('', '');
-        }
-        socket.onopen = () => {
-            console.log('connected');
-            if (socket !== undefined) {
-                resolve(socket);
-            }
-            else {
-                reject();
-            }
-        };
     });
-}
-function openWebSocket(user, recordingId) {
-    console.log('connect');
-    let url = 'wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000';
-    if (session_id !== undefined) {
-        url = 'wss://api.assemblyai.com/v2/realtime/ws/' + session_id;
-    }
-    const ws = new WebSocket(url, undefined, {
-        headers: {
-            authorization: '903a00e5d52146568131c62985d8c6ba',
-        },
+    socket.onClose.addListener(() => {
+        console.log('close');
+        socketMap.delete(user + '-' + recordingId);
     });
-    ws.onmessage = async (message) => {
+    console.log('open');
+    await socket.open();
+    console.log('wait for session');
+    const msg = await socket.waitUnpackedMessage((data) => data !== undefined && data.session_id !== undefined);
+    console.log('session', msg);
+    socket.onUnpackedMessage.addListener((data) => console.log('unpacked msg', data));
+    console.log('session id', msg);
+    return socket;
+    /*
+    if (socket !== undefined && socket.isOpening) {
+        socket.onClose.addListener( () => {
+          //tries++;
+          resolve(socketReady(user, recordingId));
+        });
+  
+        return;
+      });
+      let initNew = true;
+      if (socket !== undefined && socket.readyState === WebSocket.CONNECTING) {
+        initNew = false;
+      }
+  
+      if (initNew || socket === undefined || socket === null) {
+        socket = openWebSocket('');
+        socketMap.set(user + '-' + recordingId, socket);
+      }
+      socket.onopen = () => {
+        console.log('connected waiting on session begin');
+      };
+  
+      socket.onmessage = async (message) => {
         //const res = JSON.parse(message.data);
-        console.log(message.data);
+        //console.log(message.data);
         const msg = JSON.parse(message.data.toString());
+        logger.trace({ msg }, 'onmessage');
         if (msg.message_type === 'SessionBegins') {
-            session_id = msg.session_id;
+          if (socket !== undefined) {
+            resolve(socket);
+          } else {
+            reject();
+          }
         }
         if (msg.message_type === 'FinalTranscript') {
-            await fs.promises.appendFile('log.txt', message.data.toString() + '\n');
+          console.log('final', msg);
         }
-    };
-    ws.onerror = (e) => {
+      };
+      socket.onerror = (e) => {
         console.log('error', e);
-        tries++;
-        ws.close();
-    };
-    ws.onclose = () => {
-        console.log('closed');
-        socket = undefined;
-    };
+        if (socket !== undefined) {
+          socket.close();
+        }
+      };
+  
+      socket.onclose = () => {
+        socketMap.delete(user + '-' + recordingId);
+      };
+    });*/
+}
+function createWebSocket(session_id) {
+    let url = 'wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000';
+    if (session_id !== undefined && session_id.length > 0) {
+        url = 'wss://api.assemblyai.com/v2/realtime/ws/' + session_id;
+    }
+    const ws = new WebSocketAsPromised(url, {
+        // @ts-ignore
+        createWebSocket: (url) => {
+            return new WebSocket(url, undefined, {
+                headers: {
+                    authorization: 'e178806c70ca48c393da1783bfb077a5',
+                },
+            });
+        },
+        extractMessageData: (event) => event,
+        packMessage: (data) => JSON.stringify(data),
+        unpackMessage: (data) => JSON.parse(data.toString()),
+    });
     return ws;
 }
