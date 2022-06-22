@@ -1,2 +1,0 @@
-{"level":10,"time":1655199540301,"pid":3698099,"hostname":"i5","module":"ffmpeg-utils","command":"ffmpeg -i /home/petschm/dev/twitch/twitch-archiving/example/segments/jinnytty/stream/46461510413/17287.ts -y -vn -acodec pcm_s16le -ar 16000 -ac 1 -f segment -segment_time 1 /home/petschm/dev/twitch/twitch-archiving/example/segments/jinnytty/stream/audio/out%03d.wav","msg":"ffmpeg command"}
-send 43656
