@@ -11,6 +11,7 @@ importers:
       '@rushstack/heft': ~0.44.2
       '@twitch-archiving/messages': workspace:*
       '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/utils': workspace:*
       '@twitch-archiving/websocket': workspace:*
       '@types/heft-jest': ~1.0.2
       '@types/node': ~17.0.18
@@ -22,6 +23,7 @@ importers:
       ws: ~8.5.0
     dependencies:
       '@twitch-archiving/messages': link:../messages
+      '@twitch-archiving/utils': link:../utils
       '@twitch-archiving/websocket': link:../websocket
       '@types/ws': 8.5.3
       irc-message-ts: 3.0.6

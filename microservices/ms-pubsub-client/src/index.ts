@@ -83,7 +83,7 @@ for (let i: number = 0; i < config.channels.length; ++i) {
       });
     },
   });
-  connection.open();
+  await connection.open();
 }
 
 async function sendData(user: string, data: string): Promise<void> {

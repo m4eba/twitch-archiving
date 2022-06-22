@@ -23,6 +23,10 @@ export abstract class WebSocketConnection<IMessage> {
 
   private listeners: MessageListener<IMessage>[] = [];
 
+  private openResolve: undefined | ((value: void | PromiseLike<void>) => void) =
+    undefined;
+  private openReject: undefined | ((reason?: any) => void) = undefined;
+
   public constructor(url: string) {
     this.url = url;
   }
@@ -48,25 +52,37 @@ export abstract class WebSocketConnection<IMessage> {
     this.listeners.push(listener);
   }
 
-  public open(): void {
-    logger.debug({ id: this.id, url: this.url, status: this.status }, 'open');
-    this.ws = new WebSocket(this.url);
-    this.status = Status.OPEN;
+  public open(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.openResolve = resolve;
+      this.openReject = reject;
+      logger.debug({ id: this.id, url: this.url, status: this.status }, 'open');
+      this.ws = new WebSocket(this.url);
+      this.status = Status.OPEN;
 
-    this.ws.on('open', () => this.wsOpen());
-    this.ws.on('message', (data: WebSocket.Data) => this.wsMessage(data));
-    this.ws.on('close', () => this.wsClose());
-    this.ws.on('error', () => this.wsError());
+      this.ws.on('open', () => this.wsOpen());
+      this.ws.on('message', (data: WebSocket.Data) => this.wsMessage(data));
+      this.ws.on('close', () => this.wsClose());
+      this.ws.on('error', () => this.wsError());
+    });
   }
 
   public close(): void {
     if (this.ws === null) return;
+    if (this.openReject) {
+      this.openReject();
+      this.openReject = undefined;
+    }
     this.status = Status.CLOSE;
     this.ws.close();
   }
 
   private wsOpen(): void {
     if (this.ws === null) throw new Error('websocket not defined');
+    if (this.openResolve) {
+      this.openResolve();
+      this.openResolve = undefined;
+    }
 
     if (this.pingInt !== null) {
       clearInterval(this.pingInt);
@@ -107,7 +123,9 @@ export abstract class WebSocketConnection<IMessage> {
       'ws disconnected, reconnect in 5 seconds'
     );
     setTimeout(() => {
-      this.open();
+      this.open().catch(() => {
+        logger.error('unable to open');
+      });
     }, 5 * 1000);
 
     this.onClose();

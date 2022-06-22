@@ -38,7 +38,7 @@ await consumer.run({
                 out.set(key, o);
             }
             const irc = JSON.parse(message.value.toString());
-            o.write(new Date(parseInt(message.timestamp)).toISOString(), irc.raw);
+            o.write(new Date(parseInt(message.timestamp)).toISOString(), irc.raw.trim());
         }
     },
 });

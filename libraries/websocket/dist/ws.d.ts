@@ -10,10 +10,12 @@ export declare abstract class WebSocketConnection<IMessage> {
     private pingInt;
     private pingTimeout;
     private listeners;
+    private openResolve;
+    private openReject;
     constructor(url: string);
     protected send(data: string): Promise<void>;
     addListener(listener: MessageListener<IMessage>): void;
-    open(): void;
+    open(): Promise<void>;
     close(): void;
     private wsOpen;
     private wsError;

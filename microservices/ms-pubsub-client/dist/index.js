@@ -47,7 +47,7 @@ for (let i = 0; i < config.channels.length; ++i) {
             });
         },
     });
-    connection.open();
+    await connection.open();
 }
 async function sendData(user, data) {
     const time = new Date();

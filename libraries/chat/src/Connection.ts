@@ -1,12 +1,11 @@
 import type WebSocket from 'ws';
-import pino, { Logger } from 'pino';
+import type { Logger } from 'pino';
 import { parse, IRCMessage as ParsedMessage } from 'irc-message-ts';
 import type { IRCMessage } from '@twitch-archiving/messages';
 import { WebSocketConnection } from '@twitch-archiving/websocket';
+import { initLogger } from '@twitch-archiving/utils';
 
-const logger: Logger = pino({ level: 'debug' }).child({
-  module: 'chat-connection',
-});
+const logger: Logger = initLogger('chat-connection');
 
 export class Connection extends WebSocketConnection<IRCMessage> {
   private username: string;
@@ -41,6 +40,7 @@ export class Connection extends WebSocketConnection<IRCMessage> {
   }
 
   protected override onMessage(data: WebSocket.Data): IRCMessage {
+    logger.trace({ data: data.toString() }, 'onMessage');
     const result: ParsedMessage | null = parse(data.toString());
     if (result === null) {
       return {

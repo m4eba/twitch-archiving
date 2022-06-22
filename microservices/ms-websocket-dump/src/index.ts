@@ -64,7 +64,7 @@ await consumer.run({
       }
       o.write(
         new Date(parseInt(message.timestamp)).toISOString(),
-        message.value.toString()
+        message.value.toString().trim()
       );
     }
   },

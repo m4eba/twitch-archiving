@@ -32,12 +32,17 @@ connection.addListener({
         if (data.params.length === 0)
             return;
         const channel = data.params[0];
-        sendData(channel, JSON.stringify(data)).catch((e) => {
+        if (channel.length === 0)
+            return;
+        const name = channel.substring(1);
+        if (!channelSet.has(name))
+            return;
+        sendData(name, JSON.stringify(data)).catch((e) => {
             logger.debug({ error: e }, 'error while sending');
         });
     },
 });
-connection.open();
+await connection.open();
 await readChannels();
 fs.watch(config.channelFile, readChannels);
 async function sendData(user, data) {

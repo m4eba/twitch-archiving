@@ -1,9 +1,7 @@
-import pino from 'pino';
 import { parse } from 'irc-message-ts';
 import { WebSocketConnection } from '@twitch-archiving/websocket';
-const logger = pino({ level: 'debug' }).child({
-    module: 'chat-connection',
-});
+import { initLogger } from '@twitch-archiving/utils';
+const logger = initLogger('chat-connection');
 export class Connection extends WebSocketConnection {
     constructor(username, oauth) {
         super('ws://irc-ws.chat.twitch.tv:80');
@@ -32,6 +30,7 @@ export class Connection extends WebSocketConnection {
         this.ws.send(`NICK ${this.username}`);
     }
     onMessage(data) {
+        logger.trace({ data: data.toString() }, 'onMessage');
         const result = parse(data.toString());
         if (result === null) {
             return {

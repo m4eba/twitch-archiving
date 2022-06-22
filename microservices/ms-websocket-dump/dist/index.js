@@ -36,7 +36,7 @@ await consumer.run({
                 o = new FileWriter(path.join(config.path, key));
                 out.set(key, o);
             }
-            o.write(new Date(parseInt(message.timestamp)).toISOString(), message.value.toString());
+            o.write(new Date(parseInt(message.timestamp)).toISOString(), message.value.toString().trim());
         }
     },
 });
