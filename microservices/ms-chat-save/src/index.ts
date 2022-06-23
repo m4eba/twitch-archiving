@@ -123,7 +123,11 @@ await consumer.run({
         data: irc.tags,
         emotes,
       };
-      await chat.insertMessage(msg);
+      try {
+        await chat.insertMessage(msg);
+      } catch (e) {
+        logger.error({ e }, 'insertMessage');
+      }
     }
   },
 });
