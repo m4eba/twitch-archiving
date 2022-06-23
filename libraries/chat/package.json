@@ -23,6 +23,7 @@
     "ws": "~8.5.0",
     "irc-message-ts": "~3.0.6",
     "@twitch-archiving/messages": "workspace:*",
-    "@twitch-archiving/utils": "workspace:*"
+    "@twitch-archiving/utils": "workspace:*",
+    "node-fetch": "~3.2.6"
   }
 }

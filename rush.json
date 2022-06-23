@@ -513,6 +513,16 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-chat-save",
+      "projectFolder": "microservices/ms-chat-save",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-chat-emote-updater",
+      "projectFolder": "microservices/ms-chat-emote-updater",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/ms-pubsub-filter",
       "projectFolder": "microservices/ms-pubsub-filter",
       "shouldPublish": true
