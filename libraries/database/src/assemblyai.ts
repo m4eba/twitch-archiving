@@ -56,7 +56,7 @@ export async function createTable(): Promise<void> {
       audio_end integer not null,
       confidence real not null,
       created timestamptz not null,
-      words json not null
+      words jsonb not null
     );
     
     create index transcribe_recording_id_idx on transcript (recording_id);
