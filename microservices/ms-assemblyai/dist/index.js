@@ -19,6 +19,7 @@ const AssemblyAiConfigOpt = {
     token: { type: String },
     sessionLength: { type: Number, defaultValue: 5 * 60 },
     tmpFolder: { type: String },
+    saveSessionFolder: { type: String, defaultValue: '' },
     redisPrefix: { type: String, defaultValue: 'tw-assemblyai-' },
 };
 const config = parse({
@@ -68,7 +69,7 @@ await consumerSegments.run({
         if (socketData.firstSegment === undefined) {
             socketData.firstSegment = msg;
         }
-        await sendSegment(socketData.socket, msg, 0, tmpOutput);
+        await sendSegment(socketData, msg, 0, tmpOutput);
         await ai.addSegment(msg);
     },
 });
@@ -105,9 +106,11 @@ await consumerRecordingEnded.run({
     },
 });
 async function socketReady(user, recordingId, tmpOutput) {
+    let sessionCount = 0;
     let socketData = socketMap.get(user + '-' + recordingId);
     let socket = undefined;
     if (socketData !== undefined) {
+        sessionCount = socketData.session.count;
         if (socketData.start < Date.now() - config.sessionLength * 1000) {
             logger.debug({ recordingId, start: socketData.start }, 'start new session');
             socketData.socket.close();
@@ -137,6 +140,11 @@ async function socketReady(user, recordingId, tmpOutput) {
     socketData = {
         socket,
         start: Date.now(),
+        session: {
+            count: sessionCount + 1,
+            waves: 0,
+            transcripts: 0,
+        },
         terminated: false,
         firstSegment: undefined,
         segmentOffset: 0,
@@ -170,8 +178,17 @@ async function socketReady(user, recordingId, tmpOutput) {
                 words: msg.words,
             };
             await ai.insertTranscript(t);
-            if (data !== undefined && data.terminated)
-                return;
+            if (data !== undefined) {
+                if (config.saveSessionFolder.length > 0) {
+                    const newPath = path.join(config.saveSessionFolder, recordingId, data.session.count.toString());
+                    await fs.promises.mkdir(newPath, { recursive: true });
+                    const name = path.join(newPath, data.session.transcripts.toString().padStart(5, '0') + '.json');
+                    data.session.transcripts++;
+                    await fs.promises.writeFile(name, JSON.stringify(msg, null, ' '));
+                }
+                if (data.terminated)
+                    return;
+            }
             await ai.setEndTime(recordingId, msg.audio_end);
         }
     });
@@ -196,7 +213,7 @@ async function socketReady(user, recordingId, tmpOutput) {
         socketData.firstSegment = segments[idx];
         socketData.segmentOffset = offset;
         for (let i = idx; i < segments.length; ++i) {
-            await sendSegment(socket, segments[i], offset, tmpOutput);
+            await sendSegment(socketData, segments[i], offset, tmpOutput);
             offset = 0;
         }
     }
@@ -224,7 +241,7 @@ function createWebSocket(session_id) {
     });
     return ws;
 }
-async function sendSegment(ws, msg, offset, tmpOutput) {
+async function sendSegment(socketData, msg, offset, tmpOutput) {
     logger.trace({ msg, offset }, 'send segment');
     let segmentTime = 1.2;
     if (msg.duration - offset < 1.7) {
@@ -244,9 +261,18 @@ async function sendSegment(ws, msg, offset, tmpOutput) {
         const content = await fs.promises.readFile(name);
         const data = Buffer.from(content).toString('base64');
         logger.trace({ name, size: data.length }, 'sending file');
-        ws.sendPacked({
+        socketData.socket.sendPacked({
             audio_data: data,
         });
-        await fs.promises.rm(name);
+        if (config.saveSessionFolder.length > 0) {
+            const newPath = path.join(config.saveSessionFolder, msg.recordingId, socketData.session.count.toString());
+            await fs.promises.mkdir(newPath, { recursive: true });
+            const newName = path.join(newPath, socketData.session.waves.toString().padStart(5, '0') + '.wav');
+            socketData.session.waves++;
+            await fs.promises.rename(name, newName);
+        }
+        else {
+            await fs.promises.rm(name);
+        }
     }
 }

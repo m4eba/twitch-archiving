@@ -36,6 +36,7 @@ interface AssemblyAiConfig {
   token: string;
   sessionLength: number;
   tmpFolder: string;
+  saveSessionFolder: string;
   redisPrefix: string;
 }
 
@@ -50,6 +51,7 @@ const AssemblyAiConfigOpt: ArgumentConfig<AssemblyAiConfig> = {
   token: { type: String },
   sessionLength: { type: Number, defaultValue: 5 * 60 },
   tmpFolder: { type: String },
+  saveSessionFolder: { type: String, defaultValue: '' },
   redisPrefix: { type: String, defaultValue: 'tw-assemblyai-' },
 };
 
@@ -88,9 +90,15 @@ await ai.createTable();
 const userSet = new Set<string>();
 config.user.forEach((u) => userSet.add(u));
 
+interface Session {
+  count: number;
+  waves: number;
+  transcripts: number;
+}
 interface SocketData {
   socket: WebSocketAsPromised;
   start: number;
+  session: Session;
   terminated: boolean;
   firstSegment: SegmentDownloadedMessage | undefined;
   segmentOffset: number;
@@ -127,7 +135,7 @@ await consumerSegments.run({
     if (socketData.firstSegment === undefined) {
       socketData.firstSegment = msg;
     }
-    await sendSegment(socketData.socket, msg, 0, tmpOutput);
+    await sendSegment(socketData, msg, 0, tmpOutput);
     await ai.addSegment(msg);
   },
 });
@@ -170,9 +178,11 @@ async function socketReady(
   recordingId: string,
   tmpOutput: string
 ): Promise<SocketData> {
+  let sessionCount = 0;
   let socketData = socketMap.get(user + '-' + recordingId);
   let socket: WebSocketAsPromised | undefined = undefined;
   if (socketData !== undefined) {
+    sessionCount = socketData.session.count;
     if (socketData.start < Date.now() - config.sessionLength * 1000) {
       logger.debug(
         { recordingId, start: socketData.start },
@@ -209,6 +219,11 @@ async function socketReady(
   socketData = {
     socket,
     start: Date.now(),
+    session: {
+      count: sessionCount + 1,
+      waves: 0,
+      transcripts: 0,
+    },
     terminated: false,
     firstSegment: undefined,
     segmentOffset: 0,
@@ -245,7 +260,23 @@ async function socketReady(
       };
       await ai.insertTranscript(t);
 
-      if (data !== undefined && data.terminated) return;
+      if (data !== undefined) {
+        if (config.saveSessionFolder.length > 0) {
+          const newPath = path.join(
+            config.saveSessionFolder,
+            recordingId,
+            data.session.count.toString()
+          );
+          await fs.promises.mkdir(newPath, { recursive: true });
+          const name = path.join(
+            newPath,
+            data.session.transcripts.toString().padStart(5, '0') + '.json'
+          );
+          data.session.transcripts++;
+          await fs.promises.writeFile(name, JSON.stringify(msg, null, ' '));
+        }
+        if (data.terminated) return;
+      }
       await ai.setEndTime(recordingId, msg.audio_end);
     }
   });
@@ -271,7 +302,7 @@ async function socketReady(
     socketData.firstSegment = segments[idx];
     socketData.segmentOffset = offset;
     for (let i = idx; i < segments.length; ++i) {
-      await sendSegment(socket, segments[i], offset, tmpOutput);
+      await sendSegment(socketData, segments[i], offset, tmpOutput);
       offset = 0;
     }
   }
@@ -305,7 +336,7 @@ function createWebSocket(session_id: string): WebSocketAsPromised {
 }
 
 async function sendSegment(
-  ws: WebSocketAsPromised,
+  socketData: SocketData,
   msg: SegmentDownloadedMessage,
   offset: number,
   tmpOutput: string
@@ -351,9 +382,24 @@ async function sendSegment(
 
     logger.trace({ name, size: data.length }, 'sending file');
 
-    ws.sendPacked({
+    socketData.socket.sendPacked({
       audio_data: data,
     });
-    await fs.promises.rm(name);
+    if (config.saveSessionFolder.length > 0) {
+      const newPath = path.join(
+        config.saveSessionFolder,
+        msg.recordingId,
+        socketData.session.count.toString()
+      );
+      await fs.promises.mkdir(newPath, { recursive: true });
+      const newName = path.join(
+        newPath,
+        socketData.session.waves.toString().padStart(5, '0') + '.wav'
+      );
+      socketData.session.waves++;
+      await fs.promises.rename(name, newName);
+    } else {
+      await fs.promises.rm(name);
+    }
   }
 }
