@@ -144,6 +144,20 @@ export async function getRecording(id) {
         site_id: result.rows[0].site_id,
     };
 }
+export async function getRecordingBySiteId(site_id) {
+    const { pool } = getP();
+    const result = await pool.query('SELECT * FROM recording WHERE site_id = $1', [site_id]);
+    if (result.rows.length === 0) {
+        return undefined;
+    }
+    return {
+        id: result.rows[0].id,
+        start: result.rows[0].start,
+        stop: result.rows[0].stop,
+        channel: result.rows[0].channel,
+        site_id: result.rows[0].site_id,
+    };
+}
 export async function updateSiteId(recordingId, siteId) {
     const { pool } = getP();
     await pool.query('UPDATE recording SET site_id=$1 WHERE id = $2', [

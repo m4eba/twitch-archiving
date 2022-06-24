@@ -123,7 +123,7 @@ await consumer.run({
     }
 
     if (!(await dl.isRecording(user))) {
-      logger.debug('member not in redis', { user });
+      logger.debug({ user }, 'member not in redis');
       init = true;
     }
 
@@ -205,28 +205,33 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
   const site_id = 'live-' + id;
   logger.trace({ user, id, site_id }, 'site_id');
 
-  if (playlistMessage !== undefined && newStream) {
-    recordingId = playlistMessage.recordingId;
-    if (recordingId.length !== 0) {
-      logger.debug({ recordingId, user }, 'stop running recording');
-      await dl.stopRecording(new Date(), recordingId);
+  const recording = await dl.getRecordingBySiteId(site_id);
+
+  // do nothing if recording continues
+  if (recording === undefined) {
+    if (playlistMessage !== undefined && newStream) {
+      recordingId = playlistMessage.recordingId;
+      if (recordingId.length !== 0) {
+        logger.debug({ recordingId, user }, 'stop running recording');
+        await dl.stopRecording(new Date(), recordingId);
+      }
     }
-  }
-  if (playlistMessage === undefined || newStream) {
-    logger.debug({ data, user }, 'start new recording');
-    recordingId = await dl.startRecording(new Date(), user, site_id);
-    data.recordingId = recordingId;
-    const recMsg: RecordingStartedMessage = {
-      user,
-      id,
-      recordingId,
-      type: data.type,
-    };
-    await sendData(config.recordingOutputTopic, {
-      key: user,
-      value: JSON.stringify(recMsg),
-      timestamp: new Date().getTime().toString(),
-    });
+    if (playlistMessage === undefined || newStream) {
+      logger.debug({ data, user }, 'start new recording');
+      recordingId = await dl.startRecording(new Date(), user, site_id);
+      data.recordingId = recordingId;
+      const recMsg: RecordingStartedMessage = {
+        user,
+        id,
+        recordingId,
+        type: data.type,
+      };
+      await sendData(config.recordingOutputTopic, {
+        key: user,
+        value: JSON.stringify(recMsg),
+        timestamp: new Date().getTime().toString(),
+      });
+    }
   }
 
   await dl.setPlaylistMessage(data);

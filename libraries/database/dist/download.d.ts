@@ -32,6 +32,7 @@ export declare function getRecordedChannels(): Promise<string[]>;
 export declare function isRecording(channel: string): Promise<boolean>;
 export declare function getRecordingId(channel: string): Promise<string>;
 export declare function getRecording(id: string): Promise<Recording | undefined>;
+export declare function getRecordingBySiteId(site_id: string): Promise<Recording | undefined>;
 export declare function updateSiteId(recordingId: string, siteId: string): Promise<void>;
 export declare function startFile(recordingId: string, name: string, seq: number, offset: number, duration: number, time: Date): Promise<void>;
 export declare function addSegment(recordingId: string, sequenceNumber: number): Promise<void>;
