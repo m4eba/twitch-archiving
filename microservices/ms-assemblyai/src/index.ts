@@ -102,6 +102,7 @@ interface SocketData {
   terminated: boolean;
   firstSegment: SegmentDownloadedMessage | undefined;
   segmentOffset: number;
+  audioShort: boolean;
 }
 const socketMap = new Map<string, SocketData>();
 
@@ -179,9 +180,11 @@ async function socketReady(
   tmpOutput: string
 ): Promise<SocketData> {
   let sessionCount = 0;
+  let audioShort = false;
   let socketData = socketMap.get(user + '-' + recordingId);
   let socket: WebSocketAsPromised | undefined = undefined;
   if (socketData !== undefined) {
+    audioShort = socketData.audioShort;
     sessionCount = socketData.session.count;
     if (socketData.start < Date.now() - config.sessionLength * 1000) {
       logger.debug(
@@ -227,6 +230,7 @@ async function socketReady(
     terminated: false,
     firstSegment: undefined,
     segmentOffset: 0,
+    audioShort: false,
   };
   socketMap.set(user + '-' + recordingId, socketData);
   logger.trace({ recordingId, msg }, 'session started');
@@ -234,6 +238,10 @@ async function socketReady(
   socket.onUnpackedMessage.addListener(async (msg) => {
     logger.trace({ msg }, 'websocket onMessage');
     const data = socketMap.get(user + '-' + recordingId);
+    //"error":"Audio duration is too short"
+    if (msg.error && msg.error === 'Audio duration is too short') {
+      if (data) data.audioShort = true;
+    }
     let segment_sequence = 0;
     let total_start = 0;
     if (data !== undefined && data.firstSegment !== undefined) {
@@ -282,28 +290,31 @@ async function socketReady(
   });
 
   // pick up unfinished parts
-  const end_time = await ai.getEndTime(recordingId);
-  const segments = await ai.getSegments(recordingId);
-  segments.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
-  logger.trace({ end_time, segments }, 'unfinished segments');
-  let count = 0;
-  let idx = -1;
-  let offset = 0;
-  for (let i = 0; i < segments.length; ++i) {
-    const s = segments[i];
-    if (count + s.duration * 1000 >= end_time) {
-      offset = end_time - count;
-      idx = i;
-      break;
+  // skip it if last socket closed with audio short message
+  if (!audioShort) {
+    const end_time = await ai.getEndTime(recordingId);
+    const segments = await ai.getSegments(recordingId);
+    segments.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+    logger.trace({ end_time, segments }, 'unfinished segments');
+    let count = 0;
+    let idx = -1;
+    let offset = 0;
+    for (let i = 0; i < segments.length; ++i) {
+      const s = segments[i];
+      if (count + s.duration * 1000 >= end_time) {
+        offset = end_time - count;
+        idx = i;
+        break;
+      }
+      count += s.duration * 1000;
     }
-    count += s.duration * 1000;
-  }
-  if (idx > -1) {
-    socketData.firstSegment = segments[idx];
-    socketData.segmentOffset = offset;
-    for (let i = idx; i < segments.length; ++i) {
-      await sendSegment(socketData, segments[i], offset, tmpOutput);
-      offset = 0;
+    if (idx > -1) {
+      socketData.firstSegment = segments[idx];
+      socketData.segmentOffset = offset;
+      for (let i = idx; i < segments.length; ++i) {
+        await sendSegment(socketData, segments[i], offset, tmpOutput);
+        offset = 0;
+      }
     }
   }
 
