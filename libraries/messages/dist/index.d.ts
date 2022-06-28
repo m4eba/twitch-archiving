@@ -17,19 +17,31 @@ export declare enum PlaylistType {
     LIVE = 0,
     VOD = 1
 }
-export interface RecordingStartedMessage {
-    user: string;
-    id: string;
-    recordingId: string;
-    type: PlaylistType;
+export declare enum RecordingMessageType {
+    STARTED = 0,
+    ENDED = 1,
+    SEGMENT = 2
 }
-export interface RecordingEndedMessage {
+export interface RecordingMessage {
+    type: RecordingMessageType;
     user: string;
     id: string;
     recordingId: string;
+    playlistType: PlaylistType;
+}
+export interface RecordingStartedMessage extends RecordingMessage {
+}
+export interface RecordingEndedMessage extends RecordingMessage {
     segmentCount: number;
 }
-export interface PlaylistMessage {
+export interface RecordingSegmentMessage extends RecordingMessage {
+    sequenceNumber: number;
+    offset: number;
+    duration: number;
+    time: string;
+    url: string;
+}
+export interface PlaylistRequestMessage {
     user: string;
     id: string;
     recordingId: string;
@@ -38,25 +50,22 @@ export interface PlaylistMessage {
     token: AccessToken;
     url: string;
 }
-export interface PlaylistSegmentMessage {
+export declare enum PlaylistMessageType {
+    START = 0,
+    END = 1,
+    DOWNLOAD = 2
+}
+export interface PlaylistMessage {
+    type: PlaylistMessageType;
     user: string;
     id: string;
     recordingId: string;
-    type: PlaylistType;
-    sequenceNumber: number;
-    offset: number;
-    duration: number;
-    time: string;
-    url: string;
 }
 export declare enum SegmentDownloadedStatus {
     DONE = 0,
     ERROR = 1
 }
-export interface SegmentDownloadedMessage {
-    user: string;
-    id: string;
-    recordingId: string;
+export interface SegmentDownloadedMessage extends PlaylistMessage {
     sequenceNumber: number;
     offset: number;
     duration: number;
@@ -65,7 +74,7 @@ export interface SegmentDownloadedMessage {
     status: SegmentDownloadedStatus;
 }
 export interface ScreenshotMessage {
-    segment: PlaylistSegmentMessage;
+    segment: SegmentDownloadedMessage;
     index: number;
     offset: number;
 }

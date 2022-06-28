@@ -21,7 +21,7 @@ interface PlaylistUpdateTimerConfig {
 const PlaylistUpdateTimerConfigOpt: ArgumentConfig<PlaylistUpdateTimerConfig> =
   {
     interval: { type: Number, defaultValue: 2000 },
-    outputTopic: { type: String, defaultValue: 'tw-playlist' },
+    outputTopic: { type: String, defaultValue: 'tw-playlist-request' },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
   };
 
