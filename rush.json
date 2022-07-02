@@ -548,11 +548,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@twitch-archiving/ms-screenshot-init",
-      "projectFolder": "microservices/ms-screenshot-init",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@twitch-archiving/ms-screenshot",
       "projectFolder": "microservices/ms-screenshot",
       "shouldPublish": true

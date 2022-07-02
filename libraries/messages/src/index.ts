@@ -94,7 +94,6 @@ export interface ScreenshotMessage {
 export interface ScreenshotDoneMessage {
   recordingId: string;
   index: number;
-  offset: number;
   filename: string;
   path: string;
 }

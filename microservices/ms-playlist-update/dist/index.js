@@ -52,7 +52,6 @@ await consumer.run({
         const { data, resp } = await fetchWithTimeoutText(playlist.bestUrl, 3, 2000);
         if (resp.status !== 200) {
             logger.debug({ code: resp.status }, 'invalid status code');
-            await dl.incPlaylistError(recording.id);
             await forcePlaylistUpdate(user);
             return;
         }
