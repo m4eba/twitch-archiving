@@ -148,9 +148,9 @@ async function initStream(user, newStream) {
             }
         }
         if (playlistMessage === undefined || newStream) {
-            logger.debug({ data, user }, 'start new recording');
             recordingId = await dl.startRecording(new Date(), user, site_id);
             data.recordingId = recordingId;
+            logger.debug({ data, user }, 'start new recording');
             const recMsg = {
                 user,
                 id,
@@ -164,8 +164,11 @@ async function initStream(user, newStream) {
             });
         }
     }
+    else {
+        data.recordingId = recording.id;
+    }
     await dl.setPlaylistMessage(data);
-    logger.debug('playlist', { user, playlistMessage: data });
+    logger.debug({ user, playlistMessage: data }, 'playlist');
     const msg = JSON.stringify(data);
     await sendData(config.playlistOutputTopic, {
         key: user,
