@@ -12,7 +12,6 @@ import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
-import { createClient } from 'redis';
 import { getLivePlaylist, getAccessToken } from '@twitch-archiving/twitch';
 import {
   PlaylistMessage,
