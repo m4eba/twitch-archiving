@@ -77,6 +77,7 @@ const kafka: Kafka = new Kafka({
 });
 
 await initPostgres(config);
+await sb.createTable();
 
 const userSet = new Set<string>();
 config.user.forEach((u) => userSet.add(u));

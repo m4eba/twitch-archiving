@@ -32,6 +32,7 @@ const kafka = new Kafka({
     brokers: config.kafkaBroker,
 });
 await initPostgres(config);
+await sb.createTable();
 const userSet = new Set();
 config.user.forEach((u) => userSet.add(u));
 logger.info({ topic: config.inputTopic }, 'subscribe');
