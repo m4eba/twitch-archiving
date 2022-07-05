@@ -39,7 +39,7 @@ interface ScreenshotConfig {
 }
 
 const ScreenshotConfigOpt: ArgumentConfig<ScreenshotConfig> = {
-  inputTopic: { type: String, defaultValue: 'tw-recording' },
+  inputTopic: { type: String, defaultValue: 'tw-playlist' },
   outputTopic: { type: String, defaultValue: 'tw-screenshot' },
   user: { type: String, multiple: true },
   interval: { type: Number, defaultValue: 10.0 },

@@ -8,7 +8,7 @@ import { execFfmpeg, initLogger } from '@twitch-archiving/utils';
 import { initPostgres, storyboard as sb, } from '@twitch-archiving/database';
 import { PlaylistMessageType, } from '@twitch-archiving/messages';
 const ScreenshotConfigOpt = {
-    inputTopic: { type: String, defaultValue: 'tw-recording' },
+    inputTopic: { type: String, defaultValue: 'tw-playlist' },
     outputTopic: { type: String, defaultValue: 'tw-screenshot' },
     user: { type: String, multiple: true },
     interval: { type: Number, defaultValue: 10.0 },

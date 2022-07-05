@@ -84,8 +84,8 @@ export async function getRecordedChannels() {
     const { pool } = getP();
     const channels = await pool.query('select channel from recording where stop is null group by channel');
     const result = [];
-    for (let i = 0; i < channels.rows.length; ++i) {
-        result.push(channels.rows[i][0]);
+    for (let i = 0; i < channels.rowCount; ++i) {
+        result.push(channels.rows[i]['channel']);
     }
     return result;
 }
