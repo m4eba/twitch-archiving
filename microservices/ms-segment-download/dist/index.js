@@ -4,7 +4,7 @@ import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import path from 'path';
 import { downloadSegment, initLogger } from '@twitch-archiving/utils';
-import { PlaylistMessageType, PlaylistType, SegmentDownloadedStatus, } from '@twitch-archiving/messages';
+import { PlaylistMessageType, PlaylistType, RecordingMessageType, SegmentDownloadedStatus, } from '@twitch-archiving/messages';
 import { initPostgres, download as dl } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-recording' },
@@ -41,6 +41,9 @@ await consumer.run({
             return;
         const seg = JSON.parse(message.value.toString());
         logger.trace({ seg }, 'segment download');
+        if (seg.type !== RecordingMessageType.SEGMENT) {
+            return;
+        }
         const filename = seg.sequenceNumber.toString().padStart(5, '0') + '.ts';
         const recordingId = seg.recordingId;
         if (recordingId.length === 0) {

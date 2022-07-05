@@ -19,6 +19,7 @@ import {
   PlaylistMessageType,
   PlaylistType,
   RecordingEndedMessage,
+  RecordingMessageType,
   RecordingSegmentMessage,
   SegmentDownloadedMessage,
   SegmentDownloadedStatus,
@@ -83,6 +84,10 @@ await consumer.run({
     if (!message.value) return;
     const seg: RecordingSegmentMessage = JSON.parse(message.value.toString());
     logger.trace({ seg }, 'segment download');
+
+    if (seg.type !== RecordingMessageType.SEGMENT) {
+      return;
+    }
 
     const filename = seg.sequenceNumber.toString().padStart(5, '0') + '.ts';
 
