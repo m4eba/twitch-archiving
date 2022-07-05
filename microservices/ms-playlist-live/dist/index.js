@@ -2,7 +2,6 @@ import { KafkaConfigOpt, RedisConfigOpt, PostgresConfigOpt, FileConfigOpt, } fro
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
-import 'redis';
 import { getLivePlaylist, getAccessToken } from '@twitch-archiving/twitch';
 import { PlaylistType, RecordingMessageType, PlaylistMessageType, } from '@twitch-archiving/messages';
 import { initPostgres, initRedis, download as dl, } from '@twitch-archiving/database';

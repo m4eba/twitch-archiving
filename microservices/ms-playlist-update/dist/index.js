@@ -1,10 +1,10 @@
-import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
+import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, PostgresConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
 import { RecordingMessageType, } from '@twitch-archiving/messages';
 import { initLogger, fetchWithTimeoutText } from '@twitch-archiving/utils';
-import { initRedis, download as dl } from '@twitch-archiving/database';
+import { initRedis, download as dl, initPostgres, } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist-request' },
     recordingOutputTopic: { type: String, defaultValue: 'tw-recording' },
@@ -13,6 +13,7 @@ const PlaylistConfigOpt = {
 };
 const config = parse({
     ...KafkaConfigOpt,
+    ...PostgresConfigOpt,
     ...PlaylistConfigOpt,
     ...RedisConfigOpt,
     ...FileConfigOpt,
@@ -25,6 +26,7 @@ const kafka = new Kafka({
     brokers: config.kafkaBroker,
 });
 await initRedis(config, config.redisPrefix);
+await initPostgres(config);
 logger.info({ topic: config.inputTopic }, 'subscribe');
 const consumer = kafka.consumer({ groupId: 'playlist-update' });
 await consumer.connect();

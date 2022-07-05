@@ -5,6 +5,8 @@ import {
   RedisConfigOpt,
   FileConfig,
   FileConfigOpt,
+  PostgresConfig,
+  PostgresConfigOpt,
 } from '@twitch-archiving/config';
 import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
@@ -18,7 +20,11 @@ import {
   RecordingSegmentMessage,
 } from '@twitch-archiving/messages';
 import { initLogger, fetchWithTimeoutText } from '@twitch-archiving/utils';
-import { initRedis, download as dl } from '@twitch-archiving/database';
+import {
+  initRedis,
+  download as dl,
+  initPostgres,
+} from '@twitch-archiving/database';
 
 interface PlaylistConfig {
   inputTopic: string;
@@ -34,11 +40,17 @@ const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 
-interface Config extends PlaylistConfig, KafkaConfig, RedisConfig, FileConfig {}
+interface Config
+  extends PlaylistConfig,
+    KafkaConfig,
+    PostgresConfig,
+    RedisConfig,
+    FileConfig {}
 
 const config: Config = parse<Config>(
   {
     ...KafkaConfigOpt,
+    ...PostgresConfigOpt,
     ...PlaylistConfigOpt,
     ...RedisConfigOpt,
     ...FileConfigOpt,
@@ -56,6 +68,7 @@ const kafka: Kafka = new Kafka({
 });
 
 await initRedis(config, config.redisPrefix);
+await initPostgres(config);
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 

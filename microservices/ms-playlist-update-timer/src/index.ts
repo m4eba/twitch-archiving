@@ -5,12 +5,18 @@ import {
   RedisConfigOpt,
   FileConfig,
   FileConfigOpt,
+  PostgresConfig,
+  PostgresConfigOpt,
 } from '@twitch-archiving/config';
 import type { Logger } from 'pino';
 import { Kafka, Producer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, download as dl } from '@twitch-archiving/database';
+import {
+  initRedis,
+  download as dl,
+  initPostgres,
+} from '@twitch-archiving/database';
 
 interface PlaylistUpdateTimerConfig {
   interval: number;
@@ -28,12 +34,14 @@ const PlaylistUpdateTimerConfigOpt: ArgumentConfig<PlaylistUpdateTimerConfig> =
 interface Config
   extends PlaylistUpdateTimerConfig,
     KafkaConfig,
+    PostgresConfig,
     RedisConfig,
     FileConfig {}
 
 const config: Config = parse<Config>(
   {
     ...KafkaConfigOpt,
+    ...PostgresConfigOpt,
     ...PlaylistUpdateTimerConfigOpt,
     ...RedisConfigOpt,
     ...FileConfigOpt,
@@ -51,6 +59,7 @@ const kafka: Kafka = new Kafka({
 });
 
 await initRedis(config, config.redisPrefix);
+await initPostgres(config);
 
 const producer: Producer = kafka.producer();
 await producer.connect();
