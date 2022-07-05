@@ -113,7 +113,6 @@ await consumer.run({
     let offset = -1;
     if (board === undefined) {
       board = {
-        id: '',
         recording_id: playMsg.recordingId,
         index: 0,
         time_offset: 0,

@@ -6,7 +6,6 @@ import crypto from 'crypto';
 const logger: Logger = initLogger('database-storyboard');
 
 export interface Storyboard {
-  id: string;
   recording_id: string;
   index: number;
   time_offset: number;
@@ -60,7 +59,7 @@ export async function insertStoryboard(sb: Storyboard): Promise<Storyboard> {
   const slug = crypto.randomUUID();
   const newSb: Storyboard = { ...sb };
   const result = await pool.query(
-    'INSERT INTO storyboard (recording_id, index, first_sequence, time_offset, interval, rows, columns, slug, data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+    'INSERT INTO storyboard (recording_id, index, first_sequence, time_offset, interval, rows, columns, slug, data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)',
     [
       sb.recording_id,
       sb.index,
@@ -73,8 +72,6 @@ export async function insertStoryboard(sb: Storyboard): Promise<Storyboard> {
       JSON.stringify(sb.data),
     ]
   );
-  const id = result.rows[0].id;
-  newSb.id = id;
   return newSb;
 }
 

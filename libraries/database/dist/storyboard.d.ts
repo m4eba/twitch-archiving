@@ -1,5 +1,4 @@
 export interface Storyboard {
-    id: string;
     recording_id: string;
     index: number;
     time_offset: number;

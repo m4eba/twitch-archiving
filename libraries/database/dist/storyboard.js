@@ -34,7 +34,7 @@ export async function insertStoryboard(sb) {
     const { pool } = getP();
     const slug = crypto.randomUUID();
     const newSb = { ...sb };
-    const result = await pool.query('INSERT INTO storyboard (recording_id, index, first_sequence, time_offset, interval, rows, columns, slug, data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id', [
+    const result = await pool.query('INSERT INTO storyboard (recording_id, index, first_sequence, time_offset, interval, rows, columns, slug, data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)', [
         sb.recording_id,
         sb.index,
         sb.first_sequence,
@@ -45,8 +45,6 @@ export async function insertStoryboard(sb) {
         slug,
         JSON.stringify(sb.data),
     ]);
-    const id = result.rows[0].id;
-    newSb.id = id;
     return newSb;
 }
 export async function getStoryboard(recordingId, index) {
