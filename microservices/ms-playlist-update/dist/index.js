@@ -63,6 +63,12 @@ await consumer.run({
         let offset = 0;
         if (latestFile !== undefined) {
             offset = latestFile.time_offset + latestFile.duration;
+            logger.trace({
+                offset_type: typeof latestFile.time_offset,
+                time_offset: latestFile.time_offset,
+                duration_type: typeof latestFile.duration,
+                duration: latestFile.duration,
+            }, 'set offset');
         }
         for (let i = 0; i < list.segments.length; ++i) {
             const seg = list.segments[i];
