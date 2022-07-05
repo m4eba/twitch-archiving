@@ -9,7 +9,7 @@ export interface Storyboard {
   id: string;
   recording_id: string;
   index: number;
-  offset: number;
+  time_offset: number;
   interval: number;
   first_sequence: number;
   rows: number;
@@ -39,7 +39,7 @@ export async function createTable(): Promise<void> {
       recording_id bigint not null,
       index smallint not null,
       first_sequence int not null,
-      offset int not null,
+      time_offset int not null,
       interval smallint not null,
       rows smallint not null,
       columns smallint not null,
@@ -48,7 +48,7 @@ export async function createTable(): Promise<void> {
       PRIMARY KEY(recording_id, index)
     );
 
-    create index storyboard_offset_idx on storyboard(offset);
+    create index storyboard_time_offset_idx on storyboard(time_offset);
     create index storyboard_slug_idx on storyboard(slug);
       `);
   }
@@ -60,12 +60,12 @@ export async function insertStoryboard(sb: Storyboard): Promise<Storyboard> {
   const slug = crypto.randomUUID();
   const newSb: Storyboard = { ...sb };
   const result = await pool.query(
-    'INSERT INTO storyboard (recording_id, index, first_sequence, offset, interval, rows, columns, slug, data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+    'INSERT INTO storyboard (recording_id, index, first_sequence, time_offset, interval, rows, columns, slug, data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
     [
       sb.recording_id,
       sb.index,
       sb.first_sequence,
-      sb.offset,
+      sb.time_offset,
       sb.interval,
       sb.rows,
       sb.columns,
@@ -119,7 +119,14 @@ export async function updateStoryboard(sb: Storyboard): Promise<void> {
   const { pool } = getP();
 
   await pool.query(
-    'UPDATE storyboard SET index=$1, offset=$2, first_sequence=$3, data=$4 WHERE recording_id = $5 and index = $6 ',
-    [sb.index, sb.offset, sb.first_sequence, sb.data, sb.recording_id, sb.index]
+    'UPDATE storyboard SET index=$1, time_offset=$2, first_sequence=$3, data=$4 WHERE recording_id = $5 and index = $6 ',
+    [
+      sb.index,
+      sb.time_offset,
+      sb.first_sequence,
+      sb.data,
+      sb.recording_id,
+      sb.index,
+    ]
   );
 }

@@ -2,7 +2,7 @@ export interface Storyboard {
     id: string;
     recording_id: string;
     index: number;
-    offset: number;
+    time_offset: number;
     interval: number;
     first_sequence: number;
     rows: number;

@@ -65,7 +65,7 @@ await consumer.run({
                 id: '',
                 recording_id: playMsg.recordingId,
                 index: 0,
-                offset: 0,
+                time_offset: 0,
                 first_sequence: msg.sequenceNumber,
                 interval: config.interval,
                 rows: config.rows,
@@ -88,7 +88,7 @@ await consumer.run({
                 // if we hit max images per board - save in next board
                 if (board.data.images.length === board.first_sequence + filesPerBoard) {
                     board.first_sequence = msg.sequenceNumber;
-                    board.offset = msg.offset + offset;
+                    board.time_offset = msg.offset + offset;
                     board.index = board.index + 1;
                     board.data.images = [filename];
                     await sb.insertStoryboard(board);
