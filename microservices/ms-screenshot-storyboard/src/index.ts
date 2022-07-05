@@ -20,6 +20,7 @@ import {
   initRedis,
   storyboard as sb,
   screenshot as ss,
+  initPostgres,
 } from '@twitch-archiving/database';
 import type {
   ScreenshotDoneMessage,
@@ -70,6 +71,7 @@ const kafka: Kafka = new Kafka({
 });
 
 await initRedis(config, config.redisPrefix);
+await initPostgres(config);
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 
@@ -102,6 +104,7 @@ await consumer.run({
     const sbIndex = Math.floor(msg.index / filesPerBoard);
     logger.debug({ msg, filesPerBoard, sbIndex }, 'msg');
 
+    board.data.images.sort();
     // build arument list
     const args: string[] = [];
     for (let i = 0; i < board.data.images.length; ++i) {

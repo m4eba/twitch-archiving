@@ -6,7 +6,7 @@ import path from 'path';
 import child_process from 'child_process';
 import util from 'util';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, storyboard as sb, } from '@twitch-archiving/database';
+import { initRedis, storyboard as sb, initPostgres, } from '@twitch-archiving/database';
 const exec = util.promisify(child_process.exec);
 const StoryboardConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-screenshot-minimized' },
@@ -29,6 +29,7 @@ const kafka = new Kafka({
     brokers: config.kafkaBroker,
 });
 await initRedis(config, config.redisPrefix);
+await initPostgres(config);
 logger.info({ topic: config.inputTopic }, 'subscribe');
 const consumer = kafka.consumer({
     groupId: 'screenshot-storyboard',
@@ -54,6 +55,7 @@ await consumer.run({
         const filesPerBoard = board.rows * board.columns;
         const sbIndex = Math.floor(msg.index / filesPerBoard);
         logger.debug({ msg, filesPerBoard, sbIndex }, 'msg');
+        board.data.images.sort();
         // build arument list
         const args = [];
         for (let i = 0; i < board.data.images.length; ++i) {
