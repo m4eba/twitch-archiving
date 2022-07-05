@@ -49,7 +49,7 @@ export async function insertStoryboard(sb) {
 }
 export async function getStoryboard(recordingId, index) {
     const { pool } = getP();
-    const result = await pool.query('SELECT * from storyboard WHERE recording_id = $1 and index = $2 desc LIMIT 1', [recordingId, index]);
+    const result = await pool.query('SELECT * from storyboard WHERE recording_id = $1 and index = $2', [recordingId, index]);
     if (result.rowCount === 0) {
         return undefined;
     }
