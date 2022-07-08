@@ -9,6 +9,11 @@ let pool: Pool | undefined = undefined;
 let redis: RedisClient | undefined = undefined;
 let redisPrefix: string = '';
 
+// see https://github.com/brianc/node-postgres/issues/811#issuecomment-488374261
+pg.types.setTypeParser(1700, function (val) {
+  return parseFloat(val);
+});
+
 export function getPool(): Pool | undefined {
   return pool;
 }

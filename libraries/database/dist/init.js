@@ -3,6 +3,10 @@ import { createClient } from 'redis';
 let pool = undefined;
 let redis = undefined;
 let redisPrefix = '';
+// see https://github.com/brianc/node-postgres/issues/811#issuecomment-488374261
+pg.types.setTypeParser(1700, function (val) {
+    return parseFloat(val);
+});
 export function getPool() {
     return pool;
 }
