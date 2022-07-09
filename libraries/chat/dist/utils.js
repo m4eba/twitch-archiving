@@ -15,7 +15,7 @@ export function parseIrcMessageEmoteTag(msg, tag) {
                 return;
             const start_idx = parseInt(idx[0]);
             const end_idx = parseInt(idx[1]);
-            const name = msg.substring(start_idx, end_idx);
+            const name = msg.substring(start_idx, end_idx + 1);
             const data = {
                 id: s[0],
                 source: 'twitch',
