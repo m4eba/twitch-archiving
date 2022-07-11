@@ -568,6 +568,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-api-live-test",
+      "projectFolder": "microservices/ms-api-live-test",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
