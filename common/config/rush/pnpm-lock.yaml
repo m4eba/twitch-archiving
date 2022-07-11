@@ -896,6 +896,45 @@ importers:
       '@tsconfig/node16-strictest-esm': 1.0.1
       eslint: 8.10.0
 
+  ../../tools/read-chat-dump:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/utils': workspace:*
+      '@types/heft-jest': ~1.0.2
+      '@types/line-reader': ~0.0.34
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      irc-message-ts: ~3.0.6
+      kafkajs: ~1.16.0
+      line-reader: ~0.4.0
+      pino: ~7.10.0
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/messages': link:../../libraries/messages
+      '@twitch-archiving/utils': link:../../libraries/utils
+      '@types/line-reader': 0.0.34
+      irc-message-ts: 3.0.6
+      kafkajs: 1.16.0
+      line-reader: 0.4.0
+      pino: 7.10.0
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
 packages:
 
   /@ampproject/remapping/2.1.2:
@@ -2105,6 +2144,12 @@ packages:
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
     dev: true
+
+  /@types/line-reader/0.0.34:
+    resolution: {integrity: sha512-r6RzbnrY+IoBgDIO4P6l2a+/ad+YCLe/htv7hp+Oqsqeb7cJbV3keKpg07ZlLlk3ZJz9xozNO8lFOiKRux234Q==}
+    dependencies:
+      '@types/node': 17.0.24
+    dev: false
 
   /@types/memorystream/0.3.0:
     resolution: {integrity: sha512-gzh6mqZcLryYHn4g2MuMWjo9J1+Py/XYwITyZmUxV7ZoBIi7bTbBgSiuC5tcm3UL3gmaiYssQFDlXr/3fK94cw==}
@@ -4393,6 +4438,10 @@ packages:
       prelude-ls: 1.2.1
       type-check: 0.4.0
     dev: true
+
+  /line-reader/0.4.0:
+    resolution: {integrity: sha512-AYJ8g+eE7v+Ba4s/cuYqzuNulH/WbjdKQ55fvx8fNVn8WQzTpioY6vI1MoxTuMgcHYX3VlmZWbVvnkIqkyJbCA==}
+    dev: false
 
   /locate-path/5.0.0:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}

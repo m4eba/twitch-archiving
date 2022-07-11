@@ -578,6 +578,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/tools-read-chat-dump",
+      "projectFolder": "tools/read-chat-dump",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
