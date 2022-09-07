@@ -1,8 +1,20 @@
-import type { ScreenshotDoneMessage } from '@twitch-archiving/messages';
+export interface Storyboard {
+    recording_id: string;
+    index: number;
+    time_offset: number;
+    interval: number;
+    first_sequence: number;
+    rows: number;
+    columns: number;
+    slug: string;
+    data: StoryboardData;
+}
+export interface StoryboardData {
+    current_offset: number;
+    images: string[];
+}
 export declare function createTable(): Promise<void>;
-export declare function screenshotReady(recordingId: string, sbIndex: number, data: ScreenshotDoneMessage): Promise<ScreenshotDoneMessage[]>;
-export declare function getAllScreenshots(recordingId: string, sbIndex: number): Promise<ScreenshotDoneMessage[]>;
-export declare function clearScreenshots(recordingId: string, sbIndex: number): Promise<void>;
-export declare function incBoardCount(recordingId: string): Promise<number>;
-export declare function getBoardCount(recordingId: string): Promise<number>;
-export declare function clearAll(recordingId: string): Promise<void>;
+export declare function insertStoryboard(sb: Storyboard): Promise<Storyboard>;
+export declare function getStoryboard(recordingId: string, index: number): Promise<Storyboard | undefined>;
+export declare function getLatestStoryBoard(recordingId: string): Promise<Storyboard | undefined>;
+export declare function updateStoryboard(sb: Storyboard): Promise<void>;

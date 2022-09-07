@@ -21,21 +21,35 @@ export enum PlaylistType {
   VOD,
 }
 
-export interface RecordingStartedMessage {
-  user: string;
-  id: string;
-  recordingId: string;
-  type: PlaylistType;
+export enum RecordingMessageType {
+  STARTED,
+  ENDED,
+  SEGMENT,
 }
 
-export interface RecordingEndedMessage {
+export interface RecordingMessage {
+  type: RecordingMessageType;
   user: string;
   id: string;
   recordingId: string;
+  playlistType: PlaylistType;
+}
+
+export interface RecordingStartedMessage extends RecordingMessage {}
+
+export interface RecordingEndedMessage extends RecordingMessage {
   segmentCount: number;
 }
 
-export interface PlaylistMessage {
+export interface RecordingSegmentMessage extends RecordingMessage {
+  sequenceNumber: number;
+  offset: number;
+  duration: number;
+  time: string;
+  url: string;
+}
+
+export interface PlaylistRequestMessage {
   user: string;
   id: string;
   recordingId: string;
@@ -45,26 +59,24 @@ export interface PlaylistMessage {
   url: string;
 }
 
-export interface PlaylistSegmentMessage {
+export enum PlaylistMessageType {
+  START,
+  END,
+  DOWNLOAD,
+}
+
+export interface PlaylistMessage {
+  type: PlaylistMessageType;
   user: string;
   id: string;
   recordingId: string;
-  type: PlaylistType;
-  sequenceNumber: number;
-  offset: number;
-  duration: number;
-  time: string;
-  url: string;
 }
 
 export enum SegmentDownloadedStatus {
   DONE,
   ERROR,
 }
-export interface SegmentDownloadedMessage {
-  user: string;
-  id: string;
-  recordingId: string;
+export interface SegmentDownloadedMessage extends PlaylistMessage {
   sequenceNumber: number;
   offset: number;
   duration: number;
@@ -74,7 +86,7 @@ export interface SegmentDownloadedMessage {
 }
 
 export interface ScreenshotMessage {
-  segment: PlaylistSegmentMessage;
+  segment: SegmentDownloadedMessage;
   index: number;
   offset: number;
 }
@@ -82,7 +94,6 @@ export interface ScreenshotMessage {
 export interface ScreenshotDoneMessage {
   recordingId: string;
   index: number;
-  offset: number;
   filename: string;
   path: string;
 }

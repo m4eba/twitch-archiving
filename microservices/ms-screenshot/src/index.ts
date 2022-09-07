@@ -15,8 +15,14 @@ import { ArgumentConfig, parse } from 'ts-command-line-args';
 import path from 'path';
 import Ffmpeg from 'fluent-ffmpeg';
 import { execFfmpeg, initLogger } from '@twitch-archiving/utils';
-import { initRedis, screenshot as ss } from '@twitch-archiving/database';
-import type {
+import {
+  initPostgres,
+  initRedis,
+  storyboard as sb,
+} from '@twitch-archiving/database';
+import {
+  PlaylistMessage,
+  PlaylistMessageType,
   ScreenshotDoneMessage,
   SegmentDownloadedMessage,
 } from '@twitch-archiving/messages';
@@ -24,13 +30,21 @@ import type {
 interface ScreenshotConfig {
   inputTopic: string;
   outputTopic: string;
+  user: string[];
+  interval: number;
+  rows: number;
+  columns: number;
   screenshotFolder: string;
   redisPrefix: string;
 }
 
 const ScreenshotConfigOpt: ArgumentConfig<ScreenshotConfig> = {
-  inputTopic: { type: String, defaultValue: 'tw-segment-ended' },
-  outputTopic: { type: String, defaultValue: 'tw-screenshot-done' },
+  inputTopic: { type: String, defaultValue: 'tw-playlist' },
+  outputTopic: { type: String, defaultValue: 'tw-screenshot' },
+  user: { type: String, multiple: true },
+  interval: { type: Number, defaultValue: 10.0 },
+  rows: { type: Number },
+  columns: { type: Number },
   screenshotFolder: { type: String },
   redisPrefix: { type: String, defaultValue: 'tw-screenshot-' },
 };
@@ -62,7 +76,11 @@ const kafka: Kafka = new Kafka({
   brokers: config.kafkaBroker,
 });
 
-await initRedis(config, config.redisPrefix);
+await initPostgres(config);
+await sb.createTable();
+
+const userSet = new Set<string>();
+config.user.forEach((u) => userSet.add(u));
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 
@@ -78,38 +96,85 @@ await consumer.run({
     if (!message.key) return;
     if (!message.value) return;
 
-    const msg: SegmentDownloadedMessage = JSON.parse(message.value.toString());
-    const request = await ss.getRequest(msg.recordingId, msg.sequenceNumber);
-    if (request === undefined) return;
+    const playMsg: PlaylistMessage = JSON.parse(message.value.toString());
+    logger.trace({ user: message.key, msg: playMsg }, 'playlistMessage');
+    if (!userSet.has(playMsg.user)) return;
 
-    logger.trace({ msg, request }, 'message request');
-    const filename = request.index.toString().padStart(5, '0') + '.png';
+    if (playMsg.type !== PlaylistMessageType.DOWNLOAD) {
+      return;
+    }
+    const msg = playMsg as SegmentDownloadedMessage;
+    const filesPerBoard = config.rows * config.columns;
+    let board = await sb.getLatestStoryBoard(playMsg.recordingId);
+
+    const filename = msg.sequenceNumber.toString().padStart(5, '0') + '.png';
     const output = path.join(config.screenshotFolder, msg.recordingId);
 
-    await fs.promises.mkdir(output, { recursive: true });
+    let offset = -1;
+    if (board === undefined) {
+      board = {
+        recording_id: playMsg.recordingId,
+        index: 0,
+        time_offset: 0,
+        first_sequence: msg.sequenceNumber,
+        interval: config.interval,
+        rows: config.rows,
+        columns: config.columns,
+        slug: '',
+        data: { current_offset: 0, images: [filename] },
+      };
+      offset = 0;
+      await sb.insertStoryboard(board);
+    } else {
+      if (board.data.current_offset + msg.duration >= config.interval) {
+        offset = config.interval - board.data.current_offset;
+        // screenshot on last frame doesn't work
+        if (offset > msg.duration - 0.05) {
+          offset = msg.duration - 0.05;
+        }
+        board.data.current_offset =
+          board.data.current_offset + msg.duration - config.interval;
 
-    const command = Ffmpeg()
-      .input(msg.path)
-      .seek(request.offset)
-      .outputOptions('-vframes', '1', '-q:v', '2')
-      .output(path.join(output, filename));
+        // if we hit max images per board - save in next board
+        if (board.data.images.length === board.first_sequence + filesPerBoard) {
+          board.first_sequence = msg.sequenceNumber;
+          board.time_offset = msg.offset + offset;
+          board.index = board.index + 1;
+          board.data.images = [filename];
+          await sb.insertStoryboard(board);
+        } else {
+          board.data.images.push(filename);
+          await sb.updateStoryboard(board);
+        }
+      } else {
+        board.data.current_offset = board.data.current_offset + msg.duration;
+        await sb.updateStoryboard(board);
+      }
+    }
 
-    await execFfmpeg(command);
+    if (offset > -1) {
+      await fs.promises.mkdir(output, { recursive: true });
 
-    await ss.rmRequest(msg.recordingId, msg.sequenceNumber);
+      const command = Ffmpeg()
+        .input(msg.path)
+        .seek(offset)
+        .outputOptions('-vframes', '1', '-q:v', '2')
+        .output(path.join(output, filename));
 
-    const doneMsg: ScreenshotDoneMessage = {
-      recordingId: msg.recordingId,
-      index: request.index,
-      offset: request.offset,
-      filename,
-      path: output,
-    };
-    await sendData(config.outputTopic, {
-      key: msg.user,
-      value: JSON.stringify(doneMsg),
-      timestamp: new Date().getTime().toString(),
-    });
+      await execFfmpeg(command);
+
+      const doneMsg: ScreenshotDoneMessage = {
+        recordingId: msg.recordingId,
+        index: board.index,
+        filename,
+        path: output,
+      };
+      await sendData(config.outputTopic, {
+        key: msg.user,
+        value: JSON.stringify(doneMsg),
+        timestamp: new Date().getTime().toString(),
+      });
+    }
   },
 });
 

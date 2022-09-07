@@ -1,15 +1,16 @@
-import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
+import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, PostgresConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, download as dl } from '@twitch-archiving/database';
+import { initRedis, download as dl, initPostgres, } from '@twitch-archiving/database';
 const PlaylistUpdateTimerConfigOpt = {
     interval: { type: Number, defaultValue: 2000 },
-    outputTopic: { type: String, defaultValue: 'tw-playlist' },
+    outputTopic: { type: String, defaultValue: 'tw-playlist-request' },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 const config = parse({
     ...KafkaConfigOpt,
+    ...PostgresConfigOpt,
     ...PlaylistUpdateTimerConfigOpt,
     ...RedisConfigOpt,
     ...FileConfigOpt,
@@ -22,6 +23,7 @@ const kafka = new Kafka({
     brokers: config.kafkaBroker,
 });
 await initRedis(config, config.redisPrefix);
+await initPostgres(config);
 const producer = kafka.producer();
 await producer.connect();
 setInterval(async () => {

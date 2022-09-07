@@ -1,5 +1,6 @@
-import { getP, getR } from './init.js';
+import { getP } from './init.js';
 import { initLogger } from '@twitch-archiving/utils';
+import crypto from 'crypto';
 const logger = initLogger('database-storyboard');
 export async function createTable() {
     const { pool } = getP();
@@ -12,51 +13,70 @@ export async function createTable() {
     if (!tabletest.rows[0].exists) {
         await pool.query(`
     create table storyboard (
-      id bigserial primary key,
       recording_id bigint not null,
-      offset integer not null,
+      index smallint not null,
+      first_sequence int not null,
+      time_offset int not null,
       interval smallint not null,
+      rows smallint not null,
+      columns smallint not null,
       slug text not null,
+      data jsonb not null,
+      PRIMARY KEY(recording_id, index)
     );
 
-    create index storyboard_recording_id_idx on storyboard(recording_id);
-    create index storyboard_offset_idx on storyboard(offset);
+    create index storyboard_time_offset_idx on storyboard(time_offset);
     create index storyboard_slug_idx on storyboard(slug);
       `);
     }
 }
-export async function screenshotReady(recordingId, sbIndex, data) {
-    const { redis, prefix } = getR();
-    const name = prefix + recordingId + sbIndex.toString();
-    await redis.lPush(name, JSON.stringify(data));
-    const list = await redis.lRange(name, 0, -1);
-    const result = list.map((l) => JSON.parse(l));
-    return result;
+export async function insertStoryboard(sb) {
+    const { pool } = getP();
+    const slug = crypto.randomUUID();
+    const newSb = { ...sb };
+    const result = await pool.query('INSERT INTO storyboard (recording_id, index, first_sequence, time_offset, interval, rows, columns, slug, data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)', [
+        sb.recording_id,
+        sb.index,
+        sb.first_sequence,
+        sb.time_offset,
+        sb.interval,
+        sb.rows,
+        sb.columns,
+        slug,
+        JSON.stringify(sb.data),
+    ]);
+    return newSb;
 }
-export async function getAllScreenshots(recordingId, sbIndex) {
-    const { redis, prefix } = getR();
-    const name = prefix + recordingId + sbIndex.toString();
-    const list = await redis.lRange(name, 0, -1);
-    const result = list.map((l) => JSON.parse(l));
-    return result;
+export async function getStoryboard(recordingId, index) {
+    const { pool } = getP();
+    const result = await pool.query('SELECT * from storyboard WHERE recording_id = $1 and index = $2', [recordingId, index]);
+    if (result.rowCount === 0) {
+        return undefined;
+    }
+    const sb = {
+        ...result.rows[0],
+    };
+    return sb;
 }
-export async function clearScreenshots(recordingId, sbIndex) {
-    const { redis, prefix } = getR();
-    await redis.del(prefix + recordingId + sbIndex.toString());
+export async function getLatestStoryBoard(recordingId) {
+    const { pool } = getP();
+    const result = await pool.query('SELECT * from storyboard WHERE recording_id = $1 order by index desc LIMIT 1', [recordingId]);
+    if (result.rowCount === 0) {
+        return undefined;
+    }
+    const sb = {
+        ...result.rows[0],
+    };
+    return sb;
 }
-export async function incBoardCount(recordingId) {
-    const { redis, prefix } = getR();
-    return await redis.incr(prefix + recordingId + '-board-count');
-}
-export async function getBoardCount(recordingId) {
-    const { redis, prefix } = getR();
-    const value = await redis.get(prefix + recordingId + '-board-count');
-    if (value === null || value === undefined)
-        return 0;
-    return parseInt(value);
-}
-export async function clearAll(recordingId) {
-    const { redis, prefix } = getR();
-    logger.trace({ recordingId }, 'clear all');
-    await redis.del(prefix + recordingId + '-board-count');
+export async function updateStoryboard(sb) {
+    const { pool } = getP();
+    await pool.query('UPDATE storyboard SET index=$1, time_offset=$2, first_sequence=$3, data=$4 WHERE recording_id = $5 and index = $6 ', [
+        sb.index,
+        sb.time_offset,
+        sb.first_sequence,
+        sb.data,
+        sb.recording_id,
+        sb.index,
+    ]);
 }

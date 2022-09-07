@@ -2,7 +2,7 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import type { Logger } from 'pino';
 import { initLogger } from './logger.js';
-import type { PlaylistSegmentMessage } from '@twitch-archiving/messages';
+import type { RecordingSegmentMessage } from '@twitch-archiving/messages';
 
 const logger: Logger = initLogger('download');
 
@@ -45,14 +45,14 @@ export interface DownloadListener {
   updateProgress:
     | undefined
     | ((
-        seg: PlaylistSegmentMessage,
+        seg: RecordingSegmentMessage,
         filename: string,
         size: number
       ) => Promise<void>);
   updateFilesize:
     | undefined
     | ((
-        seg: PlaylistSegmentMessage,
+        seg: RecordingSegmentMessage,
         filename: string,
         startSize: number,
         totalSize: number
@@ -60,7 +60,7 @@ export interface DownloadListener {
 }
 
 export async function downloadSegment(
-  seg: PlaylistSegmentMessage,
+  seg: RecordingSegmentMessage,
   filename: string,
   listener: DownloadListener
 ): Promise<void> {

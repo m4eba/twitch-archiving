@@ -31,7 +31,7 @@ interface ScreenshotConfig {
 }
 
 const ScreenshotConfigOpt: ArgumentConfig<ScreenshotConfig> = {
-  inputTopic: { type: String, defaultValue: 'tw-screenshot-done' },
+  inputTopic: { type: String, defaultValue: 'tw-screenshot' },
   outputTopic: { type: String, defaultValue: 'tw-screenshot-minimized' },
   screenshotFolder: { type: String },
   width: { type: Number },
@@ -104,7 +104,6 @@ await consumer.run({
     const outMsg: ScreenshotDoneMessage = {
       recordingId: msg.recordingId,
       index: msg.index,
-      offset: msg.offset,
       filename: msg.filename,
       path: output,
     };

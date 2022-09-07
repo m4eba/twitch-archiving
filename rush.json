@@ -548,16 +548,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@twitch-archiving/ms-ordered-segments",
-      "projectFolder": "microservices/ms-ordered-segments",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@twitch-archiving/ms-screenshot-init",
-      "projectFolder": "microservices/ms-screenshot-init",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@twitch-archiving/ms-screenshot",
       "projectFolder": "microservices/ms-screenshot",
       "shouldPublish": true
@@ -580,6 +570,11 @@
     {
       "packageName": "@twitch-archiving/tools-read-chat-dump",
       "projectFolder": "tools/read-chat-dump",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-api-live-test",
+      "projectFolder": "microservices/ms-api-live-test",
       "shouldPublish": true
     },
     {

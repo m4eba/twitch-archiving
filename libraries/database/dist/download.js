@@ -1,4 +1,4 @@
-import { getPool, getR, getP, getPR } from './init.js';
+import { getPool, getP, getPR } from './init.js';
 import { initLogger } from '@twitch-archiving/utils';
 const logger = initLogger('database-download');
 const MAX_PLAYLIST_ERROR = 3;
@@ -20,7 +20,8 @@ export async function createTableDownload() {
       start timestamptz not null,
       stop timestamptz,
       channel text not null,
-      site_id text not null DEFAULT ''
+      site_id text not null DEFAULT '',
+      data jsonb null
     );
     
     create index recording_channel_idx on recording (channel);
@@ -28,7 +29,7 @@ export async function createTableDownload() {
     create index recording_start_idx on recording (start);
     create index recording_stop_idx on recording (stop);
 
-    create type file_status as enum ('downloading', 'error', 'done'); 
+    create type file_status as enum ('downloading', 'error', 'done', 'waiting'); 
     create table file (
       recording_id bigint not null,
       name text not null,
@@ -51,82 +52,42 @@ export async function createTableDownload() {
     `);
     }
 }
-export async function setPlaylistMessage(data) {
-    const { redis, prefix } = getR();
-    await redis.set(prefix + '-stream-' + data.user, JSON.stringify(data));
-}
-export async function getPlaylistMessage(user) {
-    const { redis, prefix } = getR();
-    const data = await redis.get(prefix + '-stream-' + user);
-    if (data === null)
-        return undefined;
-    return JSON.parse(data);
-}
-export async function setPlaylistEnding(recordingId) {
-    const { redis, prefix } = getR();
-    await redis.hSet(prefix + recordingId + '-data', 'ending', '1');
-}
-export async function isPlaylistEnding(recordingId) {
-    const { redis, prefix } = getR();
-    return (await redis.hGet(prefix + recordingId + '-data', 'ending')) === '1';
-}
-export async function incPlaylistError(recordingId) {
-    const { redis, prefix } = getR();
-    let value = await getPlaylistError(recordingId);
-    ++value;
-    await redis.hSet(prefix + recordingId + '-data', 'playlistError', value);
-}
-export async function getPlaylistError(recordingId) {
-    const { redis, prefix } = getR();
-    let value = await redis.hGet(prefix + recordingId + '-data', 'playlistError');
-    if (value === null || value === undefined)
-        value = '0';
-    return parseInt(value);
-}
-export async function startRecording(time, channel, site_id) {
+export async function startRecording(time, channel, site_id, data) {
     const { pool, redis, prefix } = getPR();
-    const result = await pool.query('INSERT into recording VALUES (DEFAULT, $1, null, $2, $3) RETURNING id', [time, channel, site_id]);
+    const result = await pool.query('INSERT into recording (id, start, stop, channel, site_id, data) VALUES (DEFAULT, $1, null, $2, $3, $4) RETURNING id', [time, channel, site_id, JSON.stringify(data)]);
     const id = result.rows[0].id;
     await redis.set(prefix + channel + '-recordingId', id);
     await redis.sAdd(prefix + '-streams', channel);
     return id;
 }
+export async function resumeRecording(recordingId) {
+    const { pool } = getP();
+    await pool.query('UPDATE recording SET stop=null WHERE  id = $1', [
+        recordingId,
+    ]);
+}
 export async function stopRecording(time, recordingId) {
-    const { pool, redis, prefix } = getPR();
-    const recording = await getRecording(recordingId);
-    if (!recording)
-        return;
-    const channel = recording.channel;
+    const { pool } = getP();
     await pool.query('UPDATE recording SET stop=$1 WHERE  id = $2', [
         time,
         recordingId,
     ]);
-    await redis.del(prefix + channel + '-recordingId');
-    await redis.del(prefix + recordingId + '-data');
-    await redis.del(prefix + recordingId + '-offset-count');
-    await redis.del(prefix + '-stream-' + channel);
-    await redis.sRem(prefix + '-streams', channel);
-    await redis.del(prefix + recordingId + '-data');
-    await redis.del(prefix + recordingId + '-segments-waiting');
-    await redis.del(prefix + recordingId + '-segments-running');
-    await redis.del(prefix + recordingId + '-segments-done');
-    await redis.del(prefix + recordingId + '-segment-count');
+}
+export async function updateRecordingData(recordingId, data) {
+    const { pool } = getP();
+    await pool.query('UPDATE recording SET data=$1 WHERE  id = $2', [
+        JSON.stringify(data),
+        recordingId,
+    ]);
 }
 export async function getRecordedChannels() {
-    const { redis, prefix } = getR();
-    const channels = await redis.sMembers(prefix + '-streams');
-    return channels;
-}
-export async function isRecording(channel) {
-    const { redis, prefix } = getR();
-    return await redis.sIsMember(prefix + '-streams', channel);
-}
-export async function getRecordingId(channel) {
-    const { redis, prefix } = getR();
-    const id = await redis.get(prefix + channel + '-recordingId');
-    if (!id)
-        return '';
-    return id;
+    const { pool } = getP();
+    const channels = await pool.query('select channel from recording where stop is null group by channel');
+    const result = [];
+    for (let i = 0; i < channels.rowCount; ++i) {
+        result.push(channels.rows[i]['channel']);
+    }
+    return result;
 }
 export async function getRecording(id) {
     const { pool } = getP();
@@ -142,6 +103,22 @@ export async function getRecording(id) {
         stop: result.rows[0].stop,
         channel: result.rows[0].channel,
         site_id: result.rows[0].site_id,
+        data: result.rows[0].data,
+    };
+}
+export async function getRunningRecording(channel) {
+    const { pool } = getP();
+    const result = await pool.query('select * from recording where channel = $1 and stop is null order by start desc', [channel]);
+    if (result.rows.length === 0) {
+        return undefined;
+    }
+    return {
+        id: result.rows[0].id,
+        start: result.rows[0].start,
+        stop: result.rows[0].stop,
+        channel: result.rows[0].channel,
+        site_id: result.rows[0].site_id,
+        data: result.rows[0].data,
     };
 }
 export async function getRecordingBySiteId(site_id) {
@@ -156,6 +133,7 @@ export async function getRecordingBySiteId(site_id) {
         stop: result.rows[0].stop,
         channel: result.rows[0].channel,
         site_id: result.rows[0].site_id,
+        data: result.rows[0].data,
     };
 }
 export async function updateSiteId(recordingId, siteId) {
@@ -165,72 +143,40 @@ export async function updateSiteId(recordingId, siteId) {
         recordingId,
     ]);
 }
-export async function startFile(recordingId, name, seq, offset, duration, time) {
-    const { pool, redis, prefix } = getPR();
-    await pool.query('INSERT into file (recording_id,name,seq,time_offset,duration,retries,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,$4,$5,0,$6,0,0,$7,$8)', [recordingId, name, seq, offset, duration, time, '', 'downloading']);
-    await redis.sAdd(prefix + recordingId + '-segments-running', seq.toString());
-    await redis.sRem(prefix + recordingId + '-segments-waiting', seq.toString());
+export async function addFile(recordingId, name, seq, offset, duration, time) {
+    const { pool } = getP();
+    await pool.query('INSERT into file (recording_id,name,seq,time_offset,duration,retries,datetime,size,downloaded,hash,status) VALUES ($1,$2,$3,$4,$5,0,$6,0,0,$7,$8)', [recordingId, name, seq, offset, duration, time, '', 'waiting']);
 }
-export async function addSegment(recordingId, sequenceNumber) {
-    const { redis, prefix } = getR();
-    await redis.sAdd(prefix + recordingId + '-segments-waiting', sequenceNumber.toString());
-    await redis.incr(prefix + recordingId + '-segment-count');
+export async function getLatestFile(recordingId) {
+    const { pool } = getP();
+    const result = await pool.query('select * from file where recording_id = $1 order by seq desc limit 1', [recordingId]);
+    if (result.rows.length === 0) {
+        return undefined;
+    }
+    return {
+        recording_id: result.rows[0].recording_id,
+        name: result.rows[0].name,
+        seq: result.rows[0].seq,
+        time_offset: result.rows[0].time_offset,
+        duration: result.rows[0].duration,
+        retries: result.rows[0].retries,
+        datetime: result.rows[0].datetime,
+        size: result.rows[0].size,
+        downloaded: result.rows[0].downloaded,
+        hash: result.rows[0].hash,
+        status: result.rows[0].status,
+    };
 }
-export async function getSegmentCount(recordingId) {
-    const { redis, prefix } = getR();
-    const value = await redis.get(prefix + recordingId + '-segment-count');
-    if (value === null || value === undefined)
-        return 0;
-    return parseInt(value);
-}
-export async function testSegment(recordingId, sequenceNumber) {
-    const { redis, prefix } = getR();
-    const wait = await redis.sIsMember(prefix + recordingId + '-segments-waiting', sequenceNumber.toString());
-    if (wait)
-        return true;
-    const done = await redis.sIsMember(prefix + recordingId + '-segments-done', sequenceNumber.toString());
-    if (done)
-        return true;
-    const running = await redis.sIsMember(prefix + recordingId + '-segments-running', sequenceNumber.toString());
-    return running;
-}
-export async function getOffset(recordingId) {
-    const { redis, prefix } = getR();
-    const offset = await redis.get(prefix + recordingId + '-offset-count');
-    if (offset === undefined || offset === null) {
-        return 0;
+export async function getFileCount(recordingId, status) {
+    const { pool } = getP();
+    if (status === undefined) {
+        const result = await pool.query('select count(*) from file where recording_id = $1', [recordingId]);
+        return result.rows[0][0];
     }
     else {
-        return parseFloat(offset);
+        const result = await pool.query('select count(*) from file where recording_id = $1 and status = $2', [recordingId, status]);
+        return result.rows[0][0];
     }
-}
-export async function incOffset(recordingId, duration) {
-    const { redis, prefix } = getR();
-    const offset = await redis.get(prefix + recordingId + '-offset-count');
-    let offsetN = 0;
-    logger.trace({ recordingId, offset, duration }, 'incOffset');
-    if (offset !== undefined && offset !== null) {
-        offsetN = parseFloat(offset);
-    }
-    await redis.set(prefix + recordingId + '-offset-count', (offsetN + duration).toString());
-}
-export async function finishedFile(recordingId, sequenceNumber) {
-    const { redis, prefix } = getR();
-    await redis.sRem(prefix + recordingId + '-segments-running', sequenceNumber.toString());
-    await redis.sAdd(prefix + recordingId + '-segments-done', sequenceNumber.toString());
-}
-export async function isRecordingDone(recordingId) {
-    const { redis, prefix } = getR();
-    const wait = await redis.sMembers(prefix + recordingId + '-segments-waiting');
-    const running = await redis.sMembers(prefix + recordingId + '-segments-running');
-    const done = await redis.sMembers(prefix + recordingId + '-segments-done');
-    logger.trace({ wait, running, done }, 'segments');
-    const ending = await isPlaylistEnding(recordingId);
-    const playlistError = await getPlaylistError(recordingId);
-    logger.trace({ ending, playlistError }, 'meta end - playlisterror');
-    return ((ending || playlistError >= MAX_PLAYLIST_ERROR) &&
-        (await redis.sCard(prefix + recordingId + '-segments-running')) === 0 &&
-        (await redis.sCard(prefix + recordingId + '-segments-waiting')) === 0);
 }
 export async function getFile(recordingId, name) {
     const { pool } = getP();
@@ -267,4 +213,16 @@ export async function updateFileStatus(recordingId, name, status) {
 export async function incrementFileRetries(recordingId, name) {
     const { pool } = getP();
     await pool.query('UPDATE file SET retries=retires+1 WHERE recording_id = $1 AND name = $2', [recordingId, name]);
+}
+export async function allFilesDone(recordingId) {
+    const { pool } = getP();
+    const recording = await getRecording(recordingId);
+    if (recording === undefined) {
+        throw new Error('unknown recording ' + recordingId);
+    }
+    if (recording.stop === null) {
+        return false;
+    }
+    const result = await pool.query("select count(*) from file where recording_id = $1 and status = 'downloading' or status = 'waiting'", [recordingId]);
+    return result.rows[0][0] === 0;
 }

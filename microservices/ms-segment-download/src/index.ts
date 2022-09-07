@@ -14,36 +14,30 @@ import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import path from 'path';
 import { downloadSegment, initLogger } from '@twitch-archiving/utils';
-import { createClient } from 'redis';
 import {
-  PlaylistSegmentMessage,
+  PlaylistMessage,
+  PlaylistMessageType,
   PlaylistType,
   RecordingEndedMessage,
+  RecordingMessageType,
+  RecordingSegmentMessage,
   SegmentDownloadedMessage,
   SegmentDownloadedStatus,
 } from '@twitch-archiving/messages';
-import {
-  initPostgres,
-  initRedis,
-  download as dl,
-} from '@twitch-archiving/database';
+import { initPostgres, download as dl } from '@twitch-archiving/database';
 
 interface PlaylistConfig {
   inputTopic: string;
-  segmentOutputTopic: string;
-  recordingOutputTopic: string;
+  playlistOutputTopic: string;
   outputPath: string;
   maxFileRetries: number;
-  redisPrefix: string;
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
-  inputTopic: { type: String, defaultValue: 'tw-playlist-segment' },
-  segmentOutputTopic: { type: String, defaultValue: 'tw-segment-ended' },
-  recordingOutputTopic: { type: String, defaultValue: 'tw-recording-ended' },
+  inputTopic: { type: String, defaultValue: 'tw-recording' },
+  playlistOutputTopic: { type: String, defaultValue: 'tw-playlist' },
   outputPath: { type: String },
   maxFileRetries: { type: Number, defaultValue: 3 },
-  redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 
 interface Config
@@ -73,14 +67,7 @@ const kafka: Kafka = new Kafka({
   brokers: config.kafkaBroker,
 });
 
-const redis: ReturnType<typeof createClient> = createClient({
-  url: config.redisUrl,
-});
-
 await initPostgres(config);
-await initRedis(config, config.redisPrefix);
-
-await redis.connect();
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 
@@ -95,8 +82,12 @@ await consumer.run({
   eachMessage: async ({ message, heartbeat }) => {
     if (!message.key) return;
     if (!message.value) return;
-    const seg: PlaylistSegmentMessage = JSON.parse(message.value.toString());
+    const seg: RecordingSegmentMessage = JSON.parse(message.value.toString());
     logger.trace({ seg }, 'segment download');
+
+    if (seg.type !== RecordingMessageType.SEGMENT) {
+      return;
+    }
 
     const filename = seg.sequenceNumber.toString().padStart(5, '0') + '.ts';
 
@@ -107,32 +98,16 @@ await consumer.run({
     }
 
     const file = await dl.getFile(recordingId, filename);
-    if (file !== undefined) {
-      if (file.status === 'error' && file.retries < config.maxFileRetries) {
-        logger.debug({ recordingId, filename }, 'retry');
-        await dl.incrementFileRetries(recordingId, filename);
-      } else {
-        logger.debug(
-          { recordingId, filename, status: file.status },
-          'stop download'
-        );
-        return;
-      }
+    if (file === undefined) {
+      logger.error({ seg }, 'file not in database');
+      return;
     }
-
-    const type = seg.type === PlaylistType.LIVE ? 'stream' : 'vod';
+    const type = seg.playlistType === PlaylistType.LIVE ? 'stream' : 'vod';
     const dir = path.join(config.outputPath, seg.user, type, seg.id);
     await fs.promises.mkdir(dir, { recursive: true });
     const name = path.join(dir, filename);
 
-    await dl.startFile(
-      recordingId,
-      filename,
-      seg.sequenceNumber,
-      seg.offset,
-      seg.duration,
-      new Date(seg.time)
-    );
+    await dl.updateFileStatus(recordingId, filename, 'downloading');
     let status: SegmentDownloadedStatus = SegmentDownloadedStatus.DONE;
 
     try {
@@ -158,11 +133,20 @@ await consumer.run({
       status = SegmentDownloadedStatus.DONE;
     } catch (e) {
       logger.debug('unable to download segement', { seg });
-      await dl.updateFileStatus(recordingId, filename, 'error');
+
+      await dl.incrementFileRetries(recordingId, filename);
       status = SegmentDownloadedStatus.ERROR;
+      if (file.retries > config.maxFileRetries) {
+        await dl.updateFileStatus(recordingId, filename, 'error');
+        logger.debug({ recordingId, filename }, 'max retries');
+      } else {
+        await dl.updateFileStatus(recordingId, filename, 'waiting');
+        throw new Error('unable to download' + filename);
+      }
     }
 
     const msg: SegmentDownloadedMessage = {
+      type: PlaylistMessageType.DOWNLOAD,
       user: seg.user,
       id: seg.id,
       recordingId,
@@ -174,26 +158,23 @@ await consumer.run({
       status,
     };
 
-    await sendData(config.segmentOutputTopic, {
+    await sendData(config.playlistOutputTopic, {
       key: seg.user,
       value: JSON.stringify(msg),
       timestamp: new Date().getTime().toString(),
     });
 
-    await dl.finishedFile(recordingId, seg.sequenceNumber);
-    if (await dl.isRecordingDone(recordingId)) {
-      const count = await dl.getSegmentCount(recordingId);
-      await dl.stopRecording(new Date(), recordingId);
-
-      const msg: RecordingEndedMessage = {
+    const done = await dl.allFilesDone(recordingId);
+    if (done) {
+      const plMsg: PlaylistMessage = {
+        type: PlaylistMessageType.END,
         user: seg.user,
         id: seg.id,
-        recordingId: seg.recordingId,
-        segmentCount: count,
+        recordingId,
       };
-      await sendData(config.recordingOutputTopic, {
+      await sendData(config.playlistOutputTopic, {
         key: seg.user,
-        value: JSON.stringify(msg),
+        value: JSON.stringify(plMsg),
         timestamp: new Date().getTime().toString(),
       });
     }

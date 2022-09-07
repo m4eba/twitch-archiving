@@ -4,16 +4,13 @@ import { KafkaConfigOpt, RedisConfigOpt, PostgresConfigOpt, FileConfigOpt, } fro
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { execFfmpeg, initLogger } from '@twitch-archiving/utils';
+import { PlaylistMessageType, } from '@twitch-archiving/messages';
 import { initPostgres, initRedis, assemblyai as ai, } from '@twitch-archiving/database';
 import Ffmpeg from 'fluent-ffmpeg';
 import WebSocket from 'ws';
 import WebSocketAsPromised from 'websocket-as-promised';
 const AssemblyAiConfigOpt = {
-    recordingEndedInputTopic: {
-        type: String,
-        defaultValue: 'tw-recording-ended',
-    },
-    segmentsInputTopic: { type: String, defaultValue: 'tw-segment-ended' },
+    inputTopic: { type: String, defaultValue: 'tw-playlist' },
     outputTopic: { type: String, defaultValue: 'tw-assemblyai' },
     user: { type: String, multiple: true },
     token: { type: String },
@@ -42,23 +39,43 @@ await ai.createTable();
 const userSet = new Set();
 config.user.forEach((u) => userSet.add(u));
 const socketMap = new Map();
-const consumerSegments = kafka.consumer({
+const consumer = kafka.consumer({
     groupId: 'assemblyai-segments',
 });
-await consumerSegments.connect();
-await consumerSegments.subscribe({
-    topic: config.segmentsInputTopic,
+await consumer.connect();
+await consumer.subscribe({
+    topic: config.inputTopic,
     fromBeginning: true,
 });
 const producer = kafka.producer();
 await producer.connect();
-await consumerSegments.run({
+await consumer.run({
     eachMessage: async ({ message }) => {
         if (!message.key)
             return;
         if (!message.value)
             return;
-        const msg = JSON.parse(message.value.toString());
+        const m = JSON.parse(message.value.toString());
+        if (m.type === PlaylistMessageType.END) {
+            const socketData = socketMap.get(m.user + '-' + m.recordingId);
+            if (socketData !== undefined) {
+                const socket = socketData.socket;
+                if (socket !== undefined && socket.isOpened) {
+                    socket.sendPacked({
+                        terminate_session: true,
+                    });
+                    socketData.terminated = true;
+                }
+            }
+            logger.debug({ m }, 'recording end message');
+            await ai.clear(m.recordingId);
+            return;
+        }
+        if (m.type === PlaylistMessageType.START) {
+            // nothing todo
+            return;
+        }
+        const msg = m;
         logger.trace({ user: message.key, msg }, 'playlistSegmentMessage');
         if (!userSet.has(msg.user))
             return;
@@ -71,38 +88,6 @@ await consumerSegments.run({
         }
         await sendSegment(socketData, msg, 0, tmpOutput);
         await ai.addSegment(msg);
-    },
-});
-// clean up after recording is done
-const consumerRecordingEnded = kafka.consumer({
-    groupId: 'assemblyai-recording-end',
-});
-await consumerRecordingEnded.connect();
-await consumerRecordingEnded.subscribe({
-    topic: config.recordingEndedInputTopic,
-    fromBeginning: true,
-});
-await consumerRecordingEnded.run({
-    eachMessage: async ({ message }) => {
-        if (!message.key)
-            return;
-        if (!message.value)
-            return;
-        const msg = JSON.parse(message.value.toString());
-        if (!userSet.has(msg.user))
-            return;
-        const socketData = socketMap.get(msg.user + '-' + msg.recordingId);
-        if (socketData !== undefined) {
-            const socket = socketData.socket;
-            if (socket !== undefined && socket.isOpened) {
-                socket.sendPacked({
-                    terminate_session: true,
-                });
-                socketData.terminated = true;
-            }
-        }
-        logger.debug({ msg }, 'recording end message');
-        await ai.clear(msg.recordingId);
     },
 });
 async function socketReady(user, recordingId, tmpOutput) {

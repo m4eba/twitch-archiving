@@ -1,10 +1,17 @@
-import type { PlaylistMessage } from '@twitch-archiving/messages';
+import type { AccessToken, PlaylistType } from '@twitch-archiving/messages';
 export interface Recording {
     id: string;
     start: Date;
-    stop: Date | undefined;
+    stop: Date | null;
     channel: string;
     site_id: string;
+    data: RecordingData | null;
+}
+export interface RecordingData {
+    type: PlaylistType;
+    playlist: string;
+    token: AccessToken;
+    bestUrl: string;
 }
 export interface File {
     recording_id: string;
@@ -20,30 +27,21 @@ export interface File {
     status: string;
 }
 export declare function createTableDownload(): Promise<void>;
-export declare function setPlaylistMessage(data: PlaylistMessage): Promise<void>;
-export declare function getPlaylistMessage(user: string): Promise<PlaylistMessage | undefined>;
-export declare function setPlaylistEnding(recordingId: string): Promise<void>;
-export declare function isPlaylistEnding(recordingId: string): Promise<boolean>;
-export declare function incPlaylistError(recordingId: string): Promise<void>;
-export declare function getPlaylistError(recordingId: string): Promise<number>;
-export declare function startRecording(time: Date, channel: string, site_id: string): Promise<string>;
+export declare function startRecording(time: Date, channel: string, site_id: string, data: RecordingData): Promise<string>;
+export declare function resumeRecording(recordingId: string): Promise<void>;
 export declare function stopRecording(time: Date, recordingId: string): Promise<void>;
+export declare function updateRecordingData(recordingId: string, data: RecordingData): Promise<void>;
 export declare function getRecordedChannels(): Promise<string[]>;
-export declare function isRecording(channel: string): Promise<boolean>;
-export declare function getRecordingId(channel: string): Promise<string>;
 export declare function getRecording(id: string): Promise<Recording | undefined>;
+export declare function getRunningRecording(channel: string): Promise<Recording | undefined>;
 export declare function getRecordingBySiteId(site_id: string): Promise<Recording | undefined>;
 export declare function updateSiteId(recordingId: string, siteId: string): Promise<void>;
-export declare function startFile(recordingId: string, name: string, seq: number, offset: number, duration: number, time: Date): Promise<void>;
-export declare function addSegment(recordingId: string, sequenceNumber: number): Promise<void>;
-export declare function getSegmentCount(recordingId: string): Promise<number>;
-export declare function testSegment(recordingId: string, sequenceNumber: number): Promise<boolean>;
-export declare function getOffset(recordingId: string): Promise<number>;
-export declare function incOffset(recordingId: string, duration: number): Promise<void>;
-export declare function finishedFile(recordingId: string, sequenceNumber: number): Promise<void>;
-export declare function isRecordingDone(recordingId: string): Promise<boolean>;
+export declare function addFile(recordingId: string, name: string, seq: number, offset: number, duration: number, time: Date): Promise<void>;
+export declare function getLatestFile(recordingId: string): Promise<File | undefined>;
+export declare function getFileCount(recordingId: string, status?: string): Promise<number>;
 export declare function getFile(recordingId: string, name: string): Promise<File | undefined>;
 export declare function updateFileSize(recordingId: string, name: string, size: number): Promise<void>;
 export declare function updateFileDownloadSize(recordingId: string, name: string, size: number): Promise<void>;
 export declare function updateFileStatus(recordingId: string, name: string, status: string): Promise<void>;
 export declare function incrementFileRetries(recordingId: string, name: string): Promise<void>;
+export declare function allFilesDone(recordingId: string): Promise<boolean>;

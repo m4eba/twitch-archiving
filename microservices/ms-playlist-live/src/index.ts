@@ -12,13 +12,15 @@ import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
-import { createClient } from 'redis';
 import { getLivePlaylist, getAccessToken } from '@twitch-archiving/twitch';
 import {
   PlaylistMessage,
   PlaylistType,
   RecordingStartedMessage,
   AccessToken,
+  RecordingMessageType,
+  PlaylistRequestMessage,
+  PlaylistMessageType,
 } from '@twitch-archiving/messages';
 import {
   initPostgres,
@@ -29,6 +31,7 @@ import { initLogger } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
   inputTopic: string;
+  playlistRequestOutputTopic: string;
   playlistOutputTopic: string;
   recordingOutputTopic: string;
   oauthVideo: string;
@@ -38,6 +41,10 @@ interface PlaylistConfig {
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
   inputTopic: { type: String, defaultValue: 'tw-live' },
+  playlistRequestOutputTopic: {
+    type: String,
+    defaultValue: 'tw-playlist-request',
+  },
   playlistOutputTopic: { type: String, defaultValue: 'tw-playlist' },
   recordingOutputTopic: { type: String, defaultValue: 'tw-recording' },
   oauthVideo: { type: String, defaultValue: '' },
@@ -72,14 +79,9 @@ const kafka: Kafka = new Kafka({
   brokers: config.kafkaBroker,
 });
 
-const redis: ReturnType<typeof createClient> = createClient({
-  url: config.redisUrl,
-});
-
 await initPostgres(config);
 await initRedis(config, config.redisPrefix);
 await dl.createTableDownload();
-await redis.connect();
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 
@@ -122,18 +124,23 @@ await consumer.run({
       }
     }
 
-    if (!(await dl.isRecording(user))) {
-      logger.debug({ user }, 'member not in redis');
+    const recording = await dl.getRunningRecording(user);
+    if (recording === undefined) {
+      logger.debug({ user }, 'no running recording for user');
       init = true;
     }
 
     if (init) {
-      await initStream(user, newStream);
+      await initStream(user, newStream, recording);
     }
   },
 });
 
-async function initStream(user: string, newStream: boolean): Promise<void> {
+async function initStream(
+  user: string,
+  newStream: boolean,
+  recording: dl.Recording | undefined
+): Promise<void> {
   const token: AccessToken = await getAccessToken(
     {
       isLive: true,
@@ -148,34 +155,44 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
   const playlist = await getLivePlaylist(user, token);
 
   if (playlist.length === 0) {
-    const recordingId = await dl.getRecordingId(user);
-    if (recordingId.length > 0) {
-      await dl.stopRecording(new Date(), recordingId);
+    if (recording !== undefined) {
+      await dl.stopRecording(new Date(), recording.id);
     }
     return;
   }
 
   logger.trace({ user, playlist }, 'playlist');
 
-  const playlistMessage = await dl.getPlaylistMessage(user);
-
-  logger.trace({ playlistMessage, user }, 'existing playlistMessage');
-
+  // TODO
+  // better handling if BROADCAST-ID is not set
   const reg = /BROADCAST-ID="(.*?)"/;
-  let id = '';
+  let site_id = '';
   const regResult = reg.exec(playlist);
   if (regResult) {
-    id = regResult[1].toString();
-    logger.debug({ user, id }, 'broadcast-id in playlist');
+    const streamId = regResult[1].toString();
+    site_id = 'live-' + streamId;
+    logger.debug({ user, site_id }, 'site_id in playlist');
+
+    if (recording !== undefined) {
+      if ('live-' + streamId !== recording.site_id) {
+        await dl.stopRecording(new Date(), recording.id);
+        recording = await dl.getRecordingBySiteId('live-' + streamId);
+      }
+    } else {
+      recording = await dl.getRecordingBySiteId('live-' + streamId);
+      if (recording !== undefined && recording.stop !== null) {
+        await dl.resumeRecording(recording.id);
+      }
+    }
   } else {
     // id is empty - twitch changed something
     // look for id in playlistmessage
-    if (playlistMessage === undefined || newStream) {
-      id = user + '-' + new Date().toISOString();
+    if (recording === undefined || newStream) {
+      site_id = user + '-' + new Date().toISOString();
     } else {
-      id = playlistMessage.id;
+      site_id = recording.site_id;
     }
-    logger.debug({ user, id }, 'set id from date');
+    logger.debug({ user, site_id }, 'set id from date');
   }
 
   const list: HLS.types.MasterPlaylist = HLS.parse(
@@ -191,57 +208,63 @@ async function initStream(user: string, newStream: boolean): Promise<void> {
     return result;
   });
 
-  const data: PlaylistMessage = {
+  const data: PlaylistRequestMessage = {
     user,
-    id,
+    id: site_id,
     recordingId: '',
     type: PlaylistType.LIVE,
     playlist,
     token,
     url: best.uri,
   };
-
-  let recordingId = '';
-  const site_id = 'live-' + id;
-  logger.trace({ user, id, site_id }, 'site_id');
-
-  const recording = await dl.getRecordingBySiteId(site_id);
+  const recordingData: dl.RecordingData = {
+    type: PlaylistType.LIVE,
+    playlist,
+    token,
+    bestUrl: best.uri,
+  };
 
   // do nothing if recording continues
   if (recording === undefined) {
-    if (playlistMessage !== undefined && newStream) {
-      recordingId = playlistMessage.recordingId;
-      if (recordingId.length !== 0) {
-        logger.debug({ recordingId, user }, 'stop running recording');
-        await dl.stopRecording(new Date(), recordingId);
-      }
-    }
-    if (playlistMessage === undefined || newStream) {
-      recordingId = await dl.startRecording(new Date(), user, site_id);
-      data.recordingId = recordingId;
-      logger.debug({ data, user }, 'start new recording');
-      const recMsg: RecordingStartedMessage = {
-        user,
-        id,
-        recordingId,
-        type: data.type,
-      };
-      await sendData(config.recordingOutputTopic, {
-        key: user,
-        value: JSON.stringify(recMsg),
-        timestamp: new Date().getTime().toString(),
-      });
-    }
+    logger.debug({ data, user }, 'start new recording');
+    const recordingId = await dl.startRecording(
+      new Date(),
+      user,
+      site_id,
+      recordingData
+    );
+    data.recordingId = recordingId;
+    const recMsg: RecordingStartedMessage = {
+      type: RecordingMessageType.STARTED,
+      user,
+      id: site_id,
+      recordingId,
+      playlistType: data.type,
+    };
+    await sendData(config.recordingOutputTopic, {
+      key: user,
+      value: JSON.stringify(recMsg),
+      timestamp: new Date().getTime().toString(),
+    });
+    const plMsg: PlaylistMessage = {
+      type: PlaylistMessageType.START,
+      user,
+      id: site_id,
+      recordingId,
+    };
+    await sendData(config.playlistOutputTopic, {
+      key: user,
+      value: JSON.stringify(plMsg),
+      timestamp: new Date().getTime().toString(),
+    });
   } else {
-    data.recordingId = recording.id;
+    await dl.updateRecordingData(recording.id, recordingData);
   }
-
-  await dl.setPlaylistMessage(data);
 
   logger.debug({ user, playlistMessage: data }, 'playlist');
   const msg = JSON.stringify(data);
 
-  await sendData(config.playlistOutputTopic, {
+  await sendData(config.playlistRequestOutputTopic, {
     key: user,
     value: msg,
     timestamp: new Date().getTime().toString(),
