@@ -34,6 +34,8 @@ for (let i = 0; i < config.files.length; ++i) {
         if (result === null)
             return;
         const channel = result.params[0];
+        if (!channel)
+            return;
         if (channel.length === 0)
             return;
         const ircMessage = {
