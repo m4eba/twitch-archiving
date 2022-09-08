@@ -321,7 +321,7 @@ async function responseMessage(session: Session): Promise<boolean> {
   const end = Math.round(resp.result[resp.result.length - 1].end * 1000);
   const segment_sequence = session.firstMsg.sequenceNumber;
   const total_start = Math.round(session.firstMsg.offset * 1000 + offset);
-  const total_end = Math.round(total_start + end);
+  const total_end = Math.round(session.firstMsg.offset * 1000 + end);
 
   const msg = session.msg;
   const t: transcript.Transcript = {
