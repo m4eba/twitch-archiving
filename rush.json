@@ -578,6 +578,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-vosk",
+      "projectFolder": "microservices/ms-vosk",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/node-rig",
       "projectFolder": "rigs/node-rig"
     }
