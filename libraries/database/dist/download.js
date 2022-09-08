@@ -224,5 +224,5 @@ export async function allFilesDone(recordingId) {
         return false;
     }
     const result = await pool.query("select count(*) from file where recording_id = $1 and status = 'downloading' or status = 'waiting'", [recordingId]);
-    return result.rows[0][0] === 0;
+    return result.rows[0].count === '0';
 }

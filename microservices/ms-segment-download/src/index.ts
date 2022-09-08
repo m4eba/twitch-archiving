@@ -172,6 +172,7 @@ await consumer.run({
         id: seg.id,
         recordingId,
       };
+      logger.trace({ msg: plMsg }, 'playlist done');
       await sendData(config.playlistOutputTopic, {
         key: seg.user,
         value: JSON.stringify(plMsg),
