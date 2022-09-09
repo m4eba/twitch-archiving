@@ -105,6 +105,23 @@ await consumer.run({
     logger.debug({ msg, filesPerBoard, sbIndex }, 'msg');
 
     board.data.images.sort();
+
+    // skip, if the image is not last
+    // or second to last - needed if screenshot of last segment of stream is skipped
+    const last = board.data.images[board.data.images.length - 1];
+    if (board.data.images.length > 1) {
+      const slast = board.data.images[board.data.images.length - 2];
+      if (msg.filename !== last && msg.filename !== slast) {
+        logger.debug({ msg }, 'skip montage call');
+        return;
+      }
+    } else {
+      if (msg.filename !== last) {
+        logger.debug({ msg }, 'skip montage call');
+        return;
+      }
+    }
+
     // build arument list
     const args: string[] = [];
     for (let i = 0; i < board.data.images.length; ++i) {
