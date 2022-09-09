@@ -136,7 +136,7 @@ await consumer.run({
           board.data.current_offset + msg.duration - config.interval;
 
         // if we hit max images per board - save in next board
-        if (board.data.images.length === board.first_sequence + filesPerBoard) {
+        if (board.data.images.length === filesPerBoard) {
           board.first_sequence = msg.sequenceNumber;
           board.time_offset = msg.offset + offset;
           board.index = board.index + 1;
