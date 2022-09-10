@@ -5,6 +5,7 @@ const logger = initLogger('chat-connection');
 export class Connection extends WebSocketConnection {
     constructor(username, oauth) {
         super('ws://irc-ws.chat.twitch.tv:80');
+        this.channels = new Set();
         this.joinTimer = undefined;
         this.username = username;
         this.oauth = oauth;
@@ -28,6 +29,11 @@ export class Connection extends WebSocketConnection {
         this.ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
         this.ws.send(`PASS ${this.oauth}`);
         this.ws.send(`NICK ${this.username}`);
+        setTimeout(() => {
+            this.join(Array.from(this.channels)).catch((e) => {
+                logger.error({ error: e }, 'unable to join channels');
+            });
+        }, 1000);
     }
     onMessage(data) {
         logger.trace({ data: data.toString() }, 'onMessage');
@@ -50,6 +56,7 @@ export class Connection extends WebSocketConnection {
         };
     }
     join(channels) {
+        channels.forEach((c) => this.channels.add(c));
         return new Promise((resolve, reject) => {
             if (this.joinTimer !== undefined) {
                 reject('already adding channels');
@@ -78,6 +85,7 @@ export class Connection extends WebSocketConnection {
     async part(channels) {
         for (let i = 0; i < channels.length; ++i) {
             await this.send(`PART #${channels[i]}`);
+            this.channels.delete(channels[i]);
         }
     }
     onClose() {

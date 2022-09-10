@@ -9,6 +9,7 @@ const logger: Logger = initLogger('chat-connection');
 
 export class Connection extends WebSocketConnection<IRCMessage> {
   private username: string;
+  private channels: Set<string> = new Set();
   private oauth: string;
   private joinTimer: NodeJS.Timer | undefined = undefined;
 
@@ -37,6 +38,12 @@ export class Connection extends WebSocketConnection<IRCMessage> {
     this.ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
     this.ws.send(`PASS ${this.oauth}`);
     this.ws.send(`NICK ${this.username}`);
+
+    setTimeout(() => {
+      this.join(Array.from(this.channels)).catch((e) => {
+        logger.error({ error: e }, 'unable to join channels');
+      });
+    }, 1000);
   }
 
   protected override onMessage(data: WebSocket.Data): IRCMessage {
@@ -61,6 +68,8 @@ export class Connection extends WebSocketConnection<IRCMessage> {
   }
 
   public join(channels: string[]): Promise<void> {
+    channels.forEach((c) => this.channels.add(c));
+
     return new Promise((resolve, reject) => {
       if (this.joinTimer !== undefined) {
         reject('already adding channels');
@@ -92,6 +101,7 @@ export class Connection extends WebSocketConnection<IRCMessage> {
   public async part(channels: string[]): Promise<void> {
     for (let i = 0; i < channels.length; ++i) {
       await this.send(`PART #${channels[i]}`);
+      this.channels.delete(channels[i]);
     }
   }
 

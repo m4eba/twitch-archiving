@@ -3,6 +3,7 @@ import type { IRCMessage } from '@twitch-archiving/messages';
 import { WebSocketConnection } from '@twitch-archiving/websocket';
 export declare class Connection extends WebSocketConnection<IRCMessage> {
     private username;
+    private channels;
     private oauth;
     private joinTimer;
     constructor(username: string, oauth: string);
