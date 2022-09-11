@@ -27,7 +27,7 @@ import {
   initRedis,
   download as dl,
 } from '@twitch-archiving/database';
-import { initLogger } from '@twitch-archiving/utils';
+import { initLogger, sleep } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
   inputTopic: string;
@@ -37,6 +37,7 @@ interface PlaylistConfig {
   oauthVideo: string;
   redisPrefix: string;
   redisSetName: string;
+  playlistMaxRetries: number;
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
@@ -50,6 +51,7 @@ const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
   oauthVideo: { type: String, defaultValue: '' },
   redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
   redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
+  playlistMaxRetries: { type: Number, defaultValue: 30 },
 };
 
 interface Config
@@ -93,7 +95,7 @@ const producer: Producer = kafka.producer();
 await producer.connect();
 
 await consumer.run({
-  eachMessage: async ({ message }) => {
+  eachMessage: async ({ message, heartbeat }) => {
     if (!message.key) return;
     const user = message.key.toString();
     logger.debug({ user }, 'received msg');
@@ -131,7 +133,7 @@ await consumer.run({
     }
 
     if (init) {
-      await initStream(user, newStream, recording);
+      await initStream(user, newStream, recording, heartbeat);
     }
   },
 });
@@ -139,25 +141,50 @@ await consumer.run({
 async function initStream(
   user: string,
   newStream: boolean,
-  recording: dl.Recording | undefined
+  recording: dl.Recording | undefined,
+  heartbeat: () => Promise<void>
 ): Promise<void> {
-  const token: AccessToken = await getAccessToken(
-    {
-      isLive: true,
-      isVod: false,
-      login: user,
-      playerType: '',
-      vodID: '',
-    },
-    config.oauthVideo
-  );
-  logger.trace({ user, token }, 'access token');
-  const playlist = await getLivePlaylist(user, token);
+  let tries = 0;
+
+  let token: AccessToken | undefined;
+  let playlist: string = '';
+  let stopped = false;
+
+  while (tries < config.playlistMaxRetries) {
+    token = await getAccessToken(
+      {
+        isLive: true,
+        isVod: false,
+        login: user,
+        playerType: '',
+        vodID: '',
+      },
+      config.oauthVideo
+    );
+    logger.trace({ tries, user, token }, 'access token');
+    playlist = await getLivePlaylist(user, token);
+
+    if (playlist.length === 0) {
+      logger.trace({ user }, 'playlist empty');
+      if (recording !== undefined && !stopped) {
+        await dl.stopRecording(new Date(), recording.id);
+        stopped = true;
+      }
+      await heartbeat();
+      await sleep(1000);
+      tries++;
+    } else {
+      break;
+    }
+  }
 
   if (playlist.length === 0) {
-    if (recording !== undefined) {
-      await dl.stopRecording(new Date(), recording.id);
-    }
+    logger.error(token, 'no playlist found');
+    return;
+  }
+
+  if (token === undefined) {
+    logger.error({ user, token }, 'token is undefined');
     return;
   }
 
@@ -180,7 +207,7 @@ async function initStream(
       }
     } else {
       recording = await dl.getRecordingBySiteId('live-' + streamId);
-      if (recording !== undefined && recording.stop !== null) {
+      if (recording !== undefined && (recording.stop !== null || stopped)) {
         await dl.resumeRecording(recording.id);
       }
     }

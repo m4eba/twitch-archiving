@@ -5,7 +5,7 @@ import HLS from 'hls-parser';
 import { getLivePlaylist, getAccessToken } from '@twitch-archiving/twitch';
 import { PlaylistType, RecordingMessageType, PlaylistMessageType, } from '@twitch-archiving/messages';
 import { initPostgres, initRedis, download as dl, } from '@twitch-archiving/database';
-import { initLogger } from '@twitch-archiving/utils';
+import { initLogger, sleep } from '@twitch-archiving/utils';
 const PlaylistConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-live' },
     playlistRequestOutputTopic: {
@@ -17,6 +17,7 @@ const PlaylistConfigOpt = {
     oauthVideo: { type: String, defaultValue: '' },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
     redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
+    playlistMaxRetries: { type: Number, defaultValue: 30 },
 };
 const config = parse({
     ...KafkaConfigOpt,
@@ -42,7 +43,7 @@ await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 const producer = kafka.producer();
 await producer.connect();
 await consumer.run({
-    eachMessage: async ({ message }) => {
+    eachMessage: async ({ message, heartbeat }) => {
         if (!message.key)
             return;
         const user = message.key.toString();
@@ -74,24 +75,45 @@ await consumer.run({
             init = true;
         }
         if (init) {
-            await initStream(user, newStream, recording);
+            await initStream(user, newStream, recording, heartbeat);
         }
     },
 });
-async function initStream(user, newStream, recording) {
-    const token = await getAccessToken({
-        isLive: true,
-        isVod: false,
-        login: user,
-        playerType: '',
-        vodID: '',
-    }, config.oauthVideo);
-    logger.trace({ user, token }, 'access token');
-    const playlist = await getLivePlaylist(user, token);
-    if (playlist.length === 0) {
-        if (recording !== undefined) {
-            await dl.stopRecording(new Date(), recording.id);
+async function initStream(user, newStream, recording, heartbeat) {
+    let tries = 0;
+    let token;
+    let playlist = '';
+    let stopped = false;
+    while (tries < config.playlistMaxRetries) {
+        token = await getAccessToken({
+            isLive: true,
+            isVod: false,
+            login: user,
+            playerType: '',
+            vodID: '',
+        }, config.oauthVideo);
+        logger.trace({ tries, user, token }, 'access token');
+        playlist = await getLivePlaylist(user, token);
+        if (playlist.length === 0) {
+            logger.trace({ user }, 'playlist empty');
+            if (recording !== undefined && !stopped) {
+                await dl.stopRecording(new Date(), recording.id);
+                stopped = true;
+            }
+            await heartbeat();
+            await sleep(1000);
+            tries++;
         }
+        else {
+            break;
+        }
+    }
+    if (playlist.length === 0) {
+        logger.error(token, 'no playlist found');
+        return;
+    }
+    if (token === undefined) {
+        logger.error({ user, token }, 'token is undefined');
         return;
     }
     logger.trace({ user, playlist }, 'playlist');
@@ -112,7 +134,7 @@ async function initStream(user, newStream, recording) {
         }
         else {
             recording = await dl.getRecordingBySiteId('live-' + streamId);
-            if (recording !== undefined && recording.stop !== null) {
+            if (recording !== undefined && (recording.stop !== null || stopped)) {
                 await dl.resumeRecording(recording.id);
             }
         }
