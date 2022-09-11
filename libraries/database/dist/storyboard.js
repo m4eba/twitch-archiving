@@ -16,7 +16,7 @@ export async function createTable() {
       recording_id bigint not null,
       index smallint not null,
       first_sequence int not null,
-      time_offset int not null,
+      time_offset numeric not null,
       interval smallint not null,
       rows smallint not null,
       columns smallint not null,
