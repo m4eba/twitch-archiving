@@ -42,6 +42,7 @@ await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 const producer = kafka.producer();
 await producer.connect();
 await consumer.run({
+    partitionsConsumedConcurrently: 3,
     eachMessage: async ({ message }) => {
         if (!message.key)
             return;
@@ -117,7 +118,7 @@ await consumer.run({
                 path: output,
             };
             await sendData(config.outputTopic, {
-                key: msg.user,
+                key: msg.user + '-' + msg.recordingId,
                 value: JSON.stringify(doneMsg),
                 timestamp: new Date().getTime().toString(),
             });

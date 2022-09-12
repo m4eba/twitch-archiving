@@ -79,6 +79,7 @@ const producer: Producer = kafka.producer();
 await producer.connect();
 
 await consumer.run({
+  partitionsConsumedConcurrently: 3,
   eachMessage: async ({ message, heartbeat }) => {
     if (!message.key) return;
     if (!message.value) return;
@@ -159,7 +160,7 @@ await consumer.run({
     };
 
     await sendData(config.playlistOutputTopic, {
-      key: seg.user,
+      key: seg.user + '-' + seg.recordingId,
       value: JSON.stringify(msg),
       timestamp: new Date().getTime().toString(),
     });
@@ -174,7 +175,7 @@ await consumer.run({
       };
       logger.trace({ msg: plMsg }, 'playlist done');
       await sendData(config.playlistOutputTopic, {
-        key: seg.user,
+        key: seg.user + '-' + seg.recordingId,
         value: JSON.stringify(plMsg),
         timestamp: new Date().getTime().toString(),
       });

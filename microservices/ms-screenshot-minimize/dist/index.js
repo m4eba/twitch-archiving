@@ -40,6 +40,7 @@ await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 const producer = kafka.producer();
 await producer.connect();
 await consumer.run({
+    partitionsConsumedConcurrently: 3,
     eachMessage: async ({ message }) => {
         if (!message.key)
             return;

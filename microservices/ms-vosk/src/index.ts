@@ -103,6 +103,7 @@ const producer: Producer = kafka.producer();
 await producer.connect();
 
 await consumer.run({
+  partitionsConsumedConcurrently: 3,
   eachMessage: async ({ message }) => {
     if (!message.key) return;
     if (!message.value) return;

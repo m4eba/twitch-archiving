@@ -169,7 +169,7 @@ await consumer.run({
       offset += seg.duration;
 
       await sendData(config.recordingOutputTopic, {
-        key: user,
+        key: user + '-' + recording.id,
         value: JSON.stringify(msg),
         timestamp: new Date().getTime().toString(),
       });
@@ -188,7 +188,7 @@ await consumer.run({
       };
 
       await sendData(config.recordingOutputTopic, {
-        key: user,
+        key: user + '-' + recording.id,
         value: JSON.stringify(msg),
         timestamp: new Date().getTime().toString(),
       });
