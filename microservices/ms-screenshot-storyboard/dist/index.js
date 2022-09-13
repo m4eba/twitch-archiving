@@ -1,23 +1,21 @@
 import fs from 'fs';
-import { KafkaConfigOpt, RedisConfigOpt, PostgresConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
+import { KafkaConfigOpt, PostgresConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import path from 'path';
 import child_process from 'child_process';
 import util from 'util';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis, storyboard as sb, initPostgres, } from '@twitch-archiving/database';
+import { storyboard as sb, initPostgres, } from '@twitch-archiving/database';
 const exec = util.promisify(child_process.exec);
 const StoryboardConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-screenshot-minimized' },
     outputTopic: { type: String, defaultValue: 'tw-storyboard' },
     storyboardFolder: { type: String },
-    redisPrefix: { type: String, defaultValue: 'tw-screenshot-' },
 };
 const config = parse({
     ...KafkaConfigOpt,
     ...StoryboardConfigOpt,
-    ...RedisConfigOpt,
     ...PostgresConfigOpt,
     ...FileConfigOpt,
 }, {
@@ -28,7 +26,6 @@ const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
 });
-await initRedis(config, config.redisPrefix);
 await initPostgres(config);
 logger.info({ topic: config.inputTopic }, 'subscribe');
 const consumer = kafka.consumer({

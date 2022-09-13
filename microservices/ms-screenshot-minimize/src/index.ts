@@ -2,8 +2,6 @@ import fs from 'fs';
 import {
   KafkaConfig,
   KafkaConfigOpt,
-  RedisConfig,
-  RedisConfigOpt,
   PostgresConfig,
   PostgresConfigOpt,
   FileConfig,
@@ -16,7 +14,6 @@ import path from 'path';
 import im from 'imagemagick';
 import util from 'util';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis } from '@twitch-archiving/database';
 import type { ScreenshotDoneMessage } from '@twitch-archiving/messages';
 
 const convert = util.promisify(im.convert);
@@ -27,7 +24,6 @@ interface ScreenshotConfig {
   screenshotFolder: string;
   width: number;
   deleteSource: boolean;
-  redisPrefix: string;
 }
 
 const ScreenshotConfigOpt: ArgumentConfig<ScreenshotConfig> = {
@@ -36,13 +32,11 @@ const ScreenshotConfigOpt: ArgumentConfig<ScreenshotConfig> = {
   screenshotFolder: { type: String },
   width: { type: Number },
   deleteSource: { type: Boolean, defaultValue: true },
-  redisPrefix: { type: String, defaultValue: 'tw-screenshot-' },
 };
 
 interface Config
   extends ScreenshotConfig,
     KafkaConfig,
-    RedisConfig,
     PostgresConfig,
     FileConfig {}
 
@@ -50,7 +44,6 @@ const config: Config = parse<Config>(
   {
     ...KafkaConfigOpt,
     ...ScreenshotConfigOpt,
-    ...RedisConfigOpt,
     ...PostgresConfigOpt,
     ...FileConfigOpt,
   },
@@ -65,8 +58,6 @@ const kafka: Kafka = new Kafka({
   clientId: config.kafkaClientId,
   brokers: config.kafkaBroker,
 });
-
-await initRedis(config, config.redisPrefix);
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
 

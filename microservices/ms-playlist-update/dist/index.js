@@ -70,8 +70,9 @@ await consumer.run({
                 duration: latestFile.duration,
             }, 'set offset');
         }
-        for (let i = 0; i < list.segments.length; ++i) {
-            const seg = list.segments[i];
+        const segments = list.segments;
+        for (let i = 0; i < segments.length; ++i) {
+            const seg = segments[i];
             if (latestFile !== undefined &&
                 seg.mediaSequenceNumber <= latestFile.seq) {
                 continue;

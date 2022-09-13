@@ -1,12 +1,11 @@
 import fs from 'fs';
-import { KafkaConfigOpt, RedisConfigOpt, PostgresConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
+import { KafkaConfigOpt, PostgresConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import path from 'path';
 import im from 'imagemagick';
 import util from 'util';
 import { initLogger } from '@twitch-archiving/utils';
-import { initRedis } from '@twitch-archiving/database';
 const convert = util.promisify(im.convert);
 const ScreenshotConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-screenshot' },
@@ -14,12 +13,10 @@ const ScreenshotConfigOpt = {
     screenshotFolder: { type: String },
     width: { type: Number },
     deleteSource: { type: Boolean, defaultValue: true },
-    redisPrefix: { type: String, defaultValue: 'tw-screenshot-' },
 };
 const config = parse({
     ...KafkaConfigOpt,
     ...ScreenshotConfigOpt,
-    ...RedisConfigOpt,
     ...PostgresConfigOpt,
     ...FileConfigOpt,
 }, {
@@ -30,7 +27,6 @@ const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
 });
-await initRedis(config, config.redisPrefix);
 logger.info({ topic: config.inputTopic }, 'subscribe');
 const consumer = kafka.consumer({
     groupId: 'screenshot-minimize',

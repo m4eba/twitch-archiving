@@ -2,8 +2,6 @@ import fs from 'fs';
 import {
   KafkaConfig,
   KafkaConfigOpt,
-  RedisConfig,
-  RedisConfigOpt,
   PostgresConfig,
   PostgresConfigOpt,
   FileConfig,
@@ -17,7 +15,6 @@ import child_process from 'child_process';
 import util from 'util';
 import { initLogger } from '@twitch-archiving/utils';
 import {
-  initRedis,
   storyboard as sb,
   screenshot as ss,
   initPostgres,
@@ -33,20 +30,17 @@ interface StoryboardConfig {
   inputTopic: string;
   outputTopic: string;
   storyboardFolder: string;
-  redisPrefix: string;
 }
 
 const StoryboardConfigOpt: ArgumentConfig<StoryboardConfig> = {
   inputTopic: { type: String, defaultValue: 'tw-screenshot-minimized' },
   outputTopic: { type: String, defaultValue: 'tw-storyboard' },
   storyboardFolder: { type: String },
-  redisPrefix: { type: String, defaultValue: 'tw-screenshot-' },
 };
 
 interface Config
   extends StoryboardConfig,
     KafkaConfig,
-    RedisConfig,
     PostgresConfig,
     FileConfig {}
 
@@ -54,7 +48,6 @@ const config: Config = parse<Config>(
   {
     ...KafkaConfigOpt,
     ...StoryboardConfigOpt,
-    ...RedisConfigOpt,
     ...PostgresConfigOpt,
     ...FileConfigOpt,
   },
@@ -70,7 +63,6 @@ const kafka: Kafka = new Kafka({
   brokers: config.kafkaBroker,
 });
 
-await initRedis(config, config.redisPrefix);
 await initPostgres(config);
 
 logger.info({ topic: config.inputTopic }, 'subscribe');
