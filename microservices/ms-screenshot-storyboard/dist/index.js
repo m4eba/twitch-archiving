@@ -75,6 +75,11 @@ await consumer.run({
         for (let i = 0; i < board.data.images.length; ++i) {
             if (board.data.images[i] !== null) {
                 args.push('"' + path.join(msg.path, board.data.images[i]) + '"');
+                // we only add args up to the filename in the message
+                // the other files could not be processed yet
+                if (board.data.images[i] === msg.filename) {
+                    break;
+                }
             }
             else {
                 args.push('null:');
