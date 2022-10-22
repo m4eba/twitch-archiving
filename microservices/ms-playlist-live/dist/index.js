@@ -85,15 +85,20 @@ async function initStream(user, newStream, recording, heartbeat) {
     let playlist = '';
     let stopped = false;
     while (tries < config.playlistMaxRetries) {
-        token = await getAccessToken({
-            isLive: true,
-            isVod: false,
-            login: user,
-            playerType: '',
-            vodID: '',
-        }, config.oauthVideo);
-        logger.trace({ tries, user, token }, 'access token');
-        playlist = await getLivePlaylist(user, token);
+        try {
+            token = await getAccessToken({
+                isLive: true,
+                isVod: false,
+                login: user,
+                playerType: '',
+                vodID: '',
+            }, config.oauthVideo);
+            logger.trace({ tries, user, token }, 'access token');
+            playlist = await getLivePlaylist(user, token);
+        }
+        catch (e) {
+            logger.trace({ error: e }, 'error getting playlist');
+        }
         if (playlist.length === 0) {
             logger.trace({ user }, 'playlist empty');
             if (recording !== undefined && !stopped) {
