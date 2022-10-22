@@ -324,6 +324,39 @@ export async function getFile(
   };
 }
 
+export async function getAllFiles(
+  recordingId: string
+): Promise<Array<File> | undefined> {
+  const { pool } = getP();
+
+  const result = await pool.query(
+    'SELECT * FROM file WHERE recording_id = $1 order by seq',
+    [recordingId]
+  );
+  if (result.rows.length === 0) {
+    return undefined;
+  }
+  const files: File[] = [];
+
+  for (let i = 0; i < result.rows.length; ++i) {
+    files.push({
+      recording_id: result.rows[i].recording_id,
+      name: result.rows[i].name,
+      seq: result.rows[i].seq,
+      time_offset: result.rows[i].time_offset,
+      duration: result.rows[i].duration,
+      retries: result.rows[i].retries,
+      datetime: result.rows[i].datetime,
+      size: result.rows[i].size,
+      downloaded: result.rows[i].downloaded,
+      hash: result.rows[i].hash,
+      status: result.rows[i].status,
+    });
+  }
+
+  return files;
+}
+
 export async function updateFileSize(
   recordingId: string,
   name: string,

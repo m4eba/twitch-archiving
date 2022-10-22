@@ -40,6 +40,7 @@ export declare function addFile(recordingId: string, name: string, seq: number, 
 export declare function getLatestFile(recordingId: string): Promise<File | undefined>;
 export declare function getFileCount(recordingId: string, status?: string): Promise<number>;
 export declare function getFile(recordingId: string, name: string): Promise<File | undefined>;
+export declare function getAllFiles(recordingId: string): Promise<Array<File> | undefined>;
 export declare function updateFileSize(recordingId: string, name: string, size: number): Promise<void>;
 export declare function updateFileDownloadSize(recordingId: string, name: string, size: number): Promise<void>;
 export declare function updateFileStatus(recordingId: string, name: string, status: string): Promise<void>;
