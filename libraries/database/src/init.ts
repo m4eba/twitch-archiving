@@ -1,7 +1,11 @@
 import type { PostgresConfig, RedisConfig } from '@twitch-archiving/config';
 import type { Pool } from 'pg';
+import type { Logger } from 'pino';
 import pg from 'pg';
 import { createClient } from 'redis';
+import { initLogger } from '@twitch-archiving/utils';
+
+const logger: Logger = initLogger('database-init');
 
 export type RedisClient = ReturnType<typeof createClient>;
 
@@ -95,6 +99,17 @@ export async function initPostgres(config: PostgresConfig): Promise<void> {
   } //catch block
 
   pool = p;
+  if (p !== undefined) {
+    p.on('error', (err: Error) => {
+      logger.error(err);
+    });
+  }
+}
+
+export async function closePostgres(): Promise<void> {
+  if (pool !== undefined) {
+    await pool.end();
+  }
 }
 
 export async function initRedis(

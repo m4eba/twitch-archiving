@@ -1,5 +1,7 @@
 import pg from 'pg';
 import { createClient } from 'redis';
+import { initLogger } from '@twitch-archiving/utils';
+const logger = initLogger('database-init');
 let pool = undefined;
 let redis = undefined;
 let redisPrefix = '';
@@ -82,6 +84,16 @@ export async function initPostgres(config) {
         }
     } //catch block
     pool = p;
+    if (p !== undefined) {
+        p.on('error', (err) => {
+            logger.error(err);
+        });
+    }
+}
+export async function closePostgres() {
+    if (pool !== undefined) {
+        await pool.end();
+    }
 }
 export async function initRedis(config, prefix) {
     redisPrefix = prefix;

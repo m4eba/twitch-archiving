@@ -18,4 +18,5 @@ export declare function getP(): {
     pool: Pool;
 };
 export declare function initPostgres(config: PostgresConfig): Promise<void>;
+export declare function closePostgres(): Promise<void>;
 export declare function initRedis(config: RedisConfig, prefix: string): Promise<void>;
