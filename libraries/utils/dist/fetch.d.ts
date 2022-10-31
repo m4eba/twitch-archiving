@@ -1,5 +1,7 @@
 import type { Response } from 'node-fetch';
-export declare function fetchWithTimeoutText(url: string, retries?: number, timeout?: number): Promise<{
+export declare function fetchWithTimeoutText(url: string, retries?: number, timeout?: number, headers?: {
+    [key: string]: string;
+}): Promise<{
     data: string;
     resp: Response;
 }>;

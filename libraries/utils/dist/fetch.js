@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import AbortController from 'abort-controller';
-export async function fetchWithTimeoutText(url, retries = 5, timeout = 5000) {
+export async function fetchWithTimeoutText(url, retries = 5, timeout = 5000, headers = {}) {
     return new Promise((resolve, reject) => {
         const abort = new AbortController();
         const timer = setTimeout(() => {
@@ -8,6 +8,7 @@ export async function fetchWithTimeoutText(url, retries = 5, timeout = 5000) {
         }, timeout);
         fetch(url, {
             signal: abort.signal,
+            headers,
         })
             .then((resp) => {
             resp
@@ -18,7 +19,7 @@ export async function fetchWithTimeoutText(url, retries = 5, timeout = 5000) {
                     reject(e);
                     return;
                 }
-                fetchWithTimeoutText(url, retries - 1, timeout)
+                fetchWithTimeoutText(url, retries - 1, timeout, headers)
                     .then(resolve)
                     .catch(reject);
             })
@@ -31,7 +32,7 @@ export async function fetchWithTimeoutText(url, retries = 5, timeout = 5000) {
                 reject(e);
                 return;
             }
-            fetchWithTimeoutText(url, retries - 1, timeout)
+            fetchWithTimeoutText(url, retries - 1, timeout, headers)
                 .then(resolve)
                 .catch(reject);
         })

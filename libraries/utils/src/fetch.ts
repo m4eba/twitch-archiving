@@ -5,7 +5,8 @@ import AbortController from 'abort-controller';
 export async function fetchWithTimeoutText(
   url: string,
   retries: number = 5,
-  timeout: number = 5000
+  timeout: number = 5000,
+  headers: { [key: string]: string } = {}
 ): Promise<{ data: string; resp: Response }> {
   return new Promise((resolve, reject) => {
     const abort = new AbortController();
@@ -14,6 +15,7 @@ export async function fetchWithTimeoutText(
     }, timeout);
     fetch(url, {
       signal: abort.signal,
+      headers,
     })
       .then((resp: Response) => {
         resp
@@ -24,7 +26,7 @@ export async function fetchWithTimeoutText(
               reject(e);
               return;
             }
-            fetchWithTimeoutText(url, retries - 1, timeout)
+            fetchWithTimeoutText(url, retries - 1, timeout, headers)
               .then(resolve)
               .catch(reject);
           })
@@ -37,7 +39,7 @@ export async function fetchWithTimeoutText(
           reject(e);
           return;
         }
-        fetchWithTimeoutText(url, retries - 1, timeout)
+        fetchWithTimeoutText(url, retries - 1, timeout, headers)
           .then(resolve)
           .catch(reject);
       })
