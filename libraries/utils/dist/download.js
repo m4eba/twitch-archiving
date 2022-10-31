@@ -31,7 +31,7 @@ export function timeoutPipe(ins, outs, timeout, progress) {
     });
 }
 export async function downloadSegment(seg, filename, listener) {
-    logger.debug('start download', { seg, filename });
+    logger.debug({ seg, filename }, 'start download');
     const tmpName = filename + '.tmp';
     let retries = 0;
     let controller = null;
@@ -50,7 +50,7 @@ export async function downloadSegment(seg, filename, listener) {
             let headers = {};
             let flags = 'w';
             if (stat !== null) {
-                logger.debug('resume', { seg, sise: stat.size });
+                logger.debug({ seg, sise: stat.size }, 'resume');
                 headers = {
                     Range: `bytes=${stat.size}-`,
                 };
@@ -71,7 +71,7 @@ export async function downloadSegment(seg, filename, listener) {
             const range = resp.headers.get('content-range');
             if (range !== null) {
                 flags = 'a';
-                logger.trace('range header', { seg, range });
+                logger.trace({ seg, range }, 'range header');
             }
             if (clength !== null) {
                 try {
@@ -98,7 +98,7 @@ export async function downloadSegment(seg, filename, listener) {
                     listener.updateProgress(seg, filename, size).catch(() => { });
                 }
             });
-            logger.trace('download size', { seg, length: totalLength });
+            logger.trace({ seg, length: totalLength }, 'download size');
             if (length > 0 && length !== size) {
                 throw new Error(`file size does not match ${size}/${length}`);
             }
@@ -110,13 +110,13 @@ export async function downloadSegment(seg, filename, listener) {
             if (listener.updateProgress !== undefined) {
                 await listener.updateProgress(seg, filename, totalSize);
             }
-            logger.debug('download done', { seg, filename });
+            logger.debug({ seg, filename }, 'download done');
             return;
         }
     }
     catch (e) {
         if (controller !== null)
             controller.abort();
-        logger.debug('unable to download segment', { seg, filename, error: e });
+        logger.debug({ seg, filename, error: e }, 'unable to download segment');
     }
 }

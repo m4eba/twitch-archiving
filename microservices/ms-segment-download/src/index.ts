@@ -133,7 +133,7 @@ await consumer.run({
       await dl.updateFileStatus(recordingId, filename, 'done');
       status = SegmentDownloadedStatus.DONE;
     } catch (e) {
-      logger.debug('unable to download segement', { seg });
+      logger.debug({ seg, error: e }, 'unable to download segement');
 
       await dl.incrementFileRetries(recordingId, filename);
       status = SegmentDownloadedStatus.ERROR;
