@@ -118,5 +118,6 @@ export async function downloadSegment(seg, filename, listener) {
         if (controller !== null)
             controller.abort();
         logger.debug({ seg, filename, error: e }, 'unable to download segment');
+        throw e;
     }
 }
