@@ -151,8 +151,16 @@ await consumer.run({
       session.firstMsg = msg;
     }
     session.msg = msg;
-    const filename = await prepareSegment(session, tmpOutput);
-    await sendSegment(session, filename, tmpOutput);
+    try {
+      const filename = await prepareSegment(session, tmpOutput);
+      await sendSegment(session, filename, tmpOutput);
+    } catch (e: any) {
+      if (e.toString().indexOf('does not contain any stream') > -1) {
+        logger.debug({ error: e.toString() }, 'empty stream');
+        return;
+      }
+      throw e;
+    }
 
     //throw new Error('lets do it again');
   },
