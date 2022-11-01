@@ -172,7 +172,7 @@ async function sendSegment(session, filename, tmpOutput) {
     return new Promise(async (resolve, reject) => {
         logger.trace({ msg: session.msg, filename }, 'send wav');
         const sampleRate = 16000;
-        const bufferSize = 2 * sampleRate * 0.2;
+        const bufferSize = 2 * sampleRate * 1.0;
         const buf = await fs.promises.readFile(path.join(tmpOutput, filename));
         if (!session.init) {
             await session.socket.send(`{ "config" : { "sample_rate" : ${sampleRate} } }`);
