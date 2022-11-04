@@ -91,10 +91,12 @@ export async function downloadSegment(
         };
       }
       controller = new AbortController();
+      logger.debug({ url: seg.url, headers }, 'fetch options');
       const resp = await fetch(seg.url, {
         headers,
         signal: controller.signal,
       });
+      logger.debug({ response: resp }, 'response');
       if (!resp.ok) throw new Error(`unexpected response ${resp.statusText}`);
       if (resp.body === null) throw new Error('body not defined');
       const clength = resp.headers.get('content-length');
@@ -153,9 +155,12 @@ export async function downloadSegment(
       logger.debug({ seg, filename }, 'download done');
       return;
     }
-  } catch (e) {
+  } catch (e: any) {
     if (controller !== null) controller.abort();
-    logger.debug({ seg, filename, error: e }, 'unable to download segment');
+    logger.debug(
+      { seg, filename, error: e.toString() },
+      'unable to download segment'
+    );
     throw e;
   }
 }

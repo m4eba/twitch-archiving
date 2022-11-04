@@ -56,10 +56,12 @@ export async function downloadSegment(seg, filename, listener) {
                 };
             }
             controller = new AbortController();
+            logger.debug({ url: seg.url, headers }, 'fetch options');
             const resp = await fetch(seg.url, {
                 headers,
                 signal: controller.signal,
             });
+            logger.debug({ response: resp }, 'response');
             if (!resp.ok)
                 throw new Error(`unexpected response ${resp.statusText}`);
             if (resp.body === null)
@@ -117,7 +119,7 @@ export async function downloadSegment(seg, filename, listener) {
     catch (e) {
         if (controller !== null)
             controller.abort();
-        logger.debug({ seg, filename, error: e }, 'unable to download segment');
+        logger.debug({ seg, filename, error: e.toString() }, 'unable to download segment');
         throw e;
     }
 }
