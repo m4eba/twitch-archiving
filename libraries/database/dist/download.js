@@ -236,7 +236,7 @@ export async function updateFileStatus(recordingId, name, status) {
 }
 export async function incrementFileRetries(recordingId, name) {
     const { pool } = getP();
-    await pool.query('UPDATE file SET retries=retires+1 WHERE recording_id = $1 AND name = $2', [recordingId, name]);
+    await pool.query('UPDATE file SET retries=retries+1 WHERE recording_id = $1 AND name = $2', [recordingId, name]);
 }
 export async function allFilesDone(recordingId) {
     const { pool } = getP();

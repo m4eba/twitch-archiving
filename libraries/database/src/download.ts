@@ -403,7 +403,7 @@ export async function incrementFileRetries(
   const { pool } = getP();
 
   await pool.query(
-    'UPDATE file SET retries=retires+1 WHERE recording_id = $1 AND name = $2',
+    'UPDATE file SET retries=retries+1 WHERE recording_id = $1 AND name = $2',
     [recordingId, name]
   );
 }
