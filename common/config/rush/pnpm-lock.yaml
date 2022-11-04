@@ -463,6 +463,145 @@ importers:
       '@types/node': 17.0.24
       eslint: 8.10.0
 
+  ../../microservices/ms-clips-download:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/database': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/twitch': workspace:*
+      '@twitch-archiving/utils': workspace:*
+      '@twurple/api': ~5.2.5
+      '@twurple/auth': ~5.2.5
+      '@types/heft-jest': ~1.0.2
+      '@types/luxon': ~3.0.2
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      kafkajs: ~1.16.0
+      luxon: ~3.0.4
+      node-fetch: ~3.2.10
+      pino: ~7.10.0
+      redis: ~4.0.6
+      sanitize-filename: ~1.6.3
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/database': link:../../libraries/database
+      '@twitch-archiving/messages': link:../../libraries/messages
+      '@twitch-archiving/twitch': link:../../libraries/twitch
+      '@twitch-archiving/utils': link:../../libraries/utils
+      '@twurple/api': 5.2.5_@twurple+auth@5.2.5
+      '@twurple/auth': 5.2.5
+      '@types/luxon': 3.0.2
+      kafkajs: 1.16.0
+      luxon: 3.0.4
+      node-fetch: 3.2.10
+      pino: 7.10.0
+      redis: 4.0.6
+      sanitize-filename: 1.6.3
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
+  ../../microservices/ms-clips-list:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/database': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/twitch': workspace:*
+      '@twitch-archiving/utils': workspace:*
+      '@twurple/api': ~5.2.5
+      '@twurple/auth': ~5.2.5
+      '@types/heft-jest': ~1.0.2
+      '@types/luxon': ~3.0.2
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      kafkajs: ~1.16.0
+      luxon: ~3.0.4
+      pino: ~7.10.0
+      redis: ~4.0.6
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/database': link:../../libraries/database
+      '@twitch-archiving/messages': link:../../libraries/messages
+      '@twitch-archiving/twitch': link:../../libraries/twitch
+      '@twitch-archiving/utils': link:../../libraries/utils
+      '@twurple/api': 5.2.5_@twurple+auth@5.2.5
+      '@twurple/auth': 5.2.5
+      '@types/luxon': 3.0.2
+      kafkajs: 1.16.0
+      luxon: 3.0.4
+      pino: 7.10.0
+      redis: 4.0.6
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
+  ../../microservices/ms-clips-live-scheduler:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/database': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/utils': workspace:*
+      '@twurple/api': ~5.2.5
+      '@twurple/auth': ~5.2.5
+      '@types/heft-jest': ~1.0.2
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      kafkajs: ~1.16.0
+      pino: ~7.10.0
+      redis: ~4.0.6
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/database': link:../../libraries/database
+      '@twitch-archiving/messages': link:../../libraries/messages
+      '@twitch-archiving/utils': link:../../libraries/utils
+      '@twurple/api': 5.2.5_@twurple+auth@5.2.5
+      '@twurple/auth': 5.2.5
+      kafkajs: 1.16.0
+      pino: 7.10.0
+      redis: 4.0.6
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
   ../../microservices/ms-playlist-live:
     specifiers:
       '@rushstack/eslint-config': ~2.5.1
@@ -916,6 +1055,41 @@ importers:
       '@tsconfig/node16-strictest-esm': 1.0.1
       eslint: 8.10.0
 
+  ../../tools/feed-recording:
+    specifiers:
+      '@rushstack/eslint-config': ~2.5.1
+      '@rushstack/heft': ~0.44.2
+      '@rushstack/heft-node-rig': ~1.8.0
+      '@twitch-archiving/config': workspace:*
+      '@twitch-archiving/database': workspace:*
+      '@twitch-archiving/messages': workspace:*
+      '@twitch-archiving/node-rig': workspace:*
+      '@twitch-archiving/utils': workspace:*
+      '@types/heft-jest': ~1.0.2
+      '@types/node': ~17.0.18
+      eslint: ~8.10.0
+      kafkajs: ~1.16.0
+      pino: ~7.10.0
+      ts-command-line-args: ~2.2.1
+      typescript: ~4.5.5
+    dependencies:
+      '@twitch-archiving/config': link:../../libraries/config
+      '@twitch-archiving/database': link:../../libraries/database
+      '@twitch-archiving/messages': link:../../libraries/messages
+      '@twitch-archiving/utils': link:../../libraries/utils
+      kafkajs: 1.16.0
+      pino: 7.10.0
+      ts-command-line-args: 2.2.1
+      typescript: 4.5.5
+    devDependencies:
+      '@rushstack/eslint-config': 2.5.4_eslint@8.10.0+typescript@4.5.5
+      '@rushstack/heft': 0.44.13
+      '@rushstack/heft-node-rig': 1.8.11_@rushstack+heft@0.44.13
+      '@twitch-archiving/node-rig': link:../../rigs/node-rig
+      '@types/heft-jest': 1.0.2
+      '@types/node': 17.0.24
+      eslint: 8.10.0
+
   ../../tools/read-chat-dump:
     specifiers:
       '@rushstack/eslint-config': ~2.5.1
@@ -1295,6 +1469,10 @@ packages:
       - encoding
     dev: false
 
+  /@d-fischer/detect-node/3.0.1:
+    resolution: {integrity: sha512-0Rf3XwTzuTh8+oPZW9SfxTIiL+26RRJ0BRPwj5oVjZFyFKmsj9RGfN2zuTRjOuA3FCK/jYm06HOhwNK+8Pfv8w==}
+    dev: false
+
   /@d-fischer/logger/4.2.0:
     resolution: {integrity: sha512-Hgm/GfeZfv2UPcRY4uF4S7OtCCv6Xxx++q7FAXc1qMrInaowKrmpo6YdFwRfZ8z53gzXFhc6H8j1Ttm0046uTw==}
     dependencies:
@@ -1331,6 +1509,16 @@ packages:
 
   /@d-fischer/rate-limiter/0.5.0:
     resolution: {integrity: sha512-bYxZ//vhtRSHx/K7vpcLxglCA80FGRAuRbNI//HsJmJcJ6abCO7ed/JlSJT9t4exRUPanM8igvEFEkffA4P4ug==}
+    dependencies:
+      '@d-fischer/logger': 4.2.0
+      '@d-fischer/promise.allsettled': 2.0.2
+      '@d-fischer/shared-utils': 3.2.0
+      '@types/node': 12.20.24
+      tslib: 2.3.1
+    dev: false
+
+  /@d-fischer/rate-limiter/0.6.1:
+    resolution: {integrity: sha512-SqsMxs77c/W9knmcX9ccy12ASq+E5UXzxU/ZIDAhZyll+2IqyikhgLQUu5n7bdxb3kox+TOSCIEFxDSSaGhcTA==}
     dependencies:
       '@d-fischer/logger': 4.2.0
       '@d-fischer/promise.allsettled': 2.0.2
@@ -2002,6 +2190,18 @@ packages:
       - encoding
     dev: false
 
+  /@twurple/api-call/5.2.5:
+    resolution: {integrity: sha512-oPbkNnh6zT6twNFmt2FOJwK+KQjlJvWKZUcvKW/P/JGe9olIBfNIScVcmnAEr9olOvBoipnF/xLu0V0f0C/UeQ==}
+    dependencies:
+      '@d-fischer/cross-fetch': 4.1.0
+      '@d-fischer/qs': 7.0.2
+      '@twurple/common': 5.2.5
+      '@types/node-fetch': 2.6.1
+      tslib: 2.3.1
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
   /@twurple/api/5.0.19_@twurple+auth@5.0.19:
     resolution: {integrity: sha512-wIBxfvJK/Loy9GulNymc9NrHGP7w8I+d/69z2ylh1zIYIT0P/lDngvpAmJq2+Yn8yH7OicTAizxEL6nVfA3eKQ==}
     peerDependencies:
@@ -2036,6 +2236,24 @@ packages:
       - encoding
     dev: false
 
+  /@twurple/api/5.2.5_@twurple+auth@5.2.5:
+    resolution: {integrity: sha512-EzIJToZOimXEaZt6uGZTj+6iyD+L2uUiHeSjfMdY+KwIbdxM99218YFSOA8l2RHRSBrNkt2rYEau45oFOP/RcA==}
+    peerDependencies:
+      '@twurple/auth': ^5.0.0
+    dependencies:
+      '@d-fischer/cache-decorators': 3.0.0
+      '@d-fischer/detect-node': 3.0.1
+      '@d-fischer/logger': 4.2.0
+      '@d-fischer/rate-limiter': 0.6.1
+      '@d-fischer/shared-utils': 3.2.0
+      '@twurple/api-call': 5.2.5
+      '@twurple/auth': 5.2.5
+      '@twurple/common': 5.2.5
+      tslib: 2.3.1
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
   /@twurple/auth/5.0.19:
     resolution: {integrity: sha512-d5mSqo3SPt7oVe81thK60ZT/sARUr8RrOdYei8sN3tCqXSjojNHFK+tvIHYETRPrWLpSyYS22qNmNDpC4KIR0w==}
     dependencies:
@@ -2060,6 +2278,18 @@ packages:
       - encoding
     dev: false
 
+  /@twurple/auth/5.2.5:
+    resolution: {integrity: sha512-gu2D3FU87MtXhSnxmiHgTJrOig57ttx89YvamqBq9hT4QpId23Z5H0wUtvumL+G3NlyhcJ6+LOYvWiz8MFPRWA==}
+    dependencies:
+      '@d-fischer/logger': 4.2.0
+      '@d-fischer/shared-utils': 3.2.0
+      '@twurple/api-call': 5.2.5
+      '@twurple/common': 5.2.5
+      tslib: 2.3.1
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
   /@twurple/common/5.0.19:
     resolution: {integrity: sha512-B8Rjyre2Dvl0WVKKP69J8vnC9lrmba2WKVftSCEokP+0nCkUp+gbZnoGmIaMRLl9N63FONrgAbrh2upk83Wa3Q==}
     dependencies:
@@ -2070,6 +2300,14 @@ packages:
 
   /@twurple/common/5.1.6:
     resolution: {integrity: sha512-mFDcCDbqx8MWmxGQmn0kSV7nEqTDjF7CLimRm34MMPl5gskp+isbKVdkXBy68VftQvtz92U/HRF25eTdOpDyEw==}
+    dependencies:
+      '@d-fischer/shared-utils': 3.2.0
+      klona: 2.0.5
+      tslib: 2.3.1
+    dev: false
+
+  /@twurple/common/5.2.5:
+    resolution: {integrity: sha512-pZe/IjdNfxiKtVw+3ntViq0gMnZrx8x+VB3aAzl/hB6bE10iUB0vV0qK7gCrvDJCnMDk0oGFLdl+nQOwkDHVpQ==}
     dependencies:
       '@d-fischer/shared-utils': 3.2.0
       klona: 2.0.5
@@ -2169,6 +2407,10 @@ packages:
     resolution: {integrity: sha512-r6RzbnrY+IoBgDIO4P6l2a+/ad+YCLe/htv7hp+Oqsqeb7cJbV3keKpg07ZlLlk3ZJz9xozNO8lFOiKRux234Q==}
     dependencies:
       '@types/node': 17.0.24
+    dev: false
+
+  /@types/luxon/3.0.2:
+    resolution: {integrity: sha512-HM2OVWckUMmXbWYZufmWT2XMURGDZ6XbyNyQ+Lx+gCFGFqbZaIjsz7b+AGeGP/AuVYHBiuGY+wXfweP1RremnA==}
     dev: false
 
   /@types/memorystream/0.3.0:
@@ -4538,6 +4780,11 @@ packages:
       yallist: 4.0.0
     dev: true
 
+  /luxon/3.0.4:
+    resolution: {integrity: sha512-aV48rGUwP/Vydn8HT+5cdr26YYQiUZ42NM6ToMoaGKwYfWbfLeRkEu1wXWMHBZT6+KyLfcbbtVcoQFCbbPjKlw==}
+    engines: {node: '>=12'}
+    dev: false
+
   /make-dir/3.1.0:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
     engines: {node: '>=8'}
@@ -4621,6 +4868,15 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: false
+
+  /node-fetch/3.2.10:
+    resolution: {integrity: sha512-MhuzNwdURnZ1Cp4XTazr69K0BTizsBroX7Zx3UgDSVcZYKF/6p0CBe4EUb/hLqmzVhl0UpYfgRljQ4yxE+iCxA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      data-uri-to-buffer: 4.0.0
+      fetch-blob: 3.1.5
+      formdata-polyfill: 4.0.10
     dev: false
 
   /node-fetch/3.2.4:
@@ -5191,6 +5447,12 @@ packages:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: true
 
+  /sanitize-filename/1.6.3:
+    resolution: {integrity: sha512-y/52Mcy7aw3gRm7IrcGDFx/bCk4AhRh2eI9luHOQM86nZsqwiRkkq2GekHXBBD+SmPidc8i2PqtYZl+pWJ8Oeg==}
+    dependencies:
+      truncate-utf8-bytes: 1.0.2
+    dev: false
+
   /saxes/5.0.1:
     resolution: {integrity: sha512-5LBh1Tls8c9xgGjw3QrMwETmTMVk0oFgvrFSvWx62llR2hcEInrKNZ2GZCCuuy2lvWrdl5jhbpeqc5hRYKFOcw==}
     engines: {node: '>=10'}
@@ -5499,6 +5761,12 @@ packages:
     resolution: {integrity: sha512-0z3j8R7MCjy10kc/g+qg7Ln3alJTodw9aDuVWZa3uiWqfuBMKeAeP2ocWcxoyM3D73yz3Jt/Pu4qPr4wHSdB/Q==}
     dev: true
 
+  /truncate-utf8-bytes/1.0.2:
+    resolution: {integrity: sha512-95Pu1QXQvruGEhv62XCMO3Mm90GscOCClvrIUwCM0PYOXK3kaF3l3sIHxx71ThJfcbM2O5Au6SO3AWCSEfW4mQ==}
+    dependencies:
+      utf8-byte-length: 1.0.4
+    dev: false
+
   /ts-command-line-args/2.2.1:
     resolution: {integrity: sha512-mnK68QA86FYzQYTSA/rxIjT/8EpKsvQw9QkawPic8I8t0gjAOw3Oa509NIRoaY1FmH7hdrncMp7t7o+vYoceNQ==}
     hasBin: true
@@ -5595,6 +5863,10 @@ packages:
     dependencies:
       punycode: 2.1.1
     dev: true
+
+  /utf8-byte-length/1.0.4:
+    resolution: {integrity: sha512-4+wkEYLBbWxqTahEsWrhxepcoVOJ+1z5PGIjPZxRkytcdSUaNjIjBM7Xn8E+pdSuV7SzvWovBFA54FO0JSoqhA==}
+    dev: false
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=}

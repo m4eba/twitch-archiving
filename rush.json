@@ -568,11 +568,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@twitch-archiving/tools-read-chat-dump",
-      "projectFolder": "tools/read-chat-dump",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@twitch-archiving/ms-api-live-test",
       "projectFolder": "microservices/ms-api-live-test",
       "shouldPublish": true
@@ -580,6 +575,31 @@
     {
       "packageName": "@twitch-archiving/ms-vosk",
       "projectFolder": "microservices/ms-vosk",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-clips-live-scheduler",
+      "projectFolder": "microservices/ms-clips-live-scheduler",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-clips-list",
+      "projectFolder": "microservices/ms-clips-list",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/ms-clips-download",
+      "projectFolder": "microservices/ms-clips-download",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/tools-read-chat-dump",
+      "projectFolder": "tools/read-chat-dump",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@twitch-archiving/tools-feed-recording",
+      "projectFolder": "tools/feed-recording",
       "shouldPublish": true
     },
     {

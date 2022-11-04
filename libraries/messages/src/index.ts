@@ -107,3 +107,56 @@ export interface StoryboardDoneMessage {
   path: string;
   filename: string;
 }
+
+export interface TwitchClip {
+  id: string;
+  url: string;
+  embed_url: string;
+  broadcaster_id: string;
+  broadcaster_name: string;
+  creator_id: string;
+  creator_name: string;
+  video_id: string;
+  game_id: string;
+  language: string;
+  title: string;
+  view_count: number;
+  created_at: string;
+  thumbnail_url: string;
+  duration: number;
+  vod_offset: number;
+}
+
+export interface TwitchClipResponse {
+  data: TwitchClip[];
+  pagination: {
+    cursor: string;
+  };
+}
+
+export interface TwitchClipAccessToken {
+  clip: {
+    videoQualities: {
+      sourceURL: string;
+    }[];
+    playbackAccessToken: {
+      signature: string;
+      value: string;
+    };
+  };
+}
+
+export interface ClipsList {
+  channel: string;
+  channel_id: string;
+  start: string;
+  end: string;
+  pagination: string;
+  count: number;
+  accessToken: string;
+}
+
+export interface ClipDownload {
+  channel: string;
+  clip: TwitchClip;
+}

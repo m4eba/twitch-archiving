@@ -5,4 +5,5 @@ export * as assemblyai from './assemblyai.js';
 export * as transcript from './transcript.js';
 export * as vosk from './vosk.js';
 export * as chat from './chat.js';
+export * as clips from './clips.js';
 export * from './init.js';
