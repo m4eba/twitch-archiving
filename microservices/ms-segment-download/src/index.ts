@@ -132,17 +132,21 @@ await consumer.run({
       await dl.updateFileDownloadSize(recordingId, filename, downloadSize);
       await dl.updateFileStatus(recordingId, filename, 'done');
       status = SegmentDownloadedStatus.DONE;
-    } catch (e) {
-      logger.debug({ seg, error: e }, 'unable to download segement');
+    } catch (e: any) {
+      logger.debug({ seg, error: e.toString() }, 'unable to download segement');
 
       await dl.incrementFileRetries(recordingId, filename);
       status = SegmentDownloadedStatus.ERROR;
-      if (file.retries > config.maxFileRetries) {
+      if (e.toString() === 'Error: unexpected response Not Found') {
         await dl.updateFileStatus(recordingId, filename, 'error');
-        logger.debug({ recordingId, filename }, 'max retries');
       } else {
-        await dl.updateFileStatus(recordingId, filename, 'waiting');
-        throw new Error('unable to download' + filename);
+        if (file.retries > config.maxFileRetries) {
+          await dl.updateFileStatus(recordingId, filename, 'error');
+          logger.debug({ recordingId, filename }, 'max retries');
+        } else {
+          await dl.updateFileStatus(recordingId, filename, 'waiting');
+          throw new Error('unable to download' + filename);
+        }
       }
     }
 
