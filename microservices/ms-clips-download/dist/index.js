@@ -81,7 +81,7 @@ async function download(clip, accessToken, json, heartbeat) {
     const year = date.substring(0, 4);
     const month = date.substring(5, 7);
     const day = date.substring(8, 10);
-    const out = path.join(config.outputPath, year, month, day);
+    const out = path.join(config.outputPath, clip.broadcaster_name, year, month, day);
     const name = sanitize(clip.title + '_' + clip.id);
     const json_out = path.join(path.join(out, name + '.json'));
     logger.trace({ out }, 'path');

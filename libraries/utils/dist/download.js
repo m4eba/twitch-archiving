@@ -61,7 +61,6 @@ export async function downloadSegment(seg, filename, listener) {
                 headers,
                 signal: controller.signal,
             });
-            logger.debug({ response: resp }, 'response');
             if (!resp.ok)
                 throw new Error(`unexpected response ${resp.statusText}`);
             if (resp.body === null)
