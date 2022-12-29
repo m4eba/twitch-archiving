@@ -60,41 +60,45 @@ await consumer.run({
         const dir = path.join(config.outputPath, seg.user, type, seg.id);
         await fs.promises.mkdir(dir, { recursive: true });
         const name = path.join(dir, filename);
-        await dl.updateFileStatus(recordingId, filename, 'downloading');
         let status = SegmentDownloadedStatus.DONE;
-        try {
-            let downloadSize = 0;
-            logger.debug({ name }, 'download');
-            await downloadSegment(seg, name, {
-                updateProgress: async (_, __, size) => {
-                    downloadSize = size;
-                    heartbeat().catch(() => { });
-                },
-                updateFilesize: async (_, filename, __, totalSize) => {
-                    logger.debug({ recordingId, filename, totalSize }, 'update file size');
-                    await dl.updateFileSize(recordingId, filename, totalSize);
-                },
-            });
-            logger.debug({ name, downloadSize }, 'filesize');
-            await dl.updateFileDownloadSize(recordingId, filename, downloadSize);
-            await dl.updateFileStatus(recordingId, filename, 'done');
-            status = SegmentDownloadedStatus.DONE;
-        }
-        catch (e) {
-            logger.debug({ seg, error: e.toString() }, 'unable to download segement');
-            await dl.incrementFileRetries(recordingId, filename);
-            status = SegmentDownloadedStatus.ERROR;
-            if (e.toString() === 'Error: unexpected response Not Found') {
-                await dl.updateFileStatus(recordingId, filename, 'error');
+        // the process could have been aborted but the file could be still
+        // downloaded, so don't download again
+        if (file.status !== 'done') {
+            await dl.updateFileStatus(recordingId, filename, 'downloading');
+            try {
+                let downloadSize = 0;
+                logger.debug({ name }, 'download');
+                await downloadSegment(seg, name, {
+                    updateProgress: async (_, __, size) => {
+                        downloadSize = size;
+                        heartbeat().catch(() => { });
+                    },
+                    updateFilesize: async (_, filename, __, totalSize) => {
+                        logger.debug({ recordingId, filename, totalSize }, 'update file size');
+                        await dl.updateFileSize(recordingId, filename, totalSize);
+                    },
+                });
+                logger.debug({ name, downloadSize }, 'filesize');
+                await dl.updateFileDownloadSize(recordingId, filename, downloadSize);
+                await dl.updateFileStatus(recordingId, filename, 'done');
+                status = SegmentDownloadedStatus.DONE;
             }
-            else {
-                if (file.retries > config.maxFileRetries) {
+            catch (e) {
+                logger.debug({ seg, error: e.toString() }, 'unable to download segement');
+                await dl.incrementFileRetries(recordingId, filename);
+                status = SegmentDownloadedStatus.ERROR;
+                if (e.toString() === 'Error: unexpected response Not Found') {
                     await dl.updateFileStatus(recordingId, filename, 'error');
-                    logger.debug({ recordingId, filename }, 'max retries');
                 }
                 else {
-                    await dl.updateFileStatus(recordingId, filename, 'waiting');
-                    throw new Error('unable to download' + filename);
+                    if (file.retries > config.maxFileRetries) {
+                        await dl.updateFileStatus(recordingId, filename, 'error');
+                        logger.debug({ recordingId, filename }, 'max retries');
+                    }
+                    else {
+                        await dl.updateFileStatus(recordingId, filename, 'waiting');
+                        throw new Error('unable to download' + filename);
+                    }
                 }
             }
         }
