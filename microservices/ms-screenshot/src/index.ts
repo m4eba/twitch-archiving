@@ -164,6 +164,10 @@ await consumer.run({
 
       await execFfmpeg(command);
 
+      // make sure file exists
+      const sr = await fs.promises.stat(path.join(output, filename));
+      logger.trace({ stat: sr }, 'stat result on screenshot');
+
       const doneMsg: ScreenshotDoneMessage = {
         recordingId: msg.recordingId,
         index: board.index,

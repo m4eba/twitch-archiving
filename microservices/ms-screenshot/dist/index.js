@@ -111,6 +111,9 @@ await consumer.run({
                 .outputOptions('-vframes', '1', '-q:v', '2')
                 .output(path.join(output, filename));
             await execFfmpeg(command);
+            // make sure file exists
+            const sr = await fs.promises.stat(path.join(output, filename));
+            logger.trace({ stat: sr }, 'stat result on screenshot');
             const doneMsg = {
                 recordingId: msg.recordingId,
                 index: board.index,
