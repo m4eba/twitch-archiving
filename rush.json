@@ -528,8 +528,8 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@twitch-archiving/ms-playlist-live",
-      "projectFolder": "microservices/ms-playlist-live",
+      "packageName": "@twitch-archiving/ms-playlist-get-live",
+      "projectFolder": "microservices/ms-playlist-get-live",
       "shouldPublish": true
     },
     {

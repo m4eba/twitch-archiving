@@ -1,5 +1,5 @@
 {
-  "name": "@twitch-archiving/ms-playlist-live",
+  "name": "@twitch-archiving/ms-playlist-get-live",
   "version": "0.0.1",
   "bin": "dist/index.js",
   "license": "MIT",
