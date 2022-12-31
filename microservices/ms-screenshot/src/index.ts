@@ -127,6 +127,11 @@ await consumer.run({
       offset = 0;
       await sb.insertStoryboard(board);
     } else {
+      const im = board.data.images;
+      if (im[im.length - 1] === filename) {
+        // already added this one, skip
+        return;
+      }
       if (board.data.current_offset + msg.duration >= config.interval) {
         offset = config.interval - board.data.current_offset;
         // screenshot on last frame doesn't work
