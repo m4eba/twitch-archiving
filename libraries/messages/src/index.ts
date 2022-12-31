@@ -1,3 +1,41 @@
+export const ITPlaylistGetLive: {
+  events: string;
+  request: string;
+} = {
+  events: 'tw-live-events',
+  request: 'tw-live-request',
+};
+export const OTPlaylistGetLive: {
+  masterPlaylistText: string;
+} = {
+  masterPlaylistText: 'tw-masterPlaylist-text',
+};
+
+export const ITPlaylistParseMaster: string = 'tw-masterPlaylist-text';
+export const OTPlaylistParseMaster: {
+  playlist: string;
+  recording: string;
+  playlistUpdate: string;
+  masterPlaylistRequest: string;
+} = {
+  playlist: 'tw-playlist',
+  recording: 'tw-recording',
+  playlistUpdate: 'tw-playlist-update',
+  masterPlaylistRequest: 'tw-live-request',
+};
+
+export const ITPlaylistUpdate: string = 'tw-playlist-update';
+export const OTPlaylistUpdate: {
+  playlistText: string;
+  masterPlaylistRequest: string;
+} = {
+  playlistText: 'tw-playlist-text',
+  masterPlaylistRequest: 'tw-live-request',
+};
+
+export const ITPlaylistParse: string = 'tw-playlist-text';
+export const OTPlaylistParse: string = 'tw-playlist';
+
 export interface AccessToken {
   token: string;
   sig: string;
@@ -47,6 +85,32 @@ export interface RecordingSegmentMessage extends RecordingMessage {
   duration: number;
   time: string;
   url: string;
+}
+
+export interface MasterPlaylistRequestMessage {
+  user: string;
+}
+
+export enum MasterPlaylistSourceType {
+  EVENT,
+  STREAM_UP_EVENT,
+  REQUEST,
+}
+
+export interface MasterPlaylistTextMessage {
+  user: string;
+  id: string;
+  text: string;
+  recordingId: string;
+  source: MasterPlaylistSourceType;
+  token?: AccessToken;
+}
+
+export interface PlaylistTextMessage {
+  user: string;
+  id: string;
+  text: string;
+  recordingId: string;
 }
 
 export interface PlaylistRequestMessage {

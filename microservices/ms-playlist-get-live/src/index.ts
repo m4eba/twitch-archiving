@@ -14,6 +14,8 @@ import { ArgumentConfig, parse } from 'ts-command-line-args';
 import HLS from 'hls-parser';
 import { getLivePlaylist, getAccessToken } from '@twitch-archiving/twitch';
 import {
+  ITPlaylistGetLive,
+  OTPlaylistGetLive,
   PlaylistMessage,
   PlaylistType,
   RecordingStartedMessage,
@@ -21,6 +23,9 @@ import {
   RecordingMessageType,
   PlaylistRequestMessage,
   PlaylistMessageType,
+  PlaylistTextMessage,
+  MasterPlaylistTextMessage,
+  MasterPlaylistSourceType,
 } from '@twitch-archiving/messages';
 import {
   initPostgres,
@@ -30,10 +35,9 @@ import {
 import { initLogger, sleep } from '@twitch-archiving/utils';
 
 interface PlaylistConfig {
-  inputTopic: string;
-  playlistRequestOutputTopic: string;
-  playlistOutputTopic: string;
-  recordingOutputTopic: string;
+  inputTopicEvents: string;
+  inputTopicRequest: string;
+  outputTopicMasterPlaylistText: string;
   oauthVideo: string;
   redisPrefix: string;
   redisSetName: string;
@@ -41,16 +45,15 @@ interface PlaylistConfig {
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
-  inputTopic: { type: String, defaultValue: 'tw-live' },
-  playlistRequestOutputTopic: {
+  inputTopicEvents: { type: String, defaultValue: ITPlaylistGetLive.events },
+  inputTopicRequest: { type: String, defaultValue: ITPlaylistGetLive.request },
+  outputTopicMasterPlaylistText: {
     type: String,
-    defaultValue: 'tw-playlist-request',
+    defaultValue: OTPlaylistGetLive.masterPlaylistText,
   },
-  playlistOutputTopic: { type: String, defaultValue: 'tw-playlist' },
-  recordingOutputTopic: { type: String, defaultValue: 'tw-recording' },
   oauthVideo: { type: String, defaultValue: '' },
-  redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
-  redisSetName: { type: String, defaultValue: 'tw-playlist-live' },
+  redisPrefix: { type: String, defaultValue: 'tw-playlist-get-live-' },
+  redisSetName: { type: String, defaultValue: 'tw-playlist-get-live' },
   playlistMaxRetries: { type: Number, defaultValue: 30 },
 };
 
@@ -85,16 +88,54 @@ await initPostgres(config);
 await initRedis(config, config.redisPrefix);
 await dl.createTableDownload();
 
-logger.info({ topic: config.inputTopic }, 'subscribe');
-
-const consumer: Consumer = kafka.consumer({ groupId: 'paylist-live' });
-await consumer.connect();
-await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
+logger.info(
+  {
+    topicEvents: config.inputTopicEvents,
+    topicRequest: config.inputTopicRequest,
+  },
+  'subscribe'
+);
 
 const producer: Producer = kafka.producer();
 await producer.connect();
 
-await consumer.run({
+const consumerRequest: Consumer = kafka.consumer({
+  groupId: 'paylist-get-live',
+});
+await consumerRequest.connect();
+await consumerRequest.subscribe({
+  topic: config.inputTopicEvents,
+  fromBeginning: true,
+});
+
+await consumerRequest.run({
+  eachMessage: async ({ message, heartbeat }) => {
+    if (!message.key) return;
+    const user = message.key.toString();
+    const recording = await dl.getRunningRecording(user);
+    if (recording === undefined) {
+      logger.debug({ user }, 'no running recording for user');
+    }
+
+    await initStream(
+      user,
+      MasterPlaylistSourceType.REQUEST,
+      recording,
+      heartbeat
+    );
+  },
+});
+
+const consumerEvents: Consumer = kafka.consumer({
+  groupId: 'paylist-get-live',
+});
+await consumerEvents.connect();
+await consumerEvents.subscribe({
+  topic: config.inputTopicEvents,
+  fromBeginning: true,
+});
+
+await consumerEvents.run({
   eachMessage: async ({ message, heartbeat }) => {
     if (!message.key) return;
     const user = message.key.toString();
@@ -103,16 +144,11 @@ await consumer.run({
     let newStream = false;
     if (message.value) {
       const event: {
-        forceReload?: boolean;
-        data?: { topic: string; message: string };
+        data: { topic: string; message: string };
       } = JSON.parse(message.value.toString());
       logger.trace({ event }, 'message event');
-      if (event.forceReload !== undefined && event.forceReload === true) {
-        logger.debug('forceReload message', { user, msg: event });
-        init = true;
-      }
+
       if (
-        event.data !== undefined &&
         event.data.topic !== undefined &&
         event.data.message !== undefined &&
         event.data.topic.toString().startsWith('video-playback-by-id')
@@ -133,14 +169,21 @@ await consumer.run({
     }
 
     if (init) {
-      await initStream(user, newStream, recording, heartbeat);
+      await initStream(
+        user,
+        newStream
+          ? MasterPlaylistSourceType.STREAM_UP_EVENT
+          : MasterPlaylistSourceType.EVENT,
+        recording,
+        heartbeat
+      );
     }
   },
 });
 
 async function initStream(
   user: string,
-  newStream: boolean,
+  source: MasterPlaylistSourceType,
   recording: dl.Recording | undefined,
   heartbeat: () => Promise<void>
 ): Promise<void> {
@@ -194,110 +237,17 @@ async function initStream(
 
   logger.trace({ user, playlist }, 'playlist');
 
-  // TODO
-  // better handling if BROADCAST-ID is not set
-  const reg = /BROADCAST-ID="(.*?)"/;
-  let site_id = '';
-  const regResult = reg.exec(playlist);
-  if (regResult) {
-    const streamId = regResult[1].toString();
-    site_id = 'live-' + streamId;
-    logger.debug({ user, site_id }, 'site_id in playlist');
-
-    if (recording !== undefined) {
-      if ('live-' + streamId !== recording.site_id) {
-        await dl.stopRecording(new Date(), recording.id);
-        recording = await dl.getRecordingBySiteId('live-' + streamId);
-      }
-    } else {
-      recording = await dl.getRecordingBySiteId('live-' + streamId);
-      if (recording !== undefined && (recording.stop !== null || stopped)) {
-        await dl.resumeRecording(recording.id);
-      }
-    }
-  } else {
-    // id is empty - twitch changed something
-    // look for id in playlistmessage
-    if (recording === undefined || newStream) {
-      site_id = user + '-' + new Date().toISOString();
-    } else {
-      site_id = recording.site_id;
-    }
-    logger.debug({ user, site_id }, 'set id from date');
-  }
-
-  const list: HLS.types.MasterPlaylist = HLS.parse(
-    playlist
-  ) as HLS.types.MasterPlaylist;
-
-  const best: HLS.types.Variant = list.variants.reduce((prev, curr) => {
-    let result = prev;
-    if (prev.bandwidth < curr.bandwidth) {
-      result = curr;
-    }
-    logger.debug({ user, url: result }, 'best format');
-    return result;
-  });
-
-  const data: PlaylistRequestMessage = {
+  const msg: MasterPlaylistTextMessage = {
     user,
-    id: site_id,
-    recordingId: '',
-    type: PlaylistType.LIVE,
-    playlist,
+    id: '',
+    text: playlist,
+    recordingId: recording ? recording.id : '',
+    source,
     token,
-    url: best.uri,
   };
-  const recordingData: dl.RecordingData = {
-    type: PlaylistType.LIVE,
-    playlist,
-    token,
-    bestUrl: best.uri,
-  };
-
-  // do nothing if recording continues
-  if (recording === undefined) {
-    logger.debug({ data, user }, 'start new recording');
-    const recordingId = await dl.startRecording(
-      new Date(),
-      user,
-      site_id,
-      recordingData
-    );
-    data.recordingId = recordingId;
-    const recMsg: RecordingStartedMessage = {
-      type: RecordingMessageType.STARTED,
-      user,
-      id: site_id,
-      recordingId,
-      playlistType: data.type,
-    };
-    await sendData(config.recordingOutputTopic, {
-      key: user,
-      value: JSON.stringify(recMsg),
-      timestamp: new Date().getTime().toString(),
-    });
-    const plMsg: PlaylistMessage = {
-      type: PlaylistMessageType.START,
-      user,
-      id: site_id,
-      recordingId,
-    };
-    await sendData(config.playlistOutputTopic, {
-      key: user,
-      value: JSON.stringify(plMsg),
-      timestamp: new Date().getTime().toString(),
-    });
-  } else {
-    await dl.updateRecordingData(recording.id, recordingData);
-  }
-
-  logger.debug({ user, playlistMessage: data }, 'playlist');
-  const msg = JSON.stringify(data);
-
-  await sendData(config.playlistRequestOutputTopic, {
+  await sendData(config.outputTopicMasterPlaylistText, {
     key: user,
-    value: msg,
+    value: JSON.stringify(msg),
     timestamp: new Date().getTime().toString(),
   });
 }

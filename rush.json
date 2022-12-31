@@ -533,6 +533,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@twitch-archiving/ms-playlist-parse-master",
+      "projectFolder": "microservices/ms-playlist-parse-master",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@twitch-archiving/ms-playlist-update",
       "projectFolder": "microservices/ms-playlist-update",
       "shouldPublish": true

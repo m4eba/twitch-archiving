@@ -1,3 +1,24 @@
+export declare const ITPlaylistGetLive: {
+    events: string;
+    request: string;
+};
+export declare const OTPlaylistGetLive: {
+    masterPlaylistText: string;
+};
+export declare const ITPlaylistParseMaster: string;
+export declare const OTPlaylistParseMaster: {
+    playlist: string;
+    recording: string;
+    playlistUpdate: string;
+    masterPlaylistRequest: string;
+};
+export declare const ITPlaylistUpdate: string;
+export declare const OTPlaylistUpdate: {
+    playlistText: string;
+    masterPlaylistRequest: string;
+};
+export declare const ITPlaylistParse: string;
+export declare const OTPlaylistParse: string;
 export interface AccessToken {
     token: string;
     sig: string;
@@ -40,6 +61,28 @@ export interface RecordingSegmentMessage extends RecordingMessage {
     duration: number;
     time: string;
     url: string;
+}
+export interface MasterPlaylistRequestMessage {
+    user: string;
+}
+export declare enum MasterPlaylistSourceType {
+    EVENT = 0,
+    STREAM_UP_EVENT = 1,
+    REQUEST = 2
+}
+export interface MasterPlaylistTextMessage {
+    user: string;
+    id: string;
+    text: string;
+    recordingId: string;
+    source: MasterPlaylistSourceType;
+    token?: AccessToken;
+}
+export interface PlaylistTextMessage {
+    user: string;
+    id: string;
+    text: string;
+    recordingId: string;
 }
 export interface PlaylistRequestMessage {
     user: string;

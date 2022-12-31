@@ -1,14 +1,20 @@
 import { KafkaConfigOpt, RedisConfigOpt, FileConfigOpt, PostgresConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
-import HLS from 'hls-parser';
-import { RecordingMessageType, } from '@twitch-archiving/messages';
+import 'hls-parser';
+import { ITPlaylistUpdate, OTPlaylistUpdate, } from '@twitch-archiving/messages';
 import { initLogger, fetchWithTimeoutText } from '@twitch-archiving/utils';
 import { initRedis, download as dl, initPostgres, } from '@twitch-archiving/database';
 const PlaylistConfigOpt = {
-    inputTopic: { type: String, defaultValue: 'tw-playlist-request' },
-    recordingOutputTopic: { type: String, defaultValue: 'tw-recording' },
-    playlistReloadOutputTopic: { type: String, defaultValue: 'tw-live' },
+    inputTopic: { type: String, defaultValue: ITPlaylistUpdate },
+    outputTopicPlaylistText: {
+        type: String,
+        defaultValue: OTPlaylistUpdate.playlistText,
+    },
+    outputTopicMasterPlaylistRequest: {
+        type: String,
+        defaultValue: OTPlaylistUpdate.masterPlaylistRequest,
+    },
     redisPrefix: { type: String, defaultValue: 'tw-playlist-live-' },
 };
 const config = parse({
@@ -58,77 +64,26 @@ await consumer.run({
             return;
         }
         logger.trace({ data }, 'playlist text');
-        const list = HLS.parse(data);
-        const latestFile = await dl.getLatestFile(recording.id);
-        let offset = 0;
-        if (latestFile !== undefined) {
-            offset = latestFile.time_offset + latestFile.duration;
-            logger.trace({
-                offset_type: typeof latestFile.time_offset,
-                time_offset: latestFile.time_offset,
-                duration_type: typeof latestFile.duration,
-                duration: latestFile.duration,
-            }, 'set offset');
-        }
-        const segments = list.segments;
-        for (let i = 0; i < segments.length; ++i) {
-            const seg = segments[i];
-            if (latestFile !== undefined &&
-                seg.mediaSequenceNumber <= latestFile.seq) {
-                continue;
-            }
-            let time;
-            if (seg.programDateTime) {
-                time = seg.programDateTime;
-            }
-            else {
-                time = new Date();
-            }
-            const filename = seg.mediaSequenceNumber.toString().padStart(5, '0') + '.ts';
-            await dl.addFile(recording.id, filename, seg.mediaSequenceNumber, offset, seg.duration, time);
-            const msg = {
-                type: RecordingMessageType.SEGMENT,
-                user,
-                id: recording.site_id,
-                recordingId: recording.id,
-                playlistType: playlist.type,
-                sequenceNumber: seg.mediaSequenceNumber,
-                offset: offset,
-                duration: seg.duration,
-                time: time.toISOString(),
-                url: seg.uri,
-            };
-            offset += seg.duration;
-            await sendData(config.recordingOutputTopic, {
-                key: user + '-' + recording.id,
-                value: JSON.stringify(msg),
-                timestamp: new Date().getTime().toString(),
-            });
-        }
-        if (list.endlist) {
-            await dl.stopRecording(new Date(), recording.id);
-            const msg = {
-                type: RecordingMessageType.ENDED,
-                user,
-                id: recording.site_id,
-                recordingId: recording.id,
-                playlistType: playlist.type,
-                segmentCount: await dl.getFileCount(recording.id),
-            };
-            await sendData(config.recordingOutputTopic, {
-                key: user + '-' + recording.id,
-                value: JSON.stringify(msg),
-                timestamp: new Date().getTime().toString(),
-            });
-        }
+        const msg = {
+            id: recording.site_id,
+            recordingId: recording.id,
+            text: data,
+            user,
+        };
+        await sendData(config.outputTopicPlaylistText, {
+            key: user + '-' + recording.id,
+            value: JSON.stringify(msg),
+            timestamp: new Date().getTime().toString(),
+        });
     },
 });
 async function forcePlaylistUpdate(user) {
-    await sendData(config.playlistReloadOutputTopic, {
+    const req = {
+        user,
+    };
+    await sendData(config.outputTopicMasterPlaylistRequest, {
         key: user,
-        value: JSON.stringify({
-            forceReload: true,
-        }),
+        value: JSON.stringify(req),
         timestamp: new Date().getTime().toString(),
     });
 }
