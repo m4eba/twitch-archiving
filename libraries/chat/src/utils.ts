@@ -4,6 +4,7 @@ export function parseIrcMessageEmoteTag(msg: string, tag: string): EmoteData[] {
   // example emotesv2_432ba07bfc2743e9aa2a6916e000681e:0-5,7-12/301592569:14-17
   const emotes = tag.split('/');
   const result: EmoteData[] = [];
+  const chars = [...msg];
   emotes.forEach((e) => {
     if (e.length === 0) return;
     const s = e.split(':');
@@ -14,7 +15,7 @@ export function parseIrcMessageEmoteTag(msg: string, tag: string): EmoteData[] {
       if (e.length < 2) return;
       const start_idx = parseInt(idx[0]);
       const end_idx = parseInt(idx[1]);
-      const name = msg.substring(start_idx, end_idx + 1);
+      const name = chars.slice(start_idx, end_idx + 1).join('');
       const data: EmoteData = {
         id: s[0],
         source: 'twitch',
