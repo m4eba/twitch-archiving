@@ -4,6 +4,7 @@ export interface ChatMessage {
     channel: string;
     username: string;
     message: string;
+    command: string;
     time: Date;
     data: any;
     emotes: EmoteData[];

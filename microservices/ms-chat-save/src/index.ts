@@ -22,6 +22,7 @@ import {
   Emote,
   Resolver,
 } from '@twitch-archiving/chat';
+import { randomUUID } from 'crypto';
 
 interface DumpConfig {
   chatTopic: string;
@@ -101,33 +102,45 @@ await consumer.run({
       );
 
       const irc: IRCMessage = JSON.parse(message.value.toString());
-      if (irc.command !== 'PRIVMSG') return;
-      const username = irc.prefix.substring(0, irc.prefix.indexOf('!'));
-      if (irc.params.length < 2) return;
-      const text = irc.params[1].trim();
-      const channel = irc.params[0].substring(1);
-      let emotes = parseIrcMessageEmoteTag(text, irc.tags['emotes']);
-
-      if (!resolver.hasEmotes(channel)) {
-        resolver.setEmotes(channel, await chat.getChannelEmotes(channel));
+      let emotes: EmoteData[] = [];
+      let username = '';
+      let text = '';
+      let id = '';
+      let channel = '';
+      if (irc.params.length > 0) {
+        channel = irc.params[0].substring(1);
       }
-      emotes = emotes.concat(resolver.resolve(channel, text));
+
+      if (irc.command === 'PRIVMSG') {
+        id = irc.tags['id'];
+        username = irc.prefix.substring(0, irc.prefix.indexOf('!'));
+        text = irc.params[1].trim();
+        emotes = parseIrcMessageEmoteTag(text, irc.tags['emotes']);
+
+        if (!resolver.hasEmotes(channel)) {
+          resolver.setEmotes(channel, await chat.getChannelEmotes(channel));
+        }
+        emotes = emotes.concat(resolver.resolve(channel, text));
+      }
+      if (irc.command === 'CLEARCHAT') {
+        text = irc.params[1].trim();
+      }
+      if (id.length === 0) {
+        id = randomUUID();
+      }
 
       logger.trace({ text, emotes, channel }, 'text with emotes');
       const msg: chat.ChatMessage = {
-        id: irc.tags['id'],
+        id,
         channel,
         username,
         message: text,
+        command: irc.command,
         time: new Date(parseInt(irc.tags['tmi-sent-ts'])),
         data: irc.tags,
         emotes,
       };
-      try {
-        await chat.insertMessage(msg);
-      } catch (e) {
-        logger.error({ e }, 'insertMessage');
-      }
+      await chat.insertMessage(msg);
     }
   },
 });

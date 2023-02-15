@@ -25,6 +25,7 @@ export async function createTable() {
       channel text not null,
       username text not null,
       message text not null,
+      command text not null,
       time timestamptz not null,
       data jsonb not null,
       emotes jsonb not null
@@ -60,11 +61,12 @@ export async function createTable() {
 }
 export async function insertMessage(msg) {
     const { pool } = getP();
-    await pool.query('INSERT into chat_message (id, channel, username, message, time, data, emotes ) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING', [
+    await pool.query('INSERT into chat_message (id, channel, username, message, command, time, data, emotes ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING', [
         msg.id,
         msg.channel,
         msg.username,
         msg.message,
+        msg.command,
         msg.time,
         JSON.stringify(msg.data),
         JSON.stringify(msg.emotes),
