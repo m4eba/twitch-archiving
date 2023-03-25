@@ -15,3 +15,4 @@ export declare class Connection extends WebSocketConnection<IRCMessage> {
     part(channels: string[]): Promise<void>;
     protected onClose(): void;
 }
+//# sourceMappingURL=Connection.d.ts.map

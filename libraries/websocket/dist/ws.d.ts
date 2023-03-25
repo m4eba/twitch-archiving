@@ -28,3 +28,4 @@ export declare abstract class WebSocketConnection<IMessage> {
     protected onClose(): void;
     private timeout;
 }
+//# sourceMappingURL=ws.d.ts.map

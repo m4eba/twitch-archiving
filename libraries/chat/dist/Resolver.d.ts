@@ -8,3 +8,4 @@ export declare class Resolver {
     hasEmotes(channel: string): boolean;
     resolve(channel: string, text: string): EmoteData[];
 }
+//# sourceMappingURL=Resolver.d.ts.map

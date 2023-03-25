@@ -8,3 +8,4 @@ export interface AccessTokenParams {
     vodID: string;
 }
 export declare function getAccessToken(params: AccessTokenParams, oauthVideo: string): Promise<AccessToken>;
+//# sourceMappingURL=acesstoken.d.ts.map

@@ -8,3 +8,4 @@ export declare class FileWriter {
     write(timestamp: string, data: string): void;
     private openStream;
 }
+//# sourceMappingURL=FileWriter.d.ts.map

@@ -22,3 +22,4 @@ export declare function insertClip(clip: TwitchClip, offset: number, data: any):
 export declare function updateViewCount(id: string, view_count: number): Promise<void>;
 export declare function updateStatus(id: string, status: string): Promise<void>;
 export declare function updateOnline(id: string, online: boolean): Promise<void>;
+//# sourceMappingURL=clips.d.ts.map

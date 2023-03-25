@@ -29,3 +29,4 @@ export interface LogConfig {
     logLevel: string;
 }
 export declare const LogConfigOpt: ArgumentConfig<LogConfig>;
+//# sourceMappingURL=index.d.ts.map

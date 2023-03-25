@@ -141,3 +141,4 @@ export interface ClipDownload {
     channel: string;
     clip: TwitchClip;
 }
+//# sourceMappingURL=index.d.ts.map

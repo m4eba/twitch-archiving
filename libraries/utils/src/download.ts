@@ -94,6 +94,7 @@ export async function downloadSegment(
       logger.debug({ url: seg.url, headers }, 'fetch options');
       const resp = await fetch(seg.url, {
         headers,
+        // @ts-ignore
         signal: controller.signal,
       });
       if (!resp.ok) throw new Error(`unexpected response ${resp.statusText}`);

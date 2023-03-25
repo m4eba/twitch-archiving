@@ -1,6 +1,14 @@
 {
-  "extends": "./node_modules/@twitch-archiving/node-rig/profiles/default/tsconfig-base.json",
-  "compilerOptions": {
-    "types": ["heft-jest", "node"]
-  }
+ "extends": "@twitch-archiving/config-tsconfig/microservice.json",
+ "include": [
+  "."
+ ],
+ "exclude": [
+  "dist",
+  "build",
+  "node_modules"
+ ],
+ "compilerOptions": {
+  "outDir": "./dist"
+ }
 }

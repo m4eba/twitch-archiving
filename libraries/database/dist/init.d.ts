@@ -20,3 +20,4 @@ export declare function getP(): {
 export declare function initPostgres(config: PostgresConfig): Promise<void>;
 export declare function closePostgres(): Promise<void>;
 export declare function initRedis(config: RedisConfig, prefix: string): Promise<void>;
+//# sourceMappingURL=init.d.ts.map

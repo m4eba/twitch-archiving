@@ -1,4 +1,3 @@
-import 'node-fetch';
 import url from 'url';
 import { fetchWithTimeoutText } from '@twitch-archiving/utils';
 export async function getMainPlaylist(endpoint, token) {

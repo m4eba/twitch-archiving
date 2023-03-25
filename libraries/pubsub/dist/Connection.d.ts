@@ -10,3 +10,4 @@ export declare class Connection extends WebSocketConnection<string> {
     protected ping(): void;
     protected isPong(data: WebSocket.Data): boolean;
 }
+//# sourceMappingURL=Connection.d.ts.map

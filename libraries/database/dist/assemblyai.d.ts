@@ -25,3 +25,4 @@ export declare function getSegments(recordingId: string): Promise<SegmentDownloa
 export declare function setEndTime(recordingId: string, time: number): Promise<void>;
 export declare function getEndTime(recordingId: string): Promise<number>;
 export declare function clear(recordingId: string): Promise<void>;
+//# sourceMappingURL=assemblyai.d.ts.map

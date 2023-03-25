@@ -1,7 +1,14 @@
 {
-  "extends": "./node_modules/@twitch-archiving/node-rig/profiles/default/tsconfig-base.json",
-  "compilerOptions": {
-    "composite": true,
-    "types": ["heft-jest", "node"]
-  }
+ "extends": "@twitch-archiving/config-tsconfig/library.json",
+ "include": [
+  "."
+ ],
+ "exclude": [
+  "dist",
+  "build",
+  "node_modules"
+ ],
+ "compilerOptions": {
+  "outDir": "./dist"
+ }
 }

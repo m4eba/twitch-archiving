@@ -46,3 +46,4 @@ export declare function updateFileDownloadSize(recordingId: string, name: string
 export declare function updateFileStatus(recordingId: string, name: string, status: string): Promise<void>;
 export declare function incrementFileRetries(recordingId: string, name: string): Promise<void>;
 export declare function allFilesDone(recordingId: string): Promise<boolean>;
+//# sourceMappingURL=download.d.ts.map

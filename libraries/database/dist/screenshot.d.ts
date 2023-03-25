@@ -23,3 +23,4 @@ export declare function incRequests(recordingId: string): Promise<void>;
 export declare function isRecordingInitDone(recordingId: string): Promise<boolean>;
 export declare function clearInit(recordingId: string): Promise<void>;
 export declare function clearAll(recordingId: string): Promise<void>;
+//# sourceMappingURL=screenshot.d.ts.map

@@ -1,11 +1,9 @@
 import { KafkaConfigOpt, FileConfigOpt, TwitchConfigOpt, RedisConfigOpt, } from '@twitch-archiving/config';
-import 'path';
 import fs from 'fs';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { ClientCredentialsAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
-import '@twitch-archiving/utils';
 import { initRedis, chat } from '@twitch-archiving/database';
 import { initLogger } from '@twitch-archiving/utils';
 import { seventv, bettertv, ffz, } from '@twitch-archiving/chat';

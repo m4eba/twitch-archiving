@@ -6,3 +6,4 @@ export interface DownloadListener {
     updateFilesize: undefined | ((seg: RecordingSegmentMessage, filename: string, startSize: number, totalSize: number) => Promise<void>);
 }
 export declare function downloadSegment(seg: RecordingSegmentMessage, filename: string, listener: DownloadListener): Promise<void>;
+//# sourceMappingURL=download.d.ts.map

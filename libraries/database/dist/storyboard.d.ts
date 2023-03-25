@@ -18,3 +18,4 @@ export declare function insertStoryboard(sb: Storyboard): Promise<Storyboard>;
 export declare function getStoryboard(recordingId: string, index: number): Promise<Storyboard | undefined>;
 export declare function getLatestStoryBoard(recordingId: string): Promise<Storyboard | undefined>;
 export declare function updateStoryboard(sb: Storyboard): Promise<void>;
+//# sourceMappingURL=storyboard.d.ts.map

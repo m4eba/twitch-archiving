@@ -1,8 +1,6 @@
 import { KafkaConfigOpt, FileConfigOpt, PostgresConfigOpt, RedisConfigOpt, } from '@twitch-archiving/config';
-import 'path';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
-import '@twitch-archiving/utils';
 import { initPostgres, initRedis, chat } from '@twitch-archiving/database';
 import { initLogger } from '@twitch-archiving/utils';
 import { parseIrcMessageEmoteTag, Resolver, } from '@twitch-archiving/chat';

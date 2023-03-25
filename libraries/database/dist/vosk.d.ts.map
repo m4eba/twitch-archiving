@@ -1,0 +1,1 @@
+{"version":3,"file":"vosk.d.ts","sourceRoot":"","sources":["../src/vosk.ts"],"names":[],"mappings":"AAOA,MAAM,WAAW,IAAI;IACnB,EAAE,EAAE,MAAM,CAAC;IACX,YAAY,EAAE,MAAM,CAAC;IAErB,OAAO,EAAE,IAAI,CAAC;CACf;AAED,wBAAsB,WAAW,IAAI,OAAO,CAAC,IAAI,CAAC,CAgCjD"}

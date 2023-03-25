@@ -4,3 +4,4 @@ export interface Vosk {
     created: Date;
 }
 export declare function createTable(): Promise<void>;
+//# sourceMappingURL=vosk.d.ts.map

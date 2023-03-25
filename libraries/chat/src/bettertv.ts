@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import type { Emote } from './';
+import type { Emote } from '.';
 
 function getEmotes(
   emotes: Array<{ id: string; code: string; imageType: string }>

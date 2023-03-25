@@ -59,6 +59,7 @@ export async function downloadSegment(seg, filename, listener) {
             logger.debug({ url: seg.url, headers }, 'fetch options');
             const resp = await fetch(seg.url, {
                 headers,
+                // @ts-ignore
                 signal: controller.signal,
             });
             if (!resp.ok)

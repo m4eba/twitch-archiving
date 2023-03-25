@@ -6,3 +6,4 @@ export declare function fetchWithTimeoutText(url: string, retries?: number, time
     resp: Response;
 }>;
 export declare function fetchWithTimeout(url: string, retries?: number, timeout?: number): Promise<Response>;
+//# sourceMappingURL=fetch.d.ts.map

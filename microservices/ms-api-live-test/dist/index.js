@@ -1,10 +1,7 @@
-import 'fs';
-import 'path';
 import { KafkaConfigOpt, FileConfigOpt, TwitchConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { initLogger } from '@twitch-archiving/utils';
-import '@twitch-archiving/messages';
 import { ClientCredentialsAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 const LiveTestConfigOpt = {

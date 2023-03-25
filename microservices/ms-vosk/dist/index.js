@@ -1,5 +1,4 @@
 import fs from 'fs';
-import 'stream';
 import path from 'path';
 import { KafkaConfigOpt, RedisConfigOpt, PostgresConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
@@ -10,7 +9,6 @@ import { initPostgres, vosk, transcript } from '@twitch-archiving/database';
 import Ffmpeg from 'fluent-ffmpeg';
 import WebSocket from 'ws';
 import WebSocketAsPromised from 'websocket-as-promised';
-import 'wav';
 const VoskConfigOpt = {
     inputTopic: { type: String, defaultValue: 'tw-playlist' },
     outputTopic: { type: String, defaultValue: 'tw-vosk' },

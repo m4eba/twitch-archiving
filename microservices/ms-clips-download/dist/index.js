@@ -5,7 +5,6 @@ import { KafkaConfigOpt, FileConfigOpt, PostgresConfigOpt, TwitchConfigOpt, } fr
 import fetch from 'node-fetch';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
-import 'luxon';
 import { initLogger, timeoutPipe } from '@twitch-archiving/utils';
 import { ClipsChatReplay, ClipsFullVideoButton, gql, VideoAccessToken_Clip, WatchLivePrompt, } from '@twitch-archiving/twitch';
 import { initPostgres, clips } from '@twitch-archiving/database';

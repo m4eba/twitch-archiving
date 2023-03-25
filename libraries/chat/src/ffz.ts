@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import type { Emote } from './';
+import type { Emote } from '.';
 
 export async function channelEmotes(
   channel: string

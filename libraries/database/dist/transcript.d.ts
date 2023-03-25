@@ -19,3 +19,4 @@ export interface Word {
 }
 export declare function createTable(): Promise<void>;
 export declare function insertTranscript(transcript: Transcript): Promise<string>;
+//# sourceMappingURL=transcript.d.ts.map

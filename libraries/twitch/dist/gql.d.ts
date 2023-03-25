@@ -13,3 +13,4 @@ export declare const WatchLivePrompt: (slug: string) => GraphQLRequest;
 export declare const ClipsFullVideoButton: (slug: string) => GraphQLRequest;
 export declare const ClipsChatReplay: (slug: string, offset: number | null) => GraphQLRequest;
 export declare function gql(req: GraphQLRequest[]): Promise<any>;
+//# sourceMappingURL=gql.d.ts.map

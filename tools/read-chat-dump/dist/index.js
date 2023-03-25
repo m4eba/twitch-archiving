@@ -1,12 +1,9 @@
-import 'fs';
 import { KafkaConfigOpt, FileConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { parse as parseIRC } from 'irc-message-ts';
 import { initLogger } from '@twitch-archiving/utils';
 import lineReader from 'line-reader';
-import 'process';
-import 'console';
 const PlaylistConfigOpt = {
     outputTopic: { type: String, defaultValue: 'tw-chat' },
     files: { type: String, multiple: true },
