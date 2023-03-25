@@ -64,6 +64,10 @@ await consumer.run({
             if (irc.params.length > 0) {
                 channel = irc.params[0].substring(1);
             }
+            if (!irc.tags['tmi-sent-ts']) {
+                logger.debug({ irc }, 'skip message');
+                return;
+            }
             if (irc.command === 'PRIVMSG') {
                 id = irc.tags['id'];
                 username = irc.prefix.substring(0, irc.prefix.indexOf('!'));
