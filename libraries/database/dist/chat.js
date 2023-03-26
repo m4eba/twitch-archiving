@@ -1,4 +1,4 @@
-import { getPool, getR, getP } from './init.js';
+import { getR, getRecPrismaClient } from './init.js';
 import { initLogger } from '@twitch-archiving/utils';
 const logger = initLogger('database-chat');
 const CHANNEL_EMOTES = (prefix, channel) => {
@@ -7,70 +7,15 @@ const CHANNEL_EMOTES = (prefix, channel) => {
 const GLOBAL_EMOTES = (prefix) => {
     return `${prefix}-global-emotes`;
 };
-export async function createTable() {
-    const pool = getPool();
-    if (pool === undefined) {
-        throw new Error('database not initialized');
-    }
-    // test for tables
-    const tabletest = await pool.query(`SELECT EXISTS (
-  SELECT FROM pg_tables
-  WHERE  schemaname = 'public'
-  AND    tablename  = 'chat_message'
-  );`);
-    if (!tabletest.rows[0].exists) {
-        await pool.query(`
-    create table chat_message (
-      id uuid primary key,
-      channel text not null,
-      username text not null,
-      message text not null,
-      command text not null,
-      time timestamptz not null,
-      data jsonb not null,
-      emotes jsonb not null
-    );
-    
-    create index chat_message_channel_idx on chat_message (channel);
-    create index chat_message_username_idx on chat_message (username);
-    create index chat_message_time_idx on chat_message (time);
-    create index chat_message_message_idx on chat_message using GIN(to_tsvector('english',message));
-
-    create type emote_source as enum ('twitch','bttv','ffz','7tv'); 
-    create table chat_emote (
-      id text not null,
-      source emote_source not null,
-      name text not null,
-      ext text not null,
-      data jsonb not null,
-      primary key(id,source)
-    );
-
-    create index chat_emote_name_idx on chat_emote (name);
-
-    create table chat_message_emote (
-      message_id uuid not null,
-      emote_id uuid not null,
-      emote_source uuid not null,
-      start_idx integer not null,
-      end_idx integer not null,
-      primary key(message_id,emote_id,emote_source,start_idx)
-    );
-    `);
-    }
-}
 export async function insertMessage(msg) {
-    const { pool } = getP();
-    await pool.query('INSERT into chat_message (id, channel, username, message, command, time, data, emotes ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING', [
-        msg.id,
-        msg.channel,
-        msg.username,
-        msg.message,
-        msg.command,
-        msg.time,
-        JSON.stringify(msg.data),
-        JSON.stringify(msg.emotes),
-    ]);
+    const client = getRecPrismaClient();
+    await client.chatMessage.create({
+        data: {
+            ...msg,
+            data: msg.data,
+            emotes: msg.emotes,
+        },
+    });
 }
 export async function setChannelEmotes(channel, emotes) {
     const { redis, prefix } = getR();
