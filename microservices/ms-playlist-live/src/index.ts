@@ -17,11 +17,11 @@ import {
   PlaylistMessage,
   PlaylistType,
   RecordingStartedMessage,
-  AccessToken,
   RecordingMessageType,
   PlaylistRequestMessage,
   PlaylistMessageType,
 } from '@twitch-archiving/messages';
+import type { AccessToken } from '@twitch-archiving/model';
 import {
   initPostgres,
   initRedis,

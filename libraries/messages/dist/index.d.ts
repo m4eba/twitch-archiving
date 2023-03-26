@@ -1,8 +1,4 @@
-export interface AccessToken {
-    token: string;
-    sig: string;
-    expires_at: string;
-}
+import { TwitchClip, AccessToken } from '@twitch-archiving/model';
 export interface WebsocketMessage {
     data: string;
 }
@@ -92,41 +88,6 @@ export interface StoryboardDoneMessage {
     columns: number;
     path: string;
     filename: string;
-}
-export interface TwitchClip {
-    id: string;
-    url: string;
-    embed_url: string;
-    broadcaster_id: string;
-    broadcaster_name: string;
-    creator_id: string;
-    creator_name: string;
-    video_id: string;
-    game_id: string;
-    language: string;
-    title: string;
-    view_count: number;
-    created_at: string;
-    thumbnail_url: string;
-    duration: number;
-    vod_offset: number;
-}
-export interface TwitchClipResponse {
-    data: TwitchClip[];
-    pagination: {
-        cursor: string;
-    };
-}
-export interface TwitchClipAccessToken {
-    clip: {
-        videoQualities: {
-            sourceURL: string;
-        }[];
-        playbackAccessToken: {
-            signature: string;
-            value: string;
-        };
-    };
 }
 export interface ClipsList {
     channel: string;

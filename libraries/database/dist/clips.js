@@ -12,26 +12,6 @@ export async function createTableClips() {
     WHERE  schemaname = 'public'
     AND    tablename  = 'clips'
     );`);
-    /*
-    {
-    "id": "PerfectAthleticCheetahSMOrc-tixaWW6RGGWPrPLt",
-    "url": "https://clips.twitch.tv/PerfectAthleticCheetahSMOrc-tixaWW6RGGWPrPLt",
-    "embed_url": "https://clips.twitch.tv/embed?clip=PerfectAthleticCheetahSMOrc-tixaWW6RGGWPrPLt",
-    "broadcaster_id": "159498717",
-    "broadcaster_name": "Jinnytty",
-    "creator_id": "403027202",
-    "creator_name": "Tech_IRL",
-    "video_id": "1634087691",
-    "game_id": "509658",
-    "language": "en",
-    "title": "Running to the boat",
-    "view_count": 7,
-    "created_at": "2022-10-26T07:01:30Z",
-    "thumbnail_url": "https://clips-media-assets2.twitch.tv/AQTlA7YsWllukRhlj6zy7Q/AT-cm%7CAQTlA7YsWllukRhlj
-  6zy7Q-preview-480x272.jpg",
-    "duration": 60,
-    "vod_offset": 30137
-    }*/
     if (!tabletest.rows[0].exists) {
         await pool.query(`
     create table clips (

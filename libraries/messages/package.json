@@ -1,19 +1,20 @@
 {
- "name": "@twitch-archiving/messages",
- "version": "0.0.1",
- "main": "dist/index.js",
- "license": "MIT",
- "type": "module",
- "scripts": {
-  "build": "tsc"
- },
- "devDependencies": {
-  "@types/node": "~17.0.18",
-  "eslint": "~8.10.0",
-  "@twitch-archiving/config-tsconfig": "*",
-  "@twitch-archiving/config-eslint-custom": "*"
- },
- "dependencies": {
-  "typescript": "~4.5.5"
- }
+  "name": "@twitch-archiving/messages",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.18",
+    "eslint": "~8.10.0",
+    "@twitch-archiving/config-tsconfig": "*",
+    "@twitch-archiving/config-eslint-custom": "*"
+  },
+  "dependencies": {
+    "typescript": "~4.5.5",
+    "@twitch-archiving/model": "*"
+  }
 }

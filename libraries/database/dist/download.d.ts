@@ -1,4 +1,5 @@
-import type { AccessToken, PlaylistType } from '@twitch-archiving/messages';
+import type { AccessToken } from '@twitch-archiving/model';
+import type { PlaylistType } from '@twitch-archiving/messages';
 export interface Recording {
     id: string;
     start: Date;

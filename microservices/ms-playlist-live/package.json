@@ -1,31 +1,32 @@
 {
- "name": "@twitch-archiving/ms-playlist-live",
- "version": "0.0.1",
- "bin": "dist/index.js",
- "license": "MIT",
- "type": "module",
- "scripts": {
-  "build": "tsc",
-  "start": "node dist/index.js"
- },
- "devDependencies": {
-  "@types/node": "~17.0.18",
-  "eslint": "~8.10.0",
-  "@types/hls-parser": "~0.8.3",
-  "@twitch-archiving/config-tsconfig": "*",
-  "@twitch-archiving/config-eslint-custom": "*"
- },
- "dependencies": {
-  "typescript": "~4.5.5",
-  "@twitch-archiving/config": "*",
-  "@twitch-archiving/messages": "*",
-  "kafkajs": "~1.16.0",
-  "pino": "~7.10.0",
-  "ts-command-line-args": "~2.2.1",
-  "hls-parser": "~0.10.4",
-  "@twitch-archiving/twitch": "*",
-  "redis": "~4.0.6",
-  "@twitch-archiving/database": "*",
-  "@twitch-archiving/utils": "*"
- }
+  "name": "@twitch-archiving/ms-playlist-live",
+  "version": "0.0.1",
+  "bin": "dist/index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.18",
+    "eslint": "~8.10.0",
+    "@types/hls-parser": "~0.8.3",
+    "@twitch-archiving/config-tsconfig": "*",
+    "@twitch-archiving/config-eslint-custom": "*"
+  },
+  "dependencies": {
+    "typescript": "~4.5.5",
+    "@twitch-archiving/config": "*",
+    "@twitch-archiving/messages": "*",
+    "kafkajs": "~1.16.0",
+    "pino": "~7.10.0",
+    "ts-command-line-args": "~2.2.1",
+    "hls-parser": "~0.10.4",
+    "@twitch-archiving/twitch": "*",
+    "redis": "~4.0.6",
+    "@twitch-archiving/database": "*",
+    "@twitch-archiving/model": "*",
+    "@twitch-archiving/utils": "*"
+  }
 }

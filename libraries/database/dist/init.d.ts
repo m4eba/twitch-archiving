@@ -1,6 +1,8 @@
 import type { PostgresConfig, RedisConfig } from '@twitch-archiving/config';
 import type { Pool } from 'pg';
 import { createClient } from 'redis';
+import { RecPrismaClient } from '@twitch-archiving/prisma';
+export declare function getRecPrismaClient(): RecPrismaClient;
 export declare type RedisClient = ReturnType<typeof createClient>;
 export declare function getPool(): Pool | undefined;
 export declare function getRedis(): RedisClient | undefined;

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import url from 'url';
-import type { AccessToken } from '@twitch-archiving/messages';
+import type { AccessToken } from '@twitch-archiving/model';
 import { fetchWithTimeoutText } from '@twitch-archiving/utils';
 
 export async function getMainPlaylist(

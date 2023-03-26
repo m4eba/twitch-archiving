@@ -4,8 +4,15 @@ import type { Logger } from 'pino';
 import pg from 'pg';
 import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
+import { RecPrismaClient } from '@twitch-archiving/prisma';
 
 const logger: Logger = initLogger('database-init');
+
+const recPrismaClient = new RecPrismaClient();
+
+export function getRecPrismaClient(): RecPrismaClient {
+  return recPrismaClient;
+}
 
 export type RedisClient = ReturnType<typeof createClient>;
 
@@ -73,7 +80,6 @@ export async function initPostgres(config: PostgresConfig): Promise<void> {
 
     // make one query to test for database
     await p.query('select 1');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     p = undefined;
     if (

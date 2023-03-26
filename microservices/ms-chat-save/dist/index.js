@@ -26,7 +26,6 @@ const kafka = new Kafka({
 });
 await initRedis(config, config.redisPrefix);
 await initPostgres(config);
-await chat.createTable();
 const resolver = new Resolver();
 resolver.setGlobal(await chat.getGlobalEmotes());
 const consumerE = kafka.consumer({

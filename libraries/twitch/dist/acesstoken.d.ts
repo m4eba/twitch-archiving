@@ -1,4 +1,4 @@
-import type { AccessToken } from '@twitch-archiving/messages';
+import type { AccessToken } from '@twitch-archiving/model';
 export declare const DEFAULT_PLAYER_TYPE: string;
 export interface AccessTokenParams {
     isLive: boolean;

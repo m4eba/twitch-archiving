@@ -1,7 +1,12 @@
 import pg from 'pg';
 import { createClient } from 'redis';
 import { initLogger } from '@twitch-archiving/utils';
+import { RecPrismaClient } from '@twitch-archiving/prisma';
 const logger = initLogger('database-init');
+const recPrismaClient = new RecPrismaClient();
+export function getRecPrismaClient() {
+    return recPrismaClient;
+}
 let pool = undefined;
 let redis = undefined;
 let redisPrefix = '';
@@ -60,7 +65,6 @@ export async function initPostgres(config) {
         });
         // make one query to test for database
         await p.query('select 1');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (e) {
         p = undefined;

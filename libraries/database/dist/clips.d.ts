@@ -1,4 +1,4 @@
-import type { TwitchClip } from '@twitch-archiving/messages';
+import type { TwitchClip } from '@twitch-archiving/model';
 export interface Clip {
     id: string;
     created_at: string;

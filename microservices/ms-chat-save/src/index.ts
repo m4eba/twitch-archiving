@@ -15,6 +15,7 @@ import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { FileWriter } from '@twitch-archiving/utils';
 import type { IRCMessage } from '@twitch-archiving/messages';
 import { initPostgres, initRedis, chat } from '@twitch-archiving/database';
+import type { ChatMessage } from '@twitch-archiving/model';
 import { initLogger } from '@twitch-archiving/utils';
 import {
   parseIrcMessageEmoteTag,
@@ -65,7 +66,6 @@ const kafka: Kafka = new Kafka({
 
 await initRedis(config, config.redisPrefix);
 await initPostgres(config);
-await chat.createTable();
 
 const resolver = new Resolver();
 resolver.setGlobal(await chat.getGlobalEmotes());
@@ -134,7 +134,7 @@ await consumer.run({
       }
 
       logger.trace({ text, emotes, channel }, 'text with emotes');
-      const msg: chat.ChatMessage = {
+      const msg: ChatMessage = {
         id,
         channel,
         username,

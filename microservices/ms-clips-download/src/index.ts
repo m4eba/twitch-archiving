@@ -16,13 +16,12 @@ import fetch from 'node-fetch';
 import { Kafka, Producer, TopicMessages, Message, Consumer } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { DateTime } from 'luxon';
+import type { ClipsList, ClipDownload } from '@twitch-archiving/messages';
 import type {
   TwitchClip,
   TwitchClipAccessToken,
   TwitchClipResponse,
-  ClipsList,
-  ClipDownload,
-} from '@twitch-archiving/messages';
+} from '@twitch-archiving/model';
 import { initLogger, timeoutPipe } from '@twitch-archiving/utils';
 import {
   ClipsChatReplay,

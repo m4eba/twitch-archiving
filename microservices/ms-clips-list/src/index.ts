@@ -12,12 +12,8 @@ import type { Logger } from 'pino';
 import { Kafka, Producer, TopicMessages, Message, Consumer } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { DateTime } from 'luxon';
-import type {
-  TwitchClip,
-  TwitchClipResponse,
-  ClipsList,
-  ClipDownload,
-} from '@twitch-archiving/messages';
+import type { ClipsList, ClipDownload } from '@twitch-archiving/messages';
+import type { TwitchClip, TwitchClipResponse } from '@twitch-archiving/model';
 import { initLogger, fetchWithTimeoutText } from '@twitch-archiving/utils';
 import { initPostgres } from '@twitch-archiving/database';
 import { ClientCredentialsAuthProvider } from '@twurple/auth';

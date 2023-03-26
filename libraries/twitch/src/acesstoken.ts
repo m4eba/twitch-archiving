@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import pino, { Logger } from 'pino';
-import type { AccessToken } from '@twitch-archiving/messages';
+import type { AccessToken } from '@twitch-archiving/model';
 
 const logger: Logger = pino({ level: 'debug' }).child({
   module: 'twitch',

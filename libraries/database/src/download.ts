@@ -1,11 +1,8 @@
 import type { Pool } from 'pg';
 import type { Logger } from 'pino';
 import { getPool, getR, getP, getPR } from './init.js';
-import type {
-  AccessToken,
-  PlaylistMessage,
-  PlaylistType,
-} from '@twitch-archiving/messages';
+import type { AccessToken } from '@twitch-archiving/model';
+import type { PlaylistMessage, PlaylistType } from '@twitch-archiving/messages';
 import { initLogger } from '@twitch-archiving/utils';
 
 const logger: Logger = initLogger('database-download');

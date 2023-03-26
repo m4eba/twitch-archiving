@@ -1,27 +1,29 @@
 {
- "name": "@twitch-archiving/database",
- "version": "0.0.1",
- "main": "dist/index.js",
- "license": "MIT",
- "type": "module",
- "scripts": {
-  "build": "tsc"
- },
- "devDependencies": {
-  "@types/node": "~17.0.18",
-  "eslint": "~8.10.0",
-  "@types/pg": "~8.6.5",
-  "@twitch-archiving/config-tsconfig": "*",
-  "@twitch-archiving/config-eslint-custom": "*"
- },
- "dependencies": {
-  "typescript": "~4.5.5",
-  "pino": "~7.11.0",
-  "pg": "~8.7.3",
-  "@twitch-archiving/config": "*",
-  "redis": "~4.1.0",
-  "@twitch-archiving/messages": "*",
-  "@twitch-archiving/utils": "*",
-  "@twitch-archiving/chat": "*"
- }
+  "name": "@twitch-archiving/database",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.18",
+    "eslint": "~8.10.0",
+    "@types/pg": "~8.6.5",
+    "@twitch-archiving/config-tsconfig": "*",
+    "@twitch-archiving/config-eslint-custom": "*"
+  },
+  "dependencies": {
+    "typescript": "~4.5.5",
+    "pino": "~7.11.0",
+    "pg": "~8.7.3",
+    "@twitch-archiving/config": "*",
+    "redis": "~4.1.0",
+    "@twitch-archiving/messages": "*",
+    "@twitch-archiving/utils": "*",
+    "@twitch-archiving/chat": "*",
+    "@twitch-archiving/model": "*",
+    "@twitch-archiving/prisma": "*"
+  }
 }
