@@ -19,7 +19,7 @@
     "typescript": "~4.5.5",
     "@twitch-archiving/config": "*",
     "@twitch-archiving/messages": "*",
-    "@twitch-archivin/database": "*",
+    "@twitch-archiving/database": "*",
     "kafkajs": "~1.16.0",
     "pino": "~7.10.0",
     "ts-command-line-args": "~2.2.1",
