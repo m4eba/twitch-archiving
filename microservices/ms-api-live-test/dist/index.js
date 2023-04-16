@@ -1,9 +1,10 @@
-import { KafkaConfigOpt, FileConfigOpt, TwitchConfigOpt, } from '@twitch-archiving/config';
+import { KafkaConfigOpt, PostgresConfigOpt, FileConfigOpt, TwitchConfigOpt, } from '@twitch-archiving/config';
 import { Kafka } from 'kafkajs';
 import { parse } from 'ts-command-line-args';
 import { initLogger } from '@twitch-archiving/utils';
 import { ClientCredentialsAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
+import { download as dl, initPostgres } from '@twitch-archiving/database';
 const LiveTestConfigOpt = {
     outputTopic: { type: String, defaultValue: 'tw-live' },
     user: { type: String, multiple: true },
@@ -12,6 +13,7 @@ const LiveTestConfigOpt = {
 const config = parse({
     ...KafkaConfigOpt,
     ...LiveTestConfigOpt,
+    ...PostgresConfigOpt,
     ...TwitchConfigOpt,
     ...FileConfigOpt,
 }, {
@@ -22,11 +24,15 @@ const kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
 });
+await initPostgres(config);
 const producer = kafka.producer();
 await producer.connect();
 const authProvider = new ClientCredentialsAuthProvider(config.twitchClientId, config.twitchClientSecret);
 const apiClient = new ApiClient({ authProvider });
 async function testUser(user) {
+    const recording = await dl.getRunningRecording(user);
+    if (recording !== undefined)
+        return;
     const stream = await apiClient.streams.getStreamByUserName(user);
     logger.debug({ stream, user }, 'test user');
     if (stream !== null) {

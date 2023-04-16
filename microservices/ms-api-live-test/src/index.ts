@@ -23,6 +23,7 @@ import {
 } from '@twitch-archiving/messages';
 import { ClientCredentialsAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
+import { download as dl, initPostgres } from '@twitch-archiving/database';
 
 interface LiveTestConfig {
   outputTopic: string;
@@ -40,12 +41,14 @@ interface Config
   extends LiveTestConfig,
     TwitchConfig,
     KafkaConfig,
+    PostgresConfig,
     FileConfig {}
 
 const config: Config = parse<Config>(
   {
     ...KafkaConfigOpt,
     ...LiveTestConfigOpt,
+    ...PostgresConfigOpt,
     ...TwitchConfigOpt,
     ...FileConfigOpt,
   },
@@ -61,6 +64,8 @@ const kafka: Kafka = new Kafka({
   brokers: config.kafkaBroker,
 });
 
+await initPostgres(config);
+
 const producer: Producer = kafka.producer();
 await producer.connect();
 
@@ -71,6 +76,8 @@ const authProvider = new ClientCredentialsAuthProvider(
 const apiClient = new ApiClient({ authProvider });
 
 async function testUser(user: string) {
+  const recording = await dl.getRunningRecording(user);
+  if (recording !== undefined) return;
   const stream = await apiClient.streams.getStreamByUserName(user);
   logger.debug({ stream, user }, 'test user');
   if (stream !== null) {
