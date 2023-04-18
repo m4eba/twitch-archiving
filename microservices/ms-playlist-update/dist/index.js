@@ -39,13 +39,15 @@ await consumer.run({
             return;
         const user = message.key.toString();
         const recording = await dl.getRunningRecording(user);
-        if (recording === undefined) {
+        if (!recording) {
+            logger.debug({ user }, 'force reload - no recording');
             await forcePlaylistUpdate(user);
             return;
         }
         const playlist = recording.data;
         logger.debug({ playlist, user }, 'playlist');
         if (playlist === null) {
+            logger.debug({ user }, 'force reload - empty playlist');
             await forcePlaylistUpdate(user);
             return;
         }
@@ -53,7 +55,7 @@ await consumer.run({
         //const resp = await fetch(playlist.url);
         const { data, resp } = await fetchWithTimeoutText(playlist.bestUrl, 3, 2000);
         if (resp.status !== 200) {
-            logger.debug({ code: resp.status }, 'invalid status code');
+            logger.debug({ code: resp.status, user }, 'force reload - invalid status code');
             await forcePlaylistUpdate(user);
             return;
         }

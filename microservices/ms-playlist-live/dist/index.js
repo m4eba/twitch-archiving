@@ -47,7 +47,7 @@ await consumer.run({
         if (!message.key)
             return;
         const user = message.key.toString();
-        logger.debug({ user }, 'received msg');
+        logger.debug({ user, time: message.timestamp }, 'received msg');
         let init = false;
         let newStream = false;
         if (message.value) {

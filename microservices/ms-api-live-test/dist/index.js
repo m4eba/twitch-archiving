@@ -31,11 +31,13 @@ const authProvider = new ClientCredentialsAuthProvider(config.twitchClientId, co
 const apiClient = new ApiClient({ authProvider });
 async function testUser(user) {
     const recording = await dl.getRunningRecording(user);
-    if (recording !== undefined)
+    logger.trace({ recording, user }, 'test recording');
+    if (!recording)
         return;
     const stream = await apiClient.streams.getStreamByUserName(user);
     logger.debug({ stream, user }, 'test user');
     if (stream !== null) {
+        logger.trace({ user }, 'send reload');
         sendData(config.outputTopic, {
             key: user,
             value: JSON.stringify({ forceReload: true }),
