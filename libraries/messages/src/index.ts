@@ -118,3 +118,15 @@ export interface ClipDownload {
   channel: string;
   clip: TwitchClip;
 }
+
+export interface TaskRequestMsg {
+  groupId: string;
+  taskId: string;
+}
+
+export interface TaskDoneMsg extends TaskRequestMsg {}
+
+export interface TaskData<T extends TaskRequestMsg> {
+  topic: string;
+  data: T;
+}

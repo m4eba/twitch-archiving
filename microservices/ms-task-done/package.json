@@ -1,0 +1,28 @@
+{
+  "name": "@twitch-archiving/ms-task-done",
+  "version": "0.0.1",
+  "bin": "dist/index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.18",
+    "eslint": "~8.10.0",
+    "@twitch-archiving/config-tsconfig": "*",
+    "@twitch-archiving/config-eslint-custom": "*"
+  },
+  "dependencies": {
+    "typescript": "~4.5.5",
+    "@twitch-archiving/config": "*",
+    "@twitch-archiving/messages": "*",
+    "kafkajs": "~1.16.0",
+    "pino": "~7.10.0",
+    "ts-command-line-args": "~2.2.1",
+    "@twitch-archiving/utils": "*",
+    "@twitch-archiving/retry": "*",
+    "@twitch-archiving/prisma": "*"
+  }
+}
