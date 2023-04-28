@@ -1,4 +1,5 @@
 import fs from 'fs';
+import * as crypto from 'crypto';
 export * from './FileWriter.js';
 export * from './logger.js';
 export * from './download.js';
@@ -12,4 +13,7 @@ export async function fileExists(name) {
         .access(name, fs.constants.F_OK)
         .then(() => true)
         .catch(() => false);
+}
+export function randomStr() {
+    return crypto.randomBytes(20).toString('hex');
 }

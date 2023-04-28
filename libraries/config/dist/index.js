@@ -28,3 +28,7 @@ export const FileConfigOpt = {
 export const LogConfigOpt = {
     logLevel: { type: String, defaultValue: 'info' },
 };
+export const RetryConfigOpt = {
+    retries: { type: Number, defaultValue: 3 },
+    failedTopic: { type: String, defaultValue: 'failed-task' },
+};

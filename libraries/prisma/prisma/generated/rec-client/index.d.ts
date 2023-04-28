@@ -146,6 +146,31 @@ export type ClipsViews = {
   view_count: number
 }
 
+/**
+ * Model RetryLog
+ * 
+ */
+export type RetryLog = {
+  id: bigint
+  topic: string
+  time: Date
+  data: Prisma.JsonValue
+}
+
+/**
+ * Model Task
+ * 
+ */
+export type Task = {
+  id: bigint
+  groupId: bigint
+  task: string
+  dependencies: string[]
+  started: Date | null
+  completed: Date | null
+  data: Prisma.JsonValue
+}
+
 
 /**
  * Enums
@@ -380,6 +405,26 @@ export class PrismaClient<
     * ```
     */
   get clipsViews(): Prisma.ClipsViewsDelegate<GlobalReject>;
+
+  /**
+   * `prisma.retryLog`: Exposes CRUD operations for the **RetryLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RetryLogs
+    * const retryLogs = await prisma.retryLog.findMany()
+    * ```
+    */
+  get retryLog(): Prisma.RetryLogDelegate<GlobalReject>;
+
+  /**
+   * `prisma.task`: Exposes CRUD operations for the **Task** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Tasks
+    * const tasks = await prisma.task.findMany()
+    * ```
+    */
+  get task(): Prisma.TaskDelegate<GlobalReject>;
 }
 
 export namespace Prisma {
@@ -857,7 +902,9 @@ export namespace Prisma {
     Storyboard: 'Storyboard',
     Transcript: 'Transcript',
     Clips: 'Clips',
-    ClipsViews: 'ClipsViews'
+    ClipsViews: 'ClipsViews',
+    RetryLog: 'RetryLog',
+    Task: 'Task'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -9484,6 +9531,1838 @@ export namespace Prisma {
 
 
   /**
+   * Model RetryLog
+   */
+
+
+  export type AggregateRetryLog = {
+    _count: RetryLogCountAggregateOutputType | null
+    _avg: RetryLogAvgAggregateOutputType | null
+    _sum: RetryLogSumAggregateOutputType | null
+    _min: RetryLogMinAggregateOutputType | null
+    _max: RetryLogMaxAggregateOutputType | null
+  }
+
+  export type RetryLogAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type RetryLogSumAggregateOutputType = {
+    id: bigint | null
+  }
+
+  export type RetryLogMinAggregateOutputType = {
+    id: bigint | null
+    topic: string | null
+    time: Date | null
+  }
+
+  export type RetryLogMaxAggregateOutputType = {
+    id: bigint | null
+    topic: string | null
+    time: Date | null
+  }
+
+  export type RetryLogCountAggregateOutputType = {
+    id: number
+    topic: number
+    time: number
+    data: number
+    _all: number
+  }
+
+
+  export type RetryLogAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type RetryLogSumAggregateInputType = {
+    id?: true
+  }
+
+  export type RetryLogMinAggregateInputType = {
+    id?: true
+    topic?: true
+    time?: true
+  }
+
+  export type RetryLogMaxAggregateInputType = {
+    id?: true
+    topic?: true
+    time?: true
+  }
+
+  export type RetryLogCountAggregateInputType = {
+    id?: true
+    topic?: true
+    time?: true
+    data?: true
+    _all?: true
+  }
+
+  export type RetryLogAggregateArgs = {
+    /**
+     * Filter which RetryLog to aggregate.
+     */
+    where?: RetryLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RetryLogs to fetch.
+     */
+    orderBy?: Enumerable<RetryLogOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RetryLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RetryLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RetryLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RetryLogs
+    **/
+    _count?: true | RetryLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RetryLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RetryLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RetryLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RetryLogMaxAggregateInputType
+  }
+
+  export type GetRetryLogAggregateType<T extends RetryLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateRetryLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRetryLog[P]>
+      : GetScalarType<T[P], AggregateRetryLog[P]>
+  }
+
+
+
+
+  export type RetryLogGroupByArgs = {
+    where?: RetryLogWhereInput
+    orderBy?: Enumerable<RetryLogOrderByWithAggregationInput>
+    by: RetryLogScalarFieldEnum[]
+    having?: RetryLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RetryLogCountAggregateInputType | true
+    _avg?: RetryLogAvgAggregateInputType
+    _sum?: RetryLogSumAggregateInputType
+    _min?: RetryLogMinAggregateInputType
+    _max?: RetryLogMaxAggregateInputType
+  }
+
+
+  export type RetryLogGroupByOutputType = {
+    id: bigint
+    topic: string
+    time: Date
+    data: JsonValue
+    _count: RetryLogCountAggregateOutputType | null
+    _avg: RetryLogAvgAggregateOutputType | null
+    _sum: RetryLogSumAggregateOutputType | null
+    _min: RetryLogMinAggregateOutputType | null
+    _max: RetryLogMaxAggregateOutputType | null
+  }
+
+  type GetRetryLogGroupByPayload<T extends RetryLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickArray<RetryLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RetryLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RetryLogGroupByOutputType[P]>
+            : GetScalarType<T[P], RetryLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RetryLogSelect = {
+    id?: boolean
+    topic?: boolean
+    time?: boolean
+    data?: boolean
+  }
+
+
+  export type RetryLogGetPayload<S extends boolean | null | undefined | RetryLogArgs> =
+    S extends { select: any, include: any } ? 'Please either choose `select` or `include`' :
+    S extends true ? RetryLog :
+    S extends undefined ? never :
+    S extends { include: any } & (RetryLogArgs | RetryLogFindManyArgs)
+    ? RetryLog 
+    : S extends { select: any } & (RetryLogArgs | RetryLogFindManyArgs)
+      ? {
+    [P in TruthyKeys<S['select']>]:
+    P extends keyof RetryLog ? RetryLog[P] : never
+  } 
+      : RetryLog
+
+
+  type RetryLogCountArgs = 
+    Omit<RetryLogFindManyArgs, 'select' | 'include'> & {
+      select?: RetryLogCountAggregateInputType | true
+    }
+
+  export interface RetryLogDelegate<GlobalRejectSettings extends Prisma.RejectOnNotFound | Prisma.RejectPerOperation | false | undefined> {
+
+    /**
+     * Find zero or one RetryLog that matches the filter.
+     * @param {RetryLogFindUniqueArgs} args - Arguments to find a RetryLog
+     * @example
+     * // Get one RetryLog
+     * const retryLog = await prisma.retryLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUnique<T extends RetryLogFindUniqueArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+      args: SelectSubset<T, RetryLogFindUniqueArgs>
+    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findUnique', 'RetryLog'> extends True ? Prisma__RetryLogClient<RetryLogGetPayload<T>> : Prisma__RetryLogClient<RetryLogGetPayload<T> | null, null>
+
+    /**
+     * Find one RetryLog that matches the filter or throw an error  with `error.code='P2025'` 
+     *     if no matches were found.
+     * @param {RetryLogFindUniqueOrThrowArgs} args - Arguments to find a RetryLog
+     * @example
+     * // Get one RetryLog
+     * const retryLog = await prisma.retryLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUniqueOrThrow<T extends RetryLogFindUniqueOrThrowArgs>(
+      args?: SelectSubset<T, RetryLogFindUniqueOrThrowArgs>
+    ): Prisma__RetryLogClient<RetryLogGetPayload<T>>
+
+    /**
+     * Find the first RetryLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RetryLogFindFirstArgs} args - Arguments to find a RetryLog
+     * @example
+     * // Get one RetryLog
+     * const retryLog = await prisma.retryLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirst<T extends RetryLogFindFirstArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+      args?: SelectSubset<T, RetryLogFindFirstArgs>
+    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findFirst', 'RetryLog'> extends True ? Prisma__RetryLogClient<RetryLogGetPayload<T>> : Prisma__RetryLogClient<RetryLogGetPayload<T> | null, null>
+
+    /**
+     * Find the first RetryLog that matches the filter or
+     * throw `NotFoundError` if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RetryLogFindFirstOrThrowArgs} args - Arguments to find a RetryLog
+     * @example
+     * // Get one RetryLog
+     * const retryLog = await prisma.retryLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirstOrThrow<T extends RetryLogFindFirstOrThrowArgs>(
+      args?: SelectSubset<T, RetryLogFindFirstOrThrowArgs>
+    ): Prisma__RetryLogClient<RetryLogGetPayload<T>>
+
+    /**
+     * Find zero or more RetryLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RetryLogFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RetryLogs
+     * const retryLogs = await prisma.retryLog.findMany()
+     * 
+     * // Get first 10 RetryLogs
+     * const retryLogs = await prisma.retryLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const retryLogWithIdOnly = await prisma.retryLog.findMany({ select: { id: true } })
+     * 
+    **/
+    findMany<T extends RetryLogFindManyArgs>(
+      args?: SelectSubset<T, RetryLogFindManyArgs>
+    ): Prisma.PrismaPromise<Array<RetryLogGetPayload<T>>>
+
+    /**
+     * Create a RetryLog.
+     * @param {RetryLogCreateArgs} args - Arguments to create a RetryLog.
+     * @example
+     * // Create one RetryLog
+     * const RetryLog = await prisma.retryLog.create({
+     *   data: {
+     *     // ... data to create a RetryLog
+     *   }
+     * })
+     * 
+    **/
+    create<T extends RetryLogCreateArgs>(
+      args: SelectSubset<T, RetryLogCreateArgs>
+    ): Prisma__RetryLogClient<RetryLogGetPayload<T>>
+
+    /**
+     * Create many RetryLogs.
+     *     @param {RetryLogCreateManyArgs} args - Arguments to create many RetryLogs.
+     *     @example
+     *     // Create many RetryLogs
+     *     const retryLog = await prisma.retryLog.createMany({
+     *       data: {
+     *         // ... provide data here
+     *       }
+     *     })
+     *     
+    **/
+    createMany<T extends RetryLogCreateManyArgs>(
+      args?: SelectSubset<T, RetryLogCreateManyArgs>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a RetryLog.
+     * @param {RetryLogDeleteArgs} args - Arguments to delete one RetryLog.
+     * @example
+     * // Delete one RetryLog
+     * const RetryLog = await prisma.retryLog.delete({
+     *   where: {
+     *     // ... filter to delete one RetryLog
+     *   }
+     * })
+     * 
+    **/
+    delete<T extends RetryLogDeleteArgs>(
+      args: SelectSubset<T, RetryLogDeleteArgs>
+    ): Prisma__RetryLogClient<RetryLogGetPayload<T>>
+
+    /**
+     * Update one RetryLog.
+     * @param {RetryLogUpdateArgs} args - Arguments to update one RetryLog.
+     * @example
+     * // Update one RetryLog
+     * const retryLog = await prisma.retryLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    update<T extends RetryLogUpdateArgs>(
+      args: SelectSubset<T, RetryLogUpdateArgs>
+    ): Prisma__RetryLogClient<RetryLogGetPayload<T>>
+
+    /**
+     * Delete zero or more RetryLogs.
+     * @param {RetryLogDeleteManyArgs} args - Arguments to filter RetryLogs to delete.
+     * @example
+     * // Delete a few RetryLogs
+     * const { count } = await prisma.retryLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+    **/
+    deleteMany<T extends RetryLogDeleteManyArgs>(
+      args?: SelectSubset<T, RetryLogDeleteManyArgs>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RetryLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RetryLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RetryLogs
+     * const retryLog = await prisma.retryLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    updateMany<T extends RetryLogUpdateManyArgs>(
+      args: SelectSubset<T, RetryLogUpdateManyArgs>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one RetryLog.
+     * @param {RetryLogUpsertArgs} args - Arguments to update or create a RetryLog.
+     * @example
+     * // Update or create a RetryLog
+     * const retryLog = await prisma.retryLog.upsert({
+     *   create: {
+     *     // ... data to create a RetryLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RetryLog we want to update
+     *   }
+     * })
+    **/
+    upsert<T extends RetryLogUpsertArgs>(
+      args: SelectSubset<T, RetryLogUpsertArgs>
+    ): Prisma__RetryLogClient<RetryLogGetPayload<T>>
+
+    /**
+     * Count the number of RetryLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RetryLogCountArgs} args - Arguments to filter RetryLogs to count.
+     * @example
+     * // Count the number of RetryLogs
+     * const count = await prisma.retryLog.count({
+     *   where: {
+     *     // ... the filter for the RetryLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends RetryLogCountArgs>(
+      args?: Subset<T, RetryLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends _Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RetryLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RetryLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RetryLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RetryLogAggregateArgs>(args: Subset<T, RetryLogAggregateArgs>): Prisma.PrismaPromise<GetRetryLogAggregateType<T>>
+
+    /**
+     * Group by RetryLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RetryLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RetryLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RetryLogGroupByArgs['orderBy'] }
+        : { orderBy?: RetryLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends TupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RetryLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRetryLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RetryLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export class Prisma__RetryLogClient<T, Null = never> implements Prisma.PrismaPromise<T> {
+    private readonly _dmmf;
+    private readonly _queryType;
+    private readonly _rootField;
+    private readonly _clientMethod;
+    private readonly _args;
+    private readonly _dataPath;
+    private readonly _errorFormat;
+    private readonly _measurePerformance?;
+    private _isList;
+    private _callsite;
+    private _requestPromise?;
+    readonly [Symbol.toStringTag]: 'PrismaPromise';
+    constructor(_dmmf: runtime.DMMFClass, _queryType: 'query' | 'mutation', _rootField: string, _clientMethod: string, _args: any, _dataPath: string[], _errorFormat: ErrorFormat, _measurePerformance?: boolean | undefined, _isList?: boolean);
+
+
+    private get _document();
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult>;
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): Promise<T>;
+  }
+
+
+
+  // Custom InputTypes
+
+  /**
+   * RetryLog base type for findUnique actions
+   */
+  export type RetryLogFindUniqueArgsBase = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * Filter, which RetryLog to fetch.
+     */
+    where: RetryLogWhereUniqueInput
+  }
+
+  /**
+   * RetryLog findUnique
+   */
+  export interface RetryLogFindUniqueArgs extends RetryLogFindUniqueArgsBase {
+   /**
+    * Throw an Error if query returns no results
+    * @deprecated since 4.0.0: use `findUniqueOrThrow` method instead
+    */
+    rejectOnNotFound?: RejectOnNotFound
+  }
+      
+
+  /**
+   * RetryLog findUniqueOrThrow
+   */
+  export type RetryLogFindUniqueOrThrowArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * Filter, which RetryLog to fetch.
+     */
+    where: RetryLogWhereUniqueInput
+  }
+
+
+  /**
+   * RetryLog base type for findFirst actions
+   */
+  export type RetryLogFindFirstArgsBase = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * Filter, which RetryLog to fetch.
+     */
+    where?: RetryLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RetryLogs to fetch.
+     */
+    orderBy?: Enumerable<RetryLogOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RetryLogs.
+     */
+    cursor?: RetryLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RetryLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RetryLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RetryLogs.
+     */
+    distinct?: Enumerable<RetryLogScalarFieldEnum>
+  }
+
+  /**
+   * RetryLog findFirst
+   */
+  export interface RetryLogFindFirstArgs extends RetryLogFindFirstArgsBase {
+   /**
+    * Throw an Error if query returns no results
+    * @deprecated since 4.0.0: use `findFirstOrThrow` method instead
+    */
+    rejectOnNotFound?: RejectOnNotFound
+  }
+      
+
+  /**
+   * RetryLog findFirstOrThrow
+   */
+  export type RetryLogFindFirstOrThrowArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * Filter, which RetryLog to fetch.
+     */
+    where?: RetryLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RetryLogs to fetch.
+     */
+    orderBy?: Enumerable<RetryLogOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RetryLogs.
+     */
+    cursor?: RetryLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RetryLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RetryLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RetryLogs.
+     */
+    distinct?: Enumerable<RetryLogScalarFieldEnum>
+  }
+
+
+  /**
+   * RetryLog findMany
+   */
+  export type RetryLogFindManyArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * Filter, which RetryLogs to fetch.
+     */
+    where?: RetryLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RetryLogs to fetch.
+     */
+    orderBy?: Enumerable<RetryLogOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RetryLogs.
+     */
+    cursor?: RetryLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RetryLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RetryLogs.
+     */
+    skip?: number
+    distinct?: Enumerable<RetryLogScalarFieldEnum>
+  }
+
+
+  /**
+   * RetryLog create
+   */
+  export type RetryLogCreateArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * The data needed to create a RetryLog.
+     */
+    data: XOR<RetryLogCreateInput, RetryLogUncheckedCreateInput>
+  }
+
+
+  /**
+   * RetryLog createMany
+   */
+  export type RetryLogCreateManyArgs = {
+    /**
+     * The data used to create many RetryLogs.
+     */
+    data: Enumerable<RetryLogCreateManyInput>
+    skipDuplicates?: boolean
+  }
+
+
+  /**
+   * RetryLog update
+   */
+  export type RetryLogUpdateArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * The data needed to update a RetryLog.
+     */
+    data: XOR<RetryLogUpdateInput, RetryLogUncheckedUpdateInput>
+    /**
+     * Choose, which RetryLog to update.
+     */
+    where: RetryLogWhereUniqueInput
+  }
+
+
+  /**
+   * RetryLog updateMany
+   */
+  export type RetryLogUpdateManyArgs = {
+    /**
+     * The data used to update RetryLogs.
+     */
+    data: XOR<RetryLogUpdateManyMutationInput, RetryLogUncheckedUpdateManyInput>
+    /**
+     * Filter which RetryLogs to update
+     */
+    where?: RetryLogWhereInput
+  }
+
+
+  /**
+   * RetryLog upsert
+   */
+  export type RetryLogUpsertArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * The filter to search for the RetryLog to update in case it exists.
+     */
+    where: RetryLogWhereUniqueInput
+    /**
+     * In case the RetryLog found by the `where` argument doesn't exist, create a new RetryLog with this data.
+     */
+    create: XOR<RetryLogCreateInput, RetryLogUncheckedCreateInput>
+    /**
+     * In case the RetryLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RetryLogUpdateInput, RetryLogUncheckedUpdateInput>
+  }
+
+
+  /**
+   * RetryLog delete
+   */
+  export type RetryLogDeleteArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+    /**
+     * Filter which RetryLog to delete.
+     */
+    where: RetryLogWhereUniqueInput
+  }
+
+
+  /**
+   * RetryLog deleteMany
+   */
+  export type RetryLogDeleteManyArgs = {
+    /**
+     * Filter which RetryLogs to delete
+     */
+    where?: RetryLogWhereInput
+  }
+
+
+  /**
+   * RetryLog without action
+   */
+  export type RetryLogArgs = {
+    /**
+     * Select specific fields to fetch from the RetryLog
+     */
+    select?: RetryLogSelect | null
+  }
+
+
+
+  /**
+   * Model Task
+   */
+
+
+  export type AggregateTask = {
+    _count: TaskCountAggregateOutputType | null
+    _avg: TaskAvgAggregateOutputType | null
+    _sum: TaskSumAggregateOutputType | null
+    _min: TaskMinAggregateOutputType | null
+    _max: TaskMaxAggregateOutputType | null
+  }
+
+  export type TaskAvgAggregateOutputType = {
+    id: number | null
+    groupId: number | null
+  }
+
+  export type TaskSumAggregateOutputType = {
+    id: bigint | null
+    groupId: bigint | null
+  }
+
+  export type TaskMinAggregateOutputType = {
+    id: bigint | null
+    groupId: bigint | null
+    task: string | null
+    started: Date | null
+    completed: Date | null
+  }
+
+  export type TaskMaxAggregateOutputType = {
+    id: bigint | null
+    groupId: bigint | null
+    task: string | null
+    started: Date | null
+    completed: Date | null
+  }
+
+  export type TaskCountAggregateOutputType = {
+    id: number
+    groupId: number
+    task: number
+    dependencies: number
+    started: number
+    completed: number
+    data: number
+    _all: number
+  }
+
+
+  export type TaskAvgAggregateInputType = {
+    id?: true
+    groupId?: true
+  }
+
+  export type TaskSumAggregateInputType = {
+    id?: true
+    groupId?: true
+  }
+
+  export type TaskMinAggregateInputType = {
+    id?: true
+    groupId?: true
+    task?: true
+    started?: true
+    completed?: true
+  }
+
+  export type TaskMaxAggregateInputType = {
+    id?: true
+    groupId?: true
+    task?: true
+    started?: true
+    completed?: true
+  }
+
+  export type TaskCountAggregateInputType = {
+    id?: true
+    groupId?: true
+    task?: true
+    dependencies?: true
+    started?: true
+    completed?: true
+    data?: true
+    _all?: true
+  }
+
+  export type TaskAggregateArgs = {
+    /**
+     * Filter which Task to aggregate.
+     */
+    where?: TaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tasks to fetch.
+     */
+    orderBy?: Enumerable<TaskOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Tasks
+    **/
+    _count?: true | TaskCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TaskAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TaskSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TaskMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TaskMaxAggregateInputType
+  }
+
+  export type GetTaskAggregateType<T extends TaskAggregateArgs> = {
+        [P in keyof T & keyof AggregateTask]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTask[P]>
+      : GetScalarType<T[P], AggregateTask[P]>
+  }
+
+
+
+
+  export type TaskGroupByArgs = {
+    where?: TaskWhereInput
+    orderBy?: Enumerable<TaskOrderByWithAggregationInput>
+    by: TaskScalarFieldEnum[]
+    having?: TaskScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TaskCountAggregateInputType | true
+    _avg?: TaskAvgAggregateInputType
+    _sum?: TaskSumAggregateInputType
+    _min?: TaskMinAggregateInputType
+    _max?: TaskMaxAggregateInputType
+  }
+
+
+  export type TaskGroupByOutputType = {
+    id: bigint
+    groupId: bigint
+    task: string
+    dependencies: string[]
+    started: Date | null
+    completed: Date | null
+    data: JsonValue
+    _count: TaskCountAggregateOutputType | null
+    _avg: TaskAvgAggregateOutputType | null
+    _sum: TaskSumAggregateOutputType | null
+    _min: TaskMinAggregateOutputType | null
+    _max: TaskMaxAggregateOutputType | null
+  }
+
+  type GetTaskGroupByPayload<T extends TaskGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickArray<TaskGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TaskGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TaskGroupByOutputType[P]>
+            : GetScalarType<T[P], TaskGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TaskSelect = {
+    id?: boolean
+    groupId?: boolean
+    task?: boolean
+    dependencies?: boolean
+    started?: boolean
+    completed?: boolean
+    data?: boolean
+  }
+
+
+  export type TaskGetPayload<S extends boolean | null | undefined | TaskArgs> =
+    S extends { select: any, include: any } ? 'Please either choose `select` or `include`' :
+    S extends true ? Task :
+    S extends undefined ? never :
+    S extends { include: any } & (TaskArgs | TaskFindManyArgs)
+    ? Task 
+    : S extends { select: any } & (TaskArgs | TaskFindManyArgs)
+      ? {
+    [P in TruthyKeys<S['select']>]:
+    P extends keyof Task ? Task[P] : never
+  } 
+      : Task
+
+
+  type TaskCountArgs = 
+    Omit<TaskFindManyArgs, 'select' | 'include'> & {
+      select?: TaskCountAggregateInputType | true
+    }
+
+  export interface TaskDelegate<GlobalRejectSettings extends Prisma.RejectOnNotFound | Prisma.RejectPerOperation | false | undefined> {
+
+    /**
+     * Find zero or one Task that matches the filter.
+     * @param {TaskFindUniqueArgs} args - Arguments to find a Task
+     * @example
+     * // Get one Task
+     * const task = await prisma.task.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUnique<T extends TaskFindUniqueArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+      args: SelectSubset<T, TaskFindUniqueArgs>
+    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findUnique', 'Task'> extends True ? Prisma__TaskClient<TaskGetPayload<T>> : Prisma__TaskClient<TaskGetPayload<T> | null, null>
+
+    /**
+     * Find one Task that matches the filter or throw an error  with `error.code='P2025'` 
+     *     if no matches were found.
+     * @param {TaskFindUniqueOrThrowArgs} args - Arguments to find a Task
+     * @example
+     * // Get one Task
+     * const task = await prisma.task.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUniqueOrThrow<T extends TaskFindUniqueOrThrowArgs>(
+      args?: SelectSubset<T, TaskFindUniqueOrThrowArgs>
+    ): Prisma__TaskClient<TaskGetPayload<T>>
+
+    /**
+     * Find the first Task that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskFindFirstArgs} args - Arguments to find a Task
+     * @example
+     * // Get one Task
+     * const task = await prisma.task.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirst<T extends TaskFindFirstArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+      args?: SelectSubset<T, TaskFindFirstArgs>
+    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findFirst', 'Task'> extends True ? Prisma__TaskClient<TaskGetPayload<T>> : Prisma__TaskClient<TaskGetPayload<T> | null, null>
+
+    /**
+     * Find the first Task that matches the filter or
+     * throw `NotFoundError` if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskFindFirstOrThrowArgs} args - Arguments to find a Task
+     * @example
+     * // Get one Task
+     * const task = await prisma.task.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirstOrThrow<T extends TaskFindFirstOrThrowArgs>(
+      args?: SelectSubset<T, TaskFindFirstOrThrowArgs>
+    ): Prisma__TaskClient<TaskGetPayload<T>>
+
+    /**
+     * Find zero or more Tasks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Tasks
+     * const tasks = await prisma.task.findMany()
+     * 
+     * // Get first 10 Tasks
+     * const tasks = await prisma.task.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const taskWithIdOnly = await prisma.task.findMany({ select: { id: true } })
+     * 
+    **/
+    findMany<T extends TaskFindManyArgs>(
+      args?: SelectSubset<T, TaskFindManyArgs>
+    ): Prisma.PrismaPromise<Array<TaskGetPayload<T>>>
+
+    /**
+     * Create a Task.
+     * @param {TaskCreateArgs} args - Arguments to create a Task.
+     * @example
+     * // Create one Task
+     * const Task = await prisma.task.create({
+     *   data: {
+     *     // ... data to create a Task
+     *   }
+     * })
+     * 
+    **/
+    create<T extends TaskCreateArgs>(
+      args: SelectSubset<T, TaskCreateArgs>
+    ): Prisma__TaskClient<TaskGetPayload<T>>
+
+    /**
+     * Create many Tasks.
+     *     @param {TaskCreateManyArgs} args - Arguments to create many Tasks.
+     *     @example
+     *     // Create many Tasks
+     *     const task = await prisma.task.createMany({
+     *       data: {
+     *         // ... provide data here
+     *       }
+     *     })
+     *     
+    **/
+    createMany<T extends TaskCreateManyArgs>(
+      args?: SelectSubset<T, TaskCreateManyArgs>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a Task.
+     * @param {TaskDeleteArgs} args - Arguments to delete one Task.
+     * @example
+     * // Delete one Task
+     * const Task = await prisma.task.delete({
+     *   where: {
+     *     // ... filter to delete one Task
+     *   }
+     * })
+     * 
+    **/
+    delete<T extends TaskDeleteArgs>(
+      args: SelectSubset<T, TaskDeleteArgs>
+    ): Prisma__TaskClient<TaskGetPayload<T>>
+
+    /**
+     * Update one Task.
+     * @param {TaskUpdateArgs} args - Arguments to update one Task.
+     * @example
+     * // Update one Task
+     * const task = await prisma.task.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    update<T extends TaskUpdateArgs>(
+      args: SelectSubset<T, TaskUpdateArgs>
+    ): Prisma__TaskClient<TaskGetPayload<T>>
+
+    /**
+     * Delete zero or more Tasks.
+     * @param {TaskDeleteManyArgs} args - Arguments to filter Tasks to delete.
+     * @example
+     * // Delete a few Tasks
+     * const { count } = await prisma.task.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+    **/
+    deleteMany<T extends TaskDeleteManyArgs>(
+      args?: SelectSubset<T, TaskDeleteManyArgs>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Tasks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Tasks
+     * const task = await prisma.task.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    updateMany<T extends TaskUpdateManyArgs>(
+      args: SelectSubset<T, TaskUpdateManyArgs>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Task.
+     * @param {TaskUpsertArgs} args - Arguments to update or create a Task.
+     * @example
+     * // Update or create a Task
+     * const task = await prisma.task.upsert({
+     *   create: {
+     *     // ... data to create a Task
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Task we want to update
+     *   }
+     * })
+    **/
+    upsert<T extends TaskUpsertArgs>(
+      args: SelectSubset<T, TaskUpsertArgs>
+    ): Prisma__TaskClient<TaskGetPayload<T>>
+
+    /**
+     * Count the number of Tasks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskCountArgs} args - Arguments to filter Tasks to count.
+     * @example
+     * // Count the number of Tasks
+     * const count = await prisma.task.count({
+     *   where: {
+     *     // ... the filter for the Tasks we want to count
+     *   }
+     * })
+    **/
+    count<T extends TaskCountArgs>(
+      args?: Subset<T, TaskCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends _Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TaskCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Task.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TaskAggregateArgs>(args: Subset<T, TaskAggregateArgs>): Prisma.PrismaPromise<GetTaskAggregateType<T>>
+
+    /**
+     * Group by Task.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TaskGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TaskGroupByArgs['orderBy'] }
+        : { orderBy?: TaskGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends TupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TaskGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTaskGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Task.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export class Prisma__TaskClient<T, Null = never> implements Prisma.PrismaPromise<T> {
+    private readonly _dmmf;
+    private readonly _queryType;
+    private readonly _rootField;
+    private readonly _clientMethod;
+    private readonly _args;
+    private readonly _dataPath;
+    private readonly _errorFormat;
+    private readonly _measurePerformance?;
+    private _isList;
+    private _callsite;
+    private _requestPromise?;
+    readonly [Symbol.toStringTag]: 'PrismaPromise';
+    constructor(_dmmf: runtime.DMMFClass, _queryType: 'query' | 'mutation', _rootField: string, _clientMethod: string, _args: any, _dataPath: string[], _errorFormat: ErrorFormat, _measurePerformance?: boolean | undefined, _isList?: boolean);
+
+
+    private get _document();
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult>;
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): Promise<T>;
+  }
+
+
+
+  // Custom InputTypes
+
+  /**
+   * Task base type for findUnique actions
+   */
+  export type TaskFindUniqueArgsBase = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * Filter, which Task to fetch.
+     */
+    where: TaskWhereUniqueInput
+  }
+
+  /**
+   * Task findUnique
+   */
+  export interface TaskFindUniqueArgs extends TaskFindUniqueArgsBase {
+   /**
+    * Throw an Error if query returns no results
+    * @deprecated since 4.0.0: use `findUniqueOrThrow` method instead
+    */
+    rejectOnNotFound?: RejectOnNotFound
+  }
+      
+
+  /**
+   * Task findUniqueOrThrow
+   */
+  export type TaskFindUniqueOrThrowArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * Filter, which Task to fetch.
+     */
+    where: TaskWhereUniqueInput
+  }
+
+
+  /**
+   * Task base type for findFirst actions
+   */
+  export type TaskFindFirstArgsBase = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * Filter, which Task to fetch.
+     */
+    where?: TaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tasks to fetch.
+     */
+    orderBy?: Enumerable<TaskOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Tasks.
+     */
+    cursor?: TaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Tasks.
+     */
+    distinct?: Enumerable<TaskScalarFieldEnum>
+  }
+
+  /**
+   * Task findFirst
+   */
+  export interface TaskFindFirstArgs extends TaskFindFirstArgsBase {
+   /**
+    * Throw an Error if query returns no results
+    * @deprecated since 4.0.0: use `findFirstOrThrow` method instead
+    */
+    rejectOnNotFound?: RejectOnNotFound
+  }
+      
+
+  /**
+   * Task findFirstOrThrow
+   */
+  export type TaskFindFirstOrThrowArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * Filter, which Task to fetch.
+     */
+    where?: TaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tasks to fetch.
+     */
+    orderBy?: Enumerable<TaskOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Tasks.
+     */
+    cursor?: TaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Tasks.
+     */
+    distinct?: Enumerable<TaskScalarFieldEnum>
+  }
+
+
+  /**
+   * Task findMany
+   */
+  export type TaskFindManyArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * Filter, which Tasks to fetch.
+     */
+    where?: TaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tasks to fetch.
+     */
+    orderBy?: Enumerable<TaskOrderByWithRelationInput>
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Tasks.
+     */
+    cursor?: TaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tasks.
+     */
+    skip?: number
+    distinct?: Enumerable<TaskScalarFieldEnum>
+  }
+
+
+  /**
+   * Task create
+   */
+  export type TaskCreateArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * The data needed to create a Task.
+     */
+    data: XOR<TaskCreateInput, TaskUncheckedCreateInput>
+  }
+
+
+  /**
+   * Task createMany
+   */
+  export type TaskCreateManyArgs = {
+    /**
+     * The data used to create many Tasks.
+     */
+    data: Enumerable<TaskCreateManyInput>
+    skipDuplicates?: boolean
+  }
+
+
+  /**
+   * Task update
+   */
+  export type TaskUpdateArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * The data needed to update a Task.
+     */
+    data: XOR<TaskUpdateInput, TaskUncheckedUpdateInput>
+    /**
+     * Choose, which Task to update.
+     */
+    where: TaskWhereUniqueInput
+  }
+
+
+  /**
+   * Task updateMany
+   */
+  export type TaskUpdateManyArgs = {
+    /**
+     * The data used to update Tasks.
+     */
+    data: XOR<TaskUpdateManyMutationInput, TaskUncheckedUpdateManyInput>
+    /**
+     * Filter which Tasks to update
+     */
+    where?: TaskWhereInput
+  }
+
+
+  /**
+   * Task upsert
+   */
+  export type TaskUpsertArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * The filter to search for the Task to update in case it exists.
+     */
+    where: TaskWhereUniqueInput
+    /**
+     * In case the Task found by the `where` argument doesn't exist, create a new Task with this data.
+     */
+    create: XOR<TaskCreateInput, TaskUncheckedCreateInput>
+    /**
+     * In case the Task was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TaskUpdateInput, TaskUncheckedUpdateInput>
+  }
+
+
+  /**
+   * Task delete
+   */
+  export type TaskDeleteArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+    /**
+     * Filter which Task to delete.
+     */
+    where: TaskWhereUniqueInput
+  }
+
+
+  /**
+   * Task deleteMany
+   */
+  export type TaskDeleteManyArgs = {
+    /**
+     * Filter which Tasks to delete
+     */
+    where?: TaskWhereInput
+  }
+
+
+  /**
+   * Task without action
+   */
+  export type TaskArgs = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect | null
+  }
+
+
+
+  /**
    * Enums
    */
 
@@ -9617,6 +11496,16 @@ export namespace Prisma {
   export type RecordingScalarFieldEnum = (typeof RecordingScalarFieldEnum)[keyof typeof RecordingScalarFieldEnum]
 
 
+  export const RetryLogScalarFieldEnum: {
+    id: 'id',
+    topic: 'topic',
+    time: 'time',
+    data: 'data'
+  };
+
+  export type RetryLogScalarFieldEnum = (typeof RetryLogScalarFieldEnum)[keyof typeof RetryLogScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -9638,6 +11527,19 @@ export namespace Prisma {
   };
 
   export type StoryboardScalarFieldEnum = (typeof StoryboardScalarFieldEnum)[keyof typeof StoryboardScalarFieldEnum]
+
+
+  export const TaskScalarFieldEnum: {
+    id: 'id',
+    groupId: 'groupId',
+    task: 'task',
+    dependencies: 'dependencies',
+    started: 'started',
+    completed: 'completed',
+    data: 'data'
+  };
+
+  export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
 
 
   export const TransactionIsolationLevel: {
@@ -10201,6 +12103,104 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter | string
     date?: DateTimeWithAggregatesFilter | Date | string
     view_count?: IntWithAggregatesFilter | number
+  }
+
+  export type RetryLogWhereInput = {
+    AND?: Enumerable<RetryLogWhereInput>
+    OR?: Enumerable<RetryLogWhereInput>
+    NOT?: Enumerable<RetryLogWhereInput>
+    id?: BigIntFilter | bigint | number
+    topic?: StringFilter | string
+    time?: DateTimeFilter | Date | string
+    data?: JsonFilter
+  }
+
+  export type RetryLogOrderByWithRelationInput = {
+    id?: SortOrder
+    topic?: SortOrder
+    time?: SortOrder
+    data?: SortOrder
+  }
+
+  export type RetryLogWhereUniqueInput = {
+    id?: bigint | number
+  }
+
+  export type RetryLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    topic?: SortOrder
+    time?: SortOrder
+    data?: SortOrder
+    _count?: RetryLogCountOrderByAggregateInput
+    _avg?: RetryLogAvgOrderByAggregateInput
+    _max?: RetryLogMaxOrderByAggregateInput
+    _min?: RetryLogMinOrderByAggregateInput
+    _sum?: RetryLogSumOrderByAggregateInput
+  }
+
+  export type RetryLogScalarWhereWithAggregatesInput = {
+    AND?: Enumerable<RetryLogScalarWhereWithAggregatesInput>
+    OR?: Enumerable<RetryLogScalarWhereWithAggregatesInput>
+    NOT?: Enumerable<RetryLogScalarWhereWithAggregatesInput>
+    id?: BigIntWithAggregatesFilter | bigint | number
+    topic?: StringWithAggregatesFilter | string
+    time?: DateTimeWithAggregatesFilter | Date | string
+    data?: JsonWithAggregatesFilter
+  }
+
+  export type TaskWhereInput = {
+    AND?: Enumerable<TaskWhereInput>
+    OR?: Enumerable<TaskWhereInput>
+    NOT?: Enumerable<TaskWhereInput>
+    id?: BigIntFilter | bigint | number
+    groupId?: BigIntFilter | bigint | number
+    task?: StringFilter | string
+    dependencies?: StringNullableListFilter
+    started?: DateTimeNullableFilter | Date | string | null
+    completed?: DateTimeNullableFilter | Date | string | null
+    data?: JsonFilter
+  }
+
+  export type TaskOrderByWithRelationInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    task?: SortOrder
+    dependencies?: SortOrder
+    started?: SortOrder
+    completed?: SortOrder
+    data?: SortOrder
+  }
+
+  export type TaskWhereUniqueInput = {
+    id?: bigint | number
+  }
+
+  export type TaskOrderByWithAggregationInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    task?: SortOrder
+    dependencies?: SortOrder
+    started?: SortOrder
+    completed?: SortOrder
+    data?: SortOrder
+    _count?: TaskCountOrderByAggregateInput
+    _avg?: TaskAvgOrderByAggregateInput
+    _max?: TaskMaxOrderByAggregateInput
+    _min?: TaskMinOrderByAggregateInput
+    _sum?: TaskSumOrderByAggregateInput
+  }
+
+  export type TaskScalarWhereWithAggregatesInput = {
+    AND?: Enumerable<TaskScalarWhereWithAggregatesInput>
+    OR?: Enumerable<TaskScalarWhereWithAggregatesInput>
+    NOT?: Enumerable<TaskScalarWhereWithAggregatesInput>
+    id?: BigIntWithAggregatesFilter | bigint | number
+    groupId?: BigIntWithAggregatesFilter | bigint | number
+    task?: StringWithAggregatesFilter | string
+    dependencies?: StringNullableListFilter
+    started?: DateTimeNullableWithAggregatesFilter | Date | string | null
+    completed?: DateTimeNullableWithAggregatesFilter | Date | string | null
+    data?: JsonWithAggregatesFilter
   }
 
   export type ChatEmoteCreateInput = {
@@ -10901,6 +12901,125 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     view_count?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type RetryLogCreateInput = {
+    id?: bigint | number
+    topic: string
+    time: Date | string
+    data: JsonNullValueInput | InputJsonValue
+  }
+
+  export type RetryLogUncheckedCreateInput = {
+    id?: bigint | number
+    topic: string
+    time: Date | string
+    data: JsonNullValueInput | InputJsonValue
+  }
+
+  export type RetryLogUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    topic?: StringFieldUpdateOperationsInput | string
+    time?: DateTimeFieldUpdateOperationsInput | Date | string
+    data?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type RetryLogUncheckedUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    topic?: StringFieldUpdateOperationsInput | string
+    time?: DateTimeFieldUpdateOperationsInput | Date | string
+    data?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type RetryLogCreateManyInput = {
+    id?: bigint | number
+    topic: string
+    time: Date | string
+    data: JsonNullValueInput | InputJsonValue
+  }
+
+  export type RetryLogUpdateManyMutationInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    topic?: StringFieldUpdateOperationsInput | string
+    time?: DateTimeFieldUpdateOperationsInput | Date | string
+    data?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type RetryLogUncheckedUpdateManyInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    topic?: StringFieldUpdateOperationsInput | string
+    time?: DateTimeFieldUpdateOperationsInput | Date | string
+    data?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type TaskCreateInput = {
+    id?: bigint | number
+    groupId: bigint | number
+    task: string
+    dependencies?: TaskCreatedependenciesInput | Enumerable<string>
+    started?: Date | string | null
+    completed?: Date | string | null
+    data: JsonNullValueInput | InputJsonValue
+  }
+
+  export type TaskUncheckedCreateInput = {
+    id?: bigint | number
+    groupId: bigint | number
+    task: string
+    dependencies?: TaskCreatedependenciesInput | Enumerable<string>
+    started?: Date | string | null
+    completed?: Date | string | null
+    data: JsonNullValueInput | InputJsonValue
+  }
+
+  export type TaskUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    task?: StringFieldUpdateOperationsInput | string
+    dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
+    started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    data?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type TaskUncheckedUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    task?: StringFieldUpdateOperationsInput | string
+    dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
+    started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    data?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type TaskCreateManyInput = {
+    id?: bigint | number
+    groupId: bigint | number
+    task: string
+    dependencies?: TaskCreatedependenciesInput | Enumerable<string>
+    started?: Date | string | null
+    completed?: Date | string | null
+    data: JsonNullValueInput | InputJsonValue
+  }
+
+  export type TaskUpdateManyMutationInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    task?: StringFieldUpdateOperationsInput | string
+    dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
+    started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    data?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type TaskUncheckedUpdateManyInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    task?: StringFieldUpdateOperationsInput | string
+    dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
+    started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    data?: JsonNullValueInput | InputJsonValue
   }
 
   export type StringFilter = {
@@ -11675,6 +13794,77 @@ export namespace Prisma {
     view_count?: SortOrder
   }
 
+  export type RetryLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    topic?: SortOrder
+    time?: SortOrder
+    data?: SortOrder
+  }
+
+  export type RetryLogAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type RetryLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    topic?: SortOrder
+    time?: SortOrder
+  }
+
+  export type RetryLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    topic?: SortOrder
+    time?: SortOrder
+  }
+
+  export type RetryLogSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type StringNullableListFilter = {
+    equals?: Enumerable<string> | null
+    has?: string | null
+    hasEvery?: Enumerable<string>
+    hasSome?: Enumerable<string>
+    isEmpty?: boolean
+  }
+
+  export type TaskCountOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    task?: SortOrder
+    dependencies?: SortOrder
+    started?: SortOrder
+    completed?: SortOrder
+    data?: SortOrder
+  }
+
+  export type TaskAvgOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+  }
+
+  export type TaskMaxOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    task?: SortOrder
+    started?: SortOrder
+    completed?: SortOrder
+  }
+
+  export type TaskMinOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    task?: SortOrder
+    started?: SortOrder
+    completed?: SortOrder
+  }
+
+  export type TaskSumOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -11729,6 +13919,15 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type TaskCreatedependenciesInput = {
+    set: Enumerable<string>
+  }
+
+  export type TaskUpdatedependenciesInput = {
+    set?: Enumerable<string>
+    push?: string | Enumerable<string>
   }
 
   export type NestedStringFilter = {

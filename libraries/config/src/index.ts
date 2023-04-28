@@ -65,3 +65,13 @@ export interface LogConfig {
 export const LogConfigOpt: ArgumentConfig<LogConfig> = {
   logLevel: { type: String, defaultValue: 'info' },
 };
+
+export interface RetryConfig {
+  retries: number;
+  failedTopic: string;
+}
+
+export const RetryConfigOpt: ArgumentConfig<RetryConfig> = {
+  retries: { type: Number, defaultValue: 3 },
+  failedTopic: { type: String, defaultValue: 'failed-task' },
+};

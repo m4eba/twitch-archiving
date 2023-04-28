@@ -29,4 +29,9 @@ export interface LogConfig {
     logLevel: string;
 }
 export declare const LogConfigOpt: ArgumentConfig<LogConfig>;
+export interface RetryConfig {
+    retries: number;
+    failedTopic: string;
+}
+export declare const RetryConfigOpt: ArgumentConfig<RetryConfig>;
 //# sourceMappingURL=index.d.ts.map

@@ -183,6 +183,13 @@ exports.Prisma.RecordingScalarFieldEnum = makeEnum({
   data: 'data'
 });
 
+exports.Prisma.RetryLogScalarFieldEnum = makeEnum({
+  id: 'id',
+  topic: 'topic',
+  time: 'time',
+  data: 'data'
+});
+
 exports.Prisma.SortOrder = makeEnum({
   asc: 'asc',
   desc: 'desc'
@@ -197,6 +204,16 @@ exports.Prisma.StoryboardScalarFieldEnum = makeEnum({
   rows: 'rows',
   columns: 'columns',
   slug: 'slug',
+  data: 'data'
+});
+
+exports.Prisma.TaskScalarFieldEnum = makeEnum({
+  id: 'id',
+  groupId: 'groupId',
+  task: 'task',
+  dependencies: 'dependencies',
+  started: 'started',
+  completed: 'completed',
   data: 'data'
 });
 
@@ -243,7 +260,9 @@ exports.Prisma.ModelName = makeEnum({
   Storyboard: 'Storyboard',
   Transcript: 'Transcript',
   Clips: 'Clips',
-  ClipsViews: 'ClipsViews'
+  ClipsViews: 'ClipsViews',
+  RetryLog: 'RetryLog',
+  Task: 'Task'
 });
 
 /**
