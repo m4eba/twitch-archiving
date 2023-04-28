@@ -1,3 +1,4 @@
+import fs from 'fs';
 export * from './FileWriter.js';
 export * from './logger.js';
 export * from './download.js';
@@ -6,4 +7,11 @@ export * from './fetch.js';
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function fileExists(name: string) {
+  return fs.promises
+    .access(name, fs.constants.F_OK)
+    .then(() => true)
+    .catch(() => false);
 }
