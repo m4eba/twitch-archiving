@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@twitch-archiving/messages": "*",
+    "@twitch-archiving/config": "*",
+    "@twitch-archiving/utils": "*",
     "async-retry": "^1.3.3",
     "pino": "~7.11.0",
     "serialize-error": "^11.0.0",
