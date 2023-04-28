@@ -189,10 +189,10 @@ exports.Prisma.SortOrder = makeEnum({
 });
 
 exports.Prisma.StoryboardScalarFieldEnum = makeEnum({
-  recording_id: 'recording_id',
+  recordingId: 'recordingId',
   index: 'index',
-  first_sequence: 'first_sequence',
-  time_offset: 'time_offset',
+  firstSequence: 'firstSequence',
+  timeOffset: 'timeOffset',
   interval: 'interval',
   rows: 'rows',
   columns: 'columns',
@@ -240,7 +240,7 @@ exports.Prisma.ModelName = makeEnum({
   ChatMessageEmote: 'ChatMessageEmote',
   File: 'File',
   Recording: 'Recording',
-  storyboard: 'storyboard',
+  Storyboard: 'Storyboard',
   Transcript: 'Transcript',
   Clips: 'Clips',
   ClipsViews: 'ClipsViews'

@@ -81,14 +81,14 @@ export type Recording = {
 }
 
 /**
- * Model storyboard
+ * Model Storyboard
  * 
  */
-export type storyboard = {
-  recording_id: bigint
+export type Storyboard = {
+  recordingId: bigint
   index: number
-  first_sequence: number
-  time_offset: Prisma.Decimal
+  firstSequence: number
+  timeOffset: Prisma.Decimal
   interval: number
   rows: number
   columns: number
@@ -342,14 +342,14 @@ export class PrismaClient<
   get recording(): Prisma.RecordingDelegate<GlobalReject>;
 
   /**
-   * `prisma.storyboard`: Exposes CRUD operations for the **storyboard** model.
+   * `prisma.storyboard`: Exposes CRUD operations for the **Storyboard** model.
     * Example usage:
     * ```ts
     * // Fetch zero or more Storyboards
     * const storyboards = await prisma.storyboard.findMany()
     * ```
     */
-  get storyboard(): Prisma.storyboardDelegate<GlobalReject>;
+  get storyboard(): Prisma.StoryboardDelegate<GlobalReject>;
 
   /**
    * `prisma.transcript`: Exposes CRUD operations for the **Transcript** model.
@@ -854,7 +854,7 @@ export namespace Prisma {
     ChatMessageEmote: 'ChatMessageEmote',
     File: 'File',
     Recording: 'Recording',
-    storyboard: 'storyboard',
+    Storyboard: 'Storyboard',
     Transcript: 'Transcript',
     Clips: 'Clips',
     ClipsViews: 'ClipsViews'
@@ -5628,7 +5628,7 @@ export namespace Prisma {
 
 
   /**
-   * Model storyboard
+   * Model Storyboard
    */
 
 
@@ -5641,30 +5641,30 @@ export namespace Prisma {
   }
 
   export type StoryboardAvgAggregateOutputType = {
-    recording_id: number | null
+    recordingId: number | null
     index: number | null
-    first_sequence: number | null
-    time_offset: Decimal | null
+    firstSequence: number | null
+    timeOffset: Decimal | null
     interval: number | null
     rows: number | null
     columns: number | null
   }
 
   export type StoryboardSumAggregateOutputType = {
-    recording_id: bigint | null
+    recordingId: bigint | null
     index: number | null
-    first_sequence: number | null
-    time_offset: Decimal | null
+    firstSequence: number | null
+    timeOffset: Decimal | null
     interval: number | null
     rows: number | null
     columns: number | null
   }
 
   export type StoryboardMinAggregateOutputType = {
-    recording_id: bigint | null
+    recordingId: bigint | null
     index: number | null
-    first_sequence: number | null
-    time_offset: Decimal | null
+    firstSequence: number | null
+    timeOffset: Decimal | null
     interval: number | null
     rows: number | null
     columns: number | null
@@ -5672,10 +5672,10 @@ export namespace Prisma {
   }
 
   export type StoryboardMaxAggregateOutputType = {
-    recording_id: bigint | null
+    recordingId: bigint | null
     index: number | null
-    first_sequence: number | null
-    time_offset: Decimal | null
+    firstSequence: number | null
+    timeOffset: Decimal | null
     interval: number | null
     rows: number | null
     columns: number | null
@@ -5683,10 +5683,10 @@ export namespace Prisma {
   }
 
   export type StoryboardCountAggregateOutputType = {
-    recording_id: number
+    recordingId: number
     index: number
-    first_sequence: number
-    time_offset: number
+    firstSequence: number
+    timeOffset: number
     interval: number
     rows: number
     columns: number
@@ -5697,30 +5697,30 @@ export namespace Prisma {
 
 
   export type StoryboardAvgAggregateInputType = {
-    recording_id?: true
+    recordingId?: true
     index?: true
-    first_sequence?: true
-    time_offset?: true
+    firstSequence?: true
+    timeOffset?: true
     interval?: true
     rows?: true
     columns?: true
   }
 
   export type StoryboardSumAggregateInputType = {
-    recording_id?: true
+    recordingId?: true
     index?: true
-    first_sequence?: true
-    time_offset?: true
+    firstSequence?: true
+    timeOffset?: true
     interval?: true
     rows?: true
     columns?: true
   }
 
   export type StoryboardMinAggregateInputType = {
-    recording_id?: true
+    recordingId?: true
     index?: true
-    first_sequence?: true
-    time_offset?: true
+    firstSequence?: true
+    timeOffset?: true
     interval?: true
     rows?: true
     columns?: true
@@ -5728,10 +5728,10 @@ export namespace Prisma {
   }
 
   export type StoryboardMaxAggregateInputType = {
-    recording_id?: true
+    recordingId?: true
     index?: true
-    first_sequence?: true
-    time_offset?: true
+    firstSequence?: true
+    timeOffset?: true
     interval?: true
     rows?: true
     columns?: true
@@ -5739,10 +5739,10 @@ export namespace Prisma {
   }
 
   export type StoryboardCountAggregateInputType = {
-    recording_id?: true
+    recordingId?: true
     index?: true
-    first_sequence?: true
-    time_offset?: true
+    firstSequence?: true
+    timeOffset?: true
     interval?: true
     rows?: true
     columns?: true
@@ -5753,37 +5753,37 @@ export namespace Prisma {
 
   export type StoryboardAggregateArgs = {
     /**
-     * Filter which storyboard to aggregate.
+     * Filter which Storyboard to aggregate.
      */
-    where?: storyboardWhereInput
+    where?: StoryboardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of storyboards to fetch.
+     * Determine the order of Storyboards to fetch.
      */
-    orderBy?: Enumerable<storyboardOrderByWithRelationInput>
+    orderBy?: Enumerable<StoryboardOrderByWithRelationInput>
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: storyboardWhereUniqueInput
+    cursor?: StoryboardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` storyboards from the position of the cursor.
+     * Take `±n` Storyboards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` storyboards.
+     * Skip the first `n` Storyboards.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned storyboards
+     * Count returned Storyboards
     **/
     _count?: true | StoryboardCountAggregateInputType
     /**
@@ -5824,10 +5824,10 @@ export namespace Prisma {
 
 
   export type StoryboardGroupByArgs = {
-    where?: storyboardWhereInput
-    orderBy?: Enumerable<storyboardOrderByWithAggregationInput>
+    where?: StoryboardWhereInput
+    orderBy?: Enumerable<StoryboardOrderByWithAggregationInput>
     by: StoryboardScalarFieldEnum[]
-    having?: storyboardScalarWhereWithAggregatesInput
+    having?: StoryboardScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: StoryboardCountAggregateInputType | true
@@ -5839,10 +5839,10 @@ export namespace Prisma {
 
 
   export type StoryboardGroupByOutputType = {
-    recording_id: bigint
+    recordingId: bigint
     index: number
-    first_sequence: number
-    time_offset: Decimal
+    firstSequence: number
+    timeOffset: Decimal
     interval: number
     rows: number
     columns: number
@@ -5869,11 +5869,11 @@ export namespace Prisma {
     >
 
 
-  export type storyboardSelect = {
-    recording_id?: boolean
+  export type StoryboardSelect = {
+    recordingId?: boolean
     index?: boolean
-    first_sequence?: boolean
-    time_offset?: boolean
+    firstSequence?: boolean
+    timeOffset?: boolean
     interval?: boolean
     rows?: boolean
     columns?: boolean
@@ -5882,30 +5882,30 @@ export namespace Prisma {
   }
 
 
-  export type storyboardGetPayload<S extends boolean | null | undefined | storyboardArgs> =
+  export type StoryboardGetPayload<S extends boolean | null | undefined | StoryboardArgs> =
     S extends { select: any, include: any } ? 'Please either choose `select` or `include`' :
-    S extends true ? storyboard :
+    S extends true ? Storyboard :
     S extends undefined ? never :
-    S extends { include: any } & (storyboardArgs | storyboardFindManyArgs)
-    ? storyboard 
-    : S extends { select: any } & (storyboardArgs | storyboardFindManyArgs)
+    S extends { include: any } & (StoryboardArgs | StoryboardFindManyArgs)
+    ? Storyboard 
+    : S extends { select: any } & (StoryboardArgs | StoryboardFindManyArgs)
       ? {
     [P in TruthyKeys<S['select']>]:
-    P extends keyof storyboard ? storyboard[P] : never
+    P extends keyof Storyboard ? Storyboard[P] : never
   } 
-      : storyboard
+      : Storyboard
 
 
-  type storyboardCountArgs = 
-    Omit<storyboardFindManyArgs, 'select' | 'include'> & {
+  type StoryboardCountArgs = 
+    Omit<StoryboardFindManyArgs, 'select' | 'include'> & {
       select?: StoryboardCountAggregateInputType | true
     }
 
-  export interface storyboardDelegate<GlobalRejectSettings extends Prisma.RejectOnNotFound | Prisma.RejectPerOperation | false | undefined> {
+  export interface StoryboardDelegate<GlobalRejectSettings extends Prisma.RejectOnNotFound | Prisma.RejectPerOperation | false | undefined> {
 
     /**
      * Find zero or one Storyboard that matches the filter.
-     * @param {storyboardFindUniqueArgs} args - Arguments to find a Storyboard
+     * @param {StoryboardFindUniqueArgs} args - Arguments to find a Storyboard
      * @example
      * // Get one Storyboard
      * const storyboard = await prisma.storyboard.findUnique({
@@ -5914,14 +5914,14 @@ export namespace Prisma {
      *   }
      * })
     **/
-    findUnique<T extends storyboardFindUniqueArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
-      args: SelectSubset<T, storyboardFindUniqueArgs>
-    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findUnique', 'storyboard'> extends True ? Prisma__storyboardClient<storyboardGetPayload<T>> : Prisma__storyboardClient<storyboardGetPayload<T> | null, null>
+    findUnique<T extends StoryboardFindUniqueArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+      args: SelectSubset<T, StoryboardFindUniqueArgs>
+    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findUnique', 'Storyboard'> extends True ? Prisma__StoryboardClient<StoryboardGetPayload<T>> : Prisma__StoryboardClient<StoryboardGetPayload<T> | null, null>
 
     /**
      * Find one Storyboard that matches the filter or throw an error  with `error.code='P2025'` 
      *     if no matches were found.
-     * @param {storyboardFindUniqueOrThrowArgs} args - Arguments to find a Storyboard
+     * @param {StoryboardFindUniqueOrThrowArgs} args - Arguments to find a Storyboard
      * @example
      * // Get one Storyboard
      * const storyboard = await prisma.storyboard.findUniqueOrThrow({
@@ -5930,15 +5930,15 @@ export namespace Prisma {
      *   }
      * })
     **/
-    findUniqueOrThrow<T extends storyboardFindUniqueOrThrowArgs>(
-      args?: SelectSubset<T, storyboardFindUniqueOrThrowArgs>
-    ): Prisma__storyboardClient<storyboardGetPayload<T>>
+    findUniqueOrThrow<T extends StoryboardFindUniqueOrThrowArgs>(
+      args?: SelectSubset<T, StoryboardFindUniqueOrThrowArgs>
+    ): Prisma__StoryboardClient<StoryboardGetPayload<T>>
 
     /**
      * Find the first Storyboard that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {storyboardFindFirstArgs} args - Arguments to find a Storyboard
+     * @param {StoryboardFindFirstArgs} args - Arguments to find a Storyboard
      * @example
      * // Get one Storyboard
      * const storyboard = await prisma.storyboard.findFirst({
@@ -5947,16 +5947,16 @@ export namespace Prisma {
      *   }
      * })
     **/
-    findFirst<T extends storyboardFindFirstArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
-      args?: SelectSubset<T, storyboardFindFirstArgs>
-    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findFirst', 'storyboard'> extends True ? Prisma__storyboardClient<storyboardGetPayload<T>> : Prisma__storyboardClient<storyboardGetPayload<T> | null, null>
+    findFirst<T extends StoryboardFindFirstArgs,  LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+      args?: SelectSubset<T, StoryboardFindFirstArgs>
+    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findFirst', 'Storyboard'> extends True ? Prisma__StoryboardClient<StoryboardGetPayload<T>> : Prisma__StoryboardClient<StoryboardGetPayload<T> | null, null>
 
     /**
      * Find the first Storyboard that matches the filter or
      * throw `NotFoundError` if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {storyboardFindFirstOrThrowArgs} args - Arguments to find a Storyboard
+     * @param {StoryboardFindFirstOrThrowArgs} args - Arguments to find a Storyboard
      * @example
      * // Get one Storyboard
      * const storyboard = await prisma.storyboard.findFirstOrThrow({
@@ -5965,15 +5965,15 @@ export namespace Prisma {
      *   }
      * })
     **/
-    findFirstOrThrow<T extends storyboardFindFirstOrThrowArgs>(
-      args?: SelectSubset<T, storyboardFindFirstOrThrowArgs>
-    ): Prisma__storyboardClient<storyboardGetPayload<T>>
+    findFirstOrThrow<T extends StoryboardFindFirstOrThrowArgs>(
+      args?: SelectSubset<T, StoryboardFindFirstOrThrowArgs>
+    ): Prisma__StoryboardClient<StoryboardGetPayload<T>>
 
     /**
      * Find zero or more Storyboards that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {storyboardFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {StoryboardFindManyArgs=} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Storyboards
      * const storyboards = await prisma.storyboard.findMany()
@@ -5981,17 +5981,17 @@ export namespace Prisma {
      * // Get first 10 Storyboards
      * const storyboards = await prisma.storyboard.findMany({ take: 10 })
      * 
-     * // Only select the `recording_id`
-     * const storyboardWithRecording_idOnly = await prisma.storyboard.findMany({ select: { recording_id: true } })
+     * // Only select the `recordingId`
+     * const storyboardWithRecordingIdOnly = await prisma.storyboard.findMany({ select: { recordingId: true } })
      * 
     **/
-    findMany<T extends storyboardFindManyArgs>(
-      args?: SelectSubset<T, storyboardFindManyArgs>
-    ): Prisma.PrismaPromise<Array<storyboardGetPayload<T>>>
+    findMany<T extends StoryboardFindManyArgs>(
+      args?: SelectSubset<T, StoryboardFindManyArgs>
+    ): Prisma.PrismaPromise<Array<StoryboardGetPayload<T>>>
 
     /**
      * Create a Storyboard.
-     * @param {storyboardCreateArgs} args - Arguments to create a Storyboard.
+     * @param {StoryboardCreateArgs} args - Arguments to create a Storyboard.
      * @example
      * // Create one Storyboard
      * const Storyboard = await prisma.storyboard.create({
@@ -6001,13 +6001,13 @@ export namespace Prisma {
      * })
      * 
     **/
-    create<T extends storyboardCreateArgs>(
-      args: SelectSubset<T, storyboardCreateArgs>
-    ): Prisma__storyboardClient<storyboardGetPayload<T>>
+    create<T extends StoryboardCreateArgs>(
+      args: SelectSubset<T, StoryboardCreateArgs>
+    ): Prisma__StoryboardClient<StoryboardGetPayload<T>>
 
     /**
      * Create many Storyboards.
-     *     @param {storyboardCreateManyArgs} args - Arguments to create many Storyboards.
+     *     @param {StoryboardCreateManyArgs} args - Arguments to create many Storyboards.
      *     @example
      *     // Create many Storyboards
      *     const storyboard = await prisma.storyboard.createMany({
@@ -6017,13 +6017,13 @@ export namespace Prisma {
      *     })
      *     
     **/
-    createMany<T extends storyboardCreateManyArgs>(
-      args?: SelectSubset<T, storyboardCreateManyArgs>
+    createMany<T extends StoryboardCreateManyArgs>(
+      args?: SelectSubset<T, StoryboardCreateManyArgs>
     ): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Delete a Storyboard.
-     * @param {storyboardDeleteArgs} args - Arguments to delete one Storyboard.
+     * @param {StoryboardDeleteArgs} args - Arguments to delete one Storyboard.
      * @example
      * // Delete one Storyboard
      * const Storyboard = await prisma.storyboard.delete({
@@ -6033,13 +6033,13 @@ export namespace Prisma {
      * })
      * 
     **/
-    delete<T extends storyboardDeleteArgs>(
-      args: SelectSubset<T, storyboardDeleteArgs>
-    ): Prisma__storyboardClient<storyboardGetPayload<T>>
+    delete<T extends StoryboardDeleteArgs>(
+      args: SelectSubset<T, StoryboardDeleteArgs>
+    ): Prisma__StoryboardClient<StoryboardGetPayload<T>>
 
     /**
      * Update one Storyboard.
-     * @param {storyboardUpdateArgs} args - Arguments to update one Storyboard.
+     * @param {StoryboardUpdateArgs} args - Arguments to update one Storyboard.
      * @example
      * // Update one Storyboard
      * const storyboard = await prisma.storyboard.update({
@@ -6052,13 +6052,13 @@ export namespace Prisma {
      * })
      * 
     **/
-    update<T extends storyboardUpdateArgs>(
-      args: SelectSubset<T, storyboardUpdateArgs>
-    ): Prisma__storyboardClient<storyboardGetPayload<T>>
+    update<T extends StoryboardUpdateArgs>(
+      args: SelectSubset<T, StoryboardUpdateArgs>
+    ): Prisma__StoryboardClient<StoryboardGetPayload<T>>
 
     /**
      * Delete zero or more Storyboards.
-     * @param {storyboardDeleteManyArgs} args - Arguments to filter Storyboards to delete.
+     * @param {StoryboardDeleteManyArgs} args - Arguments to filter Storyboards to delete.
      * @example
      * // Delete a few Storyboards
      * const { count } = await prisma.storyboard.deleteMany({
@@ -6068,15 +6068,15 @@ export namespace Prisma {
      * })
      * 
     **/
-    deleteMany<T extends storyboardDeleteManyArgs>(
-      args?: SelectSubset<T, storyboardDeleteManyArgs>
+    deleteMany<T extends StoryboardDeleteManyArgs>(
+      args?: SelectSubset<T, StoryboardDeleteManyArgs>
     ): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Storyboards.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {storyboardUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {StoryboardUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
      * // Update many Storyboards
      * const storyboard = await prisma.storyboard.updateMany({
@@ -6089,13 +6089,13 @@ export namespace Prisma {
      * })
      * 
     **/
-    updateMany<T extends storyboardUpdateManyArgs>(
-      args: SelectSubset<T, storyboardUpdateManyArgs>
+    updateMany<T extends StoryboardUpdateManyArgs>(
+      args: SelectSubset<T, StoryboardUpdateManyArgs>
     ): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Storyboard.
-     * @param {storyboardUpsertArgs} args - Arguments to update or create a Storyboard.
+     * @param {StoryboardUpsertArgs} args - Arguments to update or create a Storyboard.
      * @example
      * // Update or create a Storyboard
      * const storyboard = await prisma.storyboard.upsert({
@@ -6110,15 +6110,15 @@ export namespace Prisma {
      *   }
      * })
     **/
-    upsert<T extends storyboardUpsertArgs>(
-      args: SelectSubset<T, storyboardUpsertArgs>
-    ): Prisma__storyboardClient<storyboardGetPayload<T>>
+    upsert<T extends StoryboardUpsertArgs>(
+      args: SelectSubset<T, StoryboardUpsertArgs>
+    ): Prisma__StoryboardClient<StoryboardGetPayload<T>>
 
     /**
      * Count the number of Storyboards.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {storyboardCountArgs} args - Arguments to filter Storyboards to count.
+     * @param {StoryboardCountArgs} args - Arguments to filter Storyboards to count.
      * @example
      * // Count the number of Storyboards
      * const count = await prisma.storyboard.count({
@@ -6127,8 +6127,8 @@ export namespace Prisma {
      *   }
      * })
     **/
-    count<T extends storyboardCountArgs>(
-      args?: Subset<T, storyboardCountArgs>,
+    count<T extends StoryboardCountArgs>(
+      args?: Subset<T, StoryboardCountArgs>,
     ): Prisma.PrismaPromise<
       T extends _Record<'select', any>
         ? T['select'] extends true
@@ -6243,12 +6243,12 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for storyboard.
+   * The delegate class that acts as a "Promise-like" for Storyboard.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export class Prisma__storyboardClient<T, Null = never> implements Prisma.PrismaPromise<T> {
+  export class Prisma__StoryboardClient<T, Null = never> implements Prisma.PrismaPromise<T> {
     private readonly _dmmf;
     private readonly _queryType;
     private readonly _rootField;
@@ -6292,23 +6292,23 @@ export namespace Prisma {
   // Custom InputTypes
 
   /**
-   * storyboard base type for findUnique actions
+   * Storyboard base type for findUnique actions
    */
-  export type storyboardFindUniqueArgsBase = {
+  export type StoryboardFindUniqueArgsBase = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * Filter, which storyboard to fetch.
+     * Filter, which Storyboard to fetch.
      */
-    where: storyboardWhereUniqueInput
+    where: StoryboardWhereUniqueInput
   }
 
   /**
-   * storyboard findUnique
+   * Storyboard findUnique
    */
-  export interface storyboardFindUniqueArgs extends storyboardFindUniqueArgsBase {
+  export interface StoryboardFindUniqueArgs extends StoryboardFindUniqueArgsBase {
    /**
     * Throw an Error if query returns no results
     * @deprecated since 4.0.0: use `findUniqueOrThrow` method instead
@@ -6318,68 +6318,68 @@ export namespace Prisma {
       
 
   /**
-   * storyboard findUniqueOrThrow
+   * Storyboard findUniqueOrThrow
    */
-  export type storyboardFindUniqueOrThrowArgs = {
+  export type StoryboardFindUniqueOrThrowArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * Filter, which storyboard to fetch.
+     * Filter, which Storyboard to fetch.
      */
-    where: storyboardWhereUniqueInput
+    where: StoryboardWhereUniqueInput
   }
 
 
   /**
-   * storyboard base type for findFirst actions
+   * Storyboard base type for findFirst actions
    */
-  export type storyboardFindFirstArgsBase = {
+  export type StoryboardFindFirstArgsBase = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * Filter, which storyboard to fetch.
+     * Filter, which Storyboard to fetch.
      */
-    where?: storyboardWhereInput
+    where?: StoryboardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of storyboards to fetch.
+     * Determine the order of Storyboards to fetch.
      */
-    orderBy?: Enumerable<storyboardOrderByWithRelationInput>
+    orderBy?: Enumerable<StoryboardOrderByWithRelationInput>
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for storyboards.
+     * Sets the position for searching for Storyboards.
      */
-    cursor?: storyboardWhereUniqueInput
+    cursor?: StoryboardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` storyboards from the position of the cursor.
+     * Take `±n` Storyboards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` storyboards.
+     * Skip the first `n` Storyboards.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of storyboards.
+     * Filter by unique combinations of Storyboards.
      */
     distinct?: Enumerable<StoryboardScalarFieldEnum>
   }
 
   /**
-   * storyboard findFirst
+   * Storyboard findFirst
    */
-  export interface storyboardFindFirstArgs extends storyboardFindFirstArgsBase {
+  export interface StoryboardFindFirstArgs extends StoryboardFindFirstArgsBase {
    /**
     * Throw an Error if query returns no results
     * @deprecated since 4.0.0: use `findFirstOrThrow` method instead
@@ -6389,84 +6389,84 @@ export namespace Prisma {
       
 
   /**
-   * storyboard findFirstOrThrow
+   * Storyboard findFirstOrThrow
    */
-  export type storyboardFindFirstOrThrowArgs = {
+  export type StoryboardFindFirstOrThrowArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * Filter, which storyboard to fetch.
+     * Filter, which Storyboard to fetch.
      */
-    where?: storyboardWhereInput
+    where?: StoryboardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of storyboards to fetch.
+     * Determine the order of Storyboards to fetch.
      */
-    orderBy?: Enumerable<storyboardOrderByWithRelationInput>
+    orderBy?: Enumerable<StoryboardOrderByWithRelationInput>
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for storyboards.
+     * Sets the position for searching for Storyboards.
      */
-    cursor?: storyboardWhereUniqueInput
+    cursor?: StoryboardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` storyboards from the position of the cursor.
+     * Take `±n` Storyboards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` storyboards.
+     * Skip the first `n` Storyboards.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of storyboards.
+     * Filter by unique combinations of Storyboards.
      */
     distinct?: Enumerable<StoryboardScalarFieldEnum>
   }
 
 
   /**
-   * storyboard findMany
+   * Storyboard findMany
    */
-  export type storyboardFindManyArgs = {
+  export type StoryboardFindManyArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * Filter, which storyboards to fetch.
+     * Filter, which Storyboards to fetch.
      */
-    where?: storyboardWhereInput
+    where?: StoryboardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of storyboards to fetch.
+     * Determine the order of Storyboards to fetch.
      */
-    orderBy?: Enumerable<storyboardOrderByWithRelationInput>
+    orderBy?: Enumerable<StoryboardOrderByWithRelationInput>
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing storyboards.
+     * Sets the position for listing Storyboards.
      */
-    cursor?: storyboardWhereUniqueInput
+    cursor?: StoryboardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` storyboards from the position of the cursor.
+     * Take `±n` Storyboards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` storyboards.
+     * Skip the first `n` Storyboards.
      */
     skip?: number
     distinct?: Enumerable<StoryboardScalarFieldEnum>
@@ -6474,123 +6474,123 @@ export namespace Prisma {
 
 
   /**
-   * storyboard create
+   * Storyboard create
    */
-  export type storyboardCreateArgs = {
+  export type StoryboardCreateArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * The data needed to create a storyboard.
+     * The data needed to create a Storyboard.
      */
-    data: XOR<storyboardCreateInput, storyboardUncheckedCreateInput>
+    data: XOR<StoryboardCreateInput, StoryboardUncheckedCreateInput>
   }
 
 
   /**
-   * storyboard createMany
+   * Storyboard createMany
    */
-  export type storyboardCreateManyArgs = {
+  export type StoryboardCreateManyArgs = {
     /**
-     * The data used to create many storyboards.
+     * The data used to create many Storyboards.
      */
-    data: Enumerable<storyboardCreateManyInput>
+    data: Enumerable<StoryboardCreateManyInput>
     skipDuplicates?: boolean
   }
 
 
   /**
-   * storyboard update
+   * Storyboard update
    */
-  export type storyboardUpdateArgs = {
+  export type StoryboardUpdateArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * The data needed to update a storyboard.
+     * The data needed to update a Storyboard.
      */
-    data: XOR<storyboardUpdateInput, storyboardUncheckedUpdateInput>
+    data: XOR<StoryboardUpdateInput, StoryboardUncheckedUpdateInput>
     /**
-     * Choose, which storyboard to update.
+     * Choose, which Storyboard to update.
      */
-    where: storyboardWhereUniqueInput
+    where: StoryboardWhereUniqueInput
   }
 
 
   /**
-   * storyboard updateMany
+   * Storyboard updateMany
    */
-  export type storyboardUpdateManyArgs = {
+  export type StoryboardUpdateManyArgs = {
     /**
-     * The data used to update storyboards.
+     * The data used to update Storyboards.
      */
-    data: XOR<storyboardUpdateManyMutationInput, storyboardUncheckedUpdateManyInput>
+    data: XOR<StoryboardUpdateManyMutationInput, StoryboardUncheckedUpdateManyInput>
     /**
-     * Filter which storyboards to update
+     * Filter which Storyboards to update
      */
-    where?: storyboardWhereInput
+    where?: StoryboardWhereInput
   }
 
 
   /**
-   * storyboard upsert
+   * Storyboard upsert
    */
-  export type storyboardUpsertArgs = {
+  export type StoryboardUpsertArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * The filter to search for the storyboard to update in case it exists.
+     * The filter to search for the Storyboard to update in case it exists.
      */
-    where: storyboardWhereUniqueInput
+    where: StoryboardWhereUniqueInput
     /**
-     * In case the storyboard found by the `where` argument doesn't exist, create a new storyboard with this data.
+     * In case the Storyboard found by the `where` argument doesn't exist, create a new Storyboard with this data.
      */
-    create: XOR<storyboardCreateInput, storyboardUncheckedCreateInput>
+    create: XOR<StoryboardCreateInput, StoryboardUncheckedCreateInput>
     /**
-     * In case the storyboard was found with the provided `where` argument, update it with this data.
+     * In case the Storyboard was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<storyboardUpdateInput, storyboardUncheckedUpdateInput>
+    update: XOR<StoryboardUpdateInput, StoryboardUncheckedUpdateInput>
   }
 
 
   /**
-   * storyboard delete
+   * Storyboard delete
    */
-  export type storyboardDeleteArgs = {
+  export type StoryboardDeleteArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
     /**
-     * Filter which storyboard to delete.
+     * Filter which Storyboard to delete.
      */
-    where: storyboardWhereUniqueInput
+    where: StoryboardWhereUniqueInput
   }
 
 
   /**
-   * storyboard deleteMany
+   * Storyboard deleteMany
    */
-  export type storyboardDeleteManyArgs = {
+  export type StoryboardDeleteManyArgs = {
     /**
-     * Filter which storyboards to delete
+     * Filter which Storyboards to delete
      */
-    where?: storyboardWhereInput
+    where?: StoryboardWhereInput
   }
 
 
   /**
-   * storyboard without action
+   * Storyboard without action
    */
-  export type storyboardArgs = {
+  export type StoryboardArgs = {
     /**
-     * Select specific fields to fetch from the storyboard
+     * Select specific fields to fetch from the Storyboard
      */
-    select?: storyboardSelect | null
+    select?: StoryboardSelect | null
   }
 
 
@@ -9626,10 +9626,10 @@ export namespace Prisma {
 
 
   export const StoryboardScalarFieldEnum: {
-    recording_id: 'recording_id',
+    recordingId: 'recordingId',
     index: 'index',
-    first_sequence: 'first_sequence',
-    time_offset: 'time_offset',
+    firstSequence: 'firstSequence',
+    timeOffset: 'timeOffset',
     interval: 'interval',
     rows: 'rows',
     columns: 'columns',
@@ -9943,14 +9943,14 @@ export namespace Prisma {
     data?: JsonNullableWithAggregatesFilter
   }
 
-  export type storyboardWhereInput = {
-    AND?: Enumerable<storyboardWhereInput>
-    OR?: Enumerable<storyboardWhereInput>
-    NOT?: Enumerable<storyboardWhereInput>
-    recording_id?: BigIntFilter | bigint | number
+  export type StoryboardWhereInput = {
+    AND?: Enumerable<StoryboardWhereInput>
+    OR?: Enumerable<StoryboardWhereInput>
+    NOT?: Enumerable<StoryboardWhereInput>
+    recordingId?: BigIntFilter | bigint | number
     index?: IntFilter | number
-    first_sequence?: IntFilter | number
-    time_offset?: DecimalFilter | Decimal | DecimalJsLike | number | string
+    firstSequence?: IntFilter | number
+    timeOffset?: DecimalFilter | Decimal | DecimalJsLike | number | string
     interval?: IntFilter | number
     rows?: IntFilter | number
     columns?: IntFilter | number
@@ -9958,11 +9958,11 @@ export namespace Prisma {
     data?: JsonFilter
   }
 
-  export type storyboardOrderByWithRelationInput = {
-    recording_id?: SortOrder
+  export type StoryboardOrderByWithRelationInput = {
+    recordingId?: SortOrder
     index?: SortOrder
-    first_sequence?: SortOrder
-    time_offset?: SortOrder
+    firstSequence?: SortOrder
+    timeOffset?: SortOrder
     interval?: SortOrder
     rows?: SortOrder
     columns?: SortOrder
@@ -9970,35 +9970,35 @@ export namespace Prisma {
     data?: SortOrder
   }
 
-  export type storyboardWhereUniqueInput = {
-    recording_id_index?: storyboardRecording_idIndexCompoundUniqueInput
+  export type StoryboardWhereUniqueInput = {
+    recordingId_index?: StoryboardRecordingIdIndexCompoundUniqueInput
   }
 
-  export type storyboardOrderByWithAggregationInput = {
-    recording_id?: SortOrder
+  export type StoryboardOrderByWithAggregationInput = {
+    recordingId?: SortOrder
     index?: SortOrder
-    first_sequence?: SortOrder
-    time_offset?: SortOrder
+    firstSequence?: SortOrder
+    timeOffset?: SortOrder
     interval?: SortOrder
     rows?: SortOrder
     columns?: SortOrder
     slug?: SortOrder
     data?: SortOrder
-    _count?: storyboardCountOrderByAggregateInput
-    _avg?: storyboardAvgOrderByAggregateInput
-    _max?: storyboardMaxOrderByAggregateInput
-    _min?: storyboardMinOrderByAggregateInput
-    _sum?: storyboardSumOrderByAggregateInput
+    _count?: StoryboardCountOrderByAggregateInput
+    _avg?: StoryboardAvgOrderByAggregateInput
+    _max?: StoryboardMaxOrderByAggregateInput
+    _min?: StoryboardMinOrderByAggregateInput
+    _sum?: StoryboardSumOrderByAggregateInput
   }
 
-  export type storyboardScalarWhereWithAggregatesInput = {
-    AND?: Enumerable<storyboardScalarWhereWithAggregatesInput>
-    OR?: Enumerable<storyboardScalarWhereWithAggregatesInput>
-    NOT?: Enumerable<storyboardScalarWhereWithAggregatesInput>
-    recording_id?: BigIntWithAggregatesFilter | bigint | number
+  export type StoryboardScalarWhereWithAggregatesInput = {
+    AND?: Enumerable<StoryboardScalarWhereWithAggregatesInput>
+    OR?: Enumerable<StoryboardScalarWhereWithAggregatesInput>
+    NOT?: Enumerable<StoryboardScalarWhereWithAggregatesInput>
+    recordingId?: BigIntWithAggregatesFilter | bigint | number
     index?: IntWithAggregatesFilter | number
-    first_sequence?: IntWithAggregatesFilter | number
-    time_offset?: DecimalWithAggregatesFilter | Decimal | DecimalJsLike | number | string
+    firstSequence?: IntWithAggregatesFilter | number
+    timeOffset?: DecimalWithAggregatesFilter | Decimal | DecimalJsLike | number | string
     interval?: IntWithAggregatesFilter | number
     rows?: IntWithAggregatesFilter | number
     columns?: IntWithAggregatesFilter | number
@@ -10553,11 +10553,11 @@ export namespace Prisma {
     data?: NullableJsonNullValueInput | InputJsonValue
   }
 
-  export type storyboardCreateInput = {
-    recording_id: bigint | number
+  export type StoryboardCreateInput = {
+    recordingId: bigint | number
     index: number
-    first_sequence: number
-    time_offset: Decimal | DecimalJsLike | number | string
+    firstSequence: number
+    timeOffset: Decimal | DecimalJsLike | number | string
     interval: number
     rows: number
     columns: number
@@ -10565,11 +10565,11 @@ export namespace Prisma {
     data: JsonNullValueInput | InputJsonValue
   }
 
-  export type storyboardUncheckedCreateInput = {
-    recording_id: bigint | number
+  export type StoryboardUncheckedCreateInput = {
+    recordingId: bigint | number
     index: number
-    first_sequence: number
-    time_offset: Decimal | DecimalJsLike | number | string
+    firstSequence: number
+    timeOffset: Decimal | DecimalJsLike | number | string
     interval: number
     rows: number
     columns: number
@@ -10577,11 +10577,11 @@ export namespace Prisma {
     data: JsonNullValueInput | InputJsonValue
   }
 
-  export type storyboardUpdateInput = {
-    recording_id?: BigIntFieldUpdateOperationsInput | bigint | number
+  export type StoryboardUpdateInput = {
+    recordingId?: BigIntFieldUpdateOperationsInput | bigint | number
     index?: IntFieldUpdateOperationsInput | number
-    first_sequence?: IntFieldUpdateOperationsInput | number
-    time_offset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    firstSequence?: IntFieldUpdateOperationsInput | number
+    timeOffset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     interval?: IntFieldUpdateOperationsInput | number
     rows?: IntFieldUpdateOperationsInput | number
     columns?: IntFieldUpdateOperationsInput | number
@@ -10589,11 +10589,11 @@ export namespace Prisma {
     data?: JsonNullValueInput | InputJsonValue
   }
 
-  export type storyboardUncheckedUpdateInput = {
-    recording_id?: BigIntFieldUpdateOperationsInput | bigint | number
+  export type StoryboardUncheckedUpdateInput = {
+    recordingId?: BigIntFieldUpdateOperationsInput | bigint | number
     index?: IntFieldUpdateOperationsInput | number
-    first_sequence?: IntFieldUpdateOperationsInput | number
-    time_offset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    firstSequence?: IntFieldUpdateOperationsInput | number
+    timeOffset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     interval?: IntFieldUpdateOperationsInput | number
     rows?: IntFieldUpdateOperationsInput | number
     columns?: IntFieldUpdateOperationsInput | number
@@ -10601,11 +10601,11 @@ export namespace Prisma {
     data?: JsonNullValueInput | InputJsonValue
   }
 
-  export type storyboardCreateManyInput = {
-    recording_id: bigint | number
+  export type StoryboardCreateManyInput = {
+    recordingId: bigint | number
     index: number
-    first_sequence: number
-    time_offset: Decimal | DecimalJsLike | number | string
+    firstSequence: number
+    timeOffset: Decimal | DecimalJsLike | number | string
     interval: number
     rows: number
     columns: number
@@ -10613,11 +10613,11 @@ export namespace Prisma {
     data: JsonNullValueInput | InputJsonValue
   }
 
-  export type storyboardUpdateManyMutationInput = {
-    recording_id?: BigIntFieldUpdateOperationsInput | bigint | number
+  export type StoryboardUpdateManyMutationInput = {
+    recordingId?: BigIntFieldUpdateOperationsInput | bigint | number
     index?: IntFieldUpdateOperationsInput | number
-    first_sequence?: IntFieldUpdateOperationsInput | number
-    time_offset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    firstSequence?: IntFieldUpdateOperationsInput | number
+    timeOffset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     interval?: IntFieldUpdateOperationsInput | number
     rows?: IntFieldUpdateOperationsInput | number
     columns?: IntFieldUpdateOperationsInput | number
@@ -10625,11 +10625,11 @@ export namespace Prisma {
     data?: JsonNullValueInput | InputJsonValue
   }
 
-  export type storyboardUncheckedUpdateManyInput = {
-    recording_id?: BigIntFieldUpdateOperationsInput | bigint | number
+  export type StoryboardUncheckedUpdateManyInput = {
+    recordingId?: BigIntFieldUpdateOperationsInput | bigint | number
     index?: IntFieldUpdateOperationsInput | number
-    first_sequence?: IntFieldUpdateOperationsInput | number
-    time_offset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    firstSequence?: IntFieldUpdateOperationsInput | number
+    timeOffset?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     interval?: IntFieldUpdateOperationsInput | number
     rows?: IntFieldUpdateOperationsInput | number
     columns?: IntFieldUpdateOperationsInput | number
@@ -11419,16 +11419,16 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter
   }
 
-  export type storyboardRecording_idIndexCompoundUniqueInput = {
-    recording_id: bigint | number
+  export type StoryboardRecordingIdIndexCompoundUniqueInput = {
+    recordingId: bigint | number
     index: number
   }
 
-  export type storyboardCountOrderByAggregateInput = {
-    recording_id?: SortOrder
+  export type StoryboardCountOrderByAggregateInput = {
+    recordingId?: SortOrder
     index?: SortOrder
-    first_sequence?: SortOrder
-    time_offset?: SortOrder
+    firstSequence?: SortOrder
+    timeOffset?: SortOrder
     interval?: SortOrder
     rows?: SortOrder
     columns?: SortOrder
@@ -11436,43 +11436,43 @@ export namespace Prisma {
     data?: SortOrder
   }
 
-  export type storyboardAvgOrderByAggregateInput = {
-    recording_id?: SortOrder
+  export type StoryboardAvgOrderByAggregateInput = {
+    recordingId?: SortOrder
     index?: SortOrder
-    first_sequence?: SortOrder
-    time_offset?: SortOrder
+    firstSequence?: SortOrder
+    timeOffset?: SortOrder
     interval?: SortOrder
     rows?: SortOrder
     columns?: SortOrder
   }
 
-  export type storyboardMaxOrderByAggregateInput = {
-    recording_id?: SortOrder
+  export type StoryboardMaxOrderByAggregateInput = {
+    recordingId?: SortOrder
     index?: SortOrder
-    first_sequence?: SortOrder
-    time_offset?: SortOrder
-    interval?: SortOrder
-    rows?: SortOrder
-    columns?: SortOrder
-    slug?: SortOrder
-  }
-
-  export type storyboardMinOrderByAggregateInput = {
-    recording_id?: SortOrder
-    index?: SortOrder
-    first_sequence?: SortOrder
-    time_offset?: SortOrder
+    firstSequence?: SortOrder
+    timeOffset?: SortOrder
     interval?: SortOrder
     rows?: SortOrder
     columns?: SortOrder
     slug?: SortOrder
   }
 
-  export type storyboardSumOrderByAggregateInput = {
-    recording_id?: SortOrder
+  export type StoryboardMinOrderByAggregateInput = {
+    recordingId?: SortOrder
     index?: SortOrder
-    first_sequence?: SortOrder
-    time_offset?: SortOrder
+    firstSequence?: SortOrder
+    timeOffset?: SortOrder
+    interval?: SortOrder
+    rows?: SortOrder
+    columns?: SortOrder
+    slug?: SortOrder
+  }
+
+  export type StoryboardSumOrderByAggregateInput = {
+    recordingId?: SortOrder
+    index?: SortOrder
+    firstSequence?: SortOrder
+    timeOffset?: SortOrder
     interval?: SortOrder
     rows?: SortOrder
     columns?: SortOrder

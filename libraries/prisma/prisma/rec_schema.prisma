@@ -83,20 +83,22 @@ model Recording {
   @@map("recording")
 }
 
-model storyboard {
-  recording_id   BigInt
+model Storyboard {
+  recordingId    BigInt  @map("recording_id")
   index          Int     @db.SmallInt
-  first_sequence Int
-  time_offset    Decimal @db.Decimal
+  firstSequence  Int     @map("first_sequence")
+  timeOffset     Decimal @db.Decimal @map("time_offset")
   interval       Int     @db.SmallInt
   rows           Int     @db.SmallInt
   columns        Int     @db.SmallInt
   slug           String
   data           Json
 
-  @@id([recording_id, index])
+  @@id([recordingId, index])
   @@index([slug])
-  @@index([time_offset])
+  @@index([timeOffset])
+
+  @@map("storyboard")
 }
 
 model Transcript {
