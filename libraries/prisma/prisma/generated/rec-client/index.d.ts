@@ -163,7 +163,7 @@ export type RetryLog = {
  */
 export type Task = {
   id: bigint
-  groupId: bigint
+  groupId: string
   task: string
   dependencies: string[]
   started: Date | null
@@ -10449,17 +10449,15 @@ export namespace Prisma {
 
   export type TaskAvgAggregateOutputType = {
     id: number | null
-    groupId: number | null
   }
 
   export type TaskSumAggregateOutputType = {
     id: bigint | null
-    groupId: bigint | null
   }
 
   export type TaskMinAggregateOutputType = {
     id: bigint | null
-    groupId: bigint | null
+    groupId: string | null
     task: string | null
     started: Date | null
     completed: Date | null
@@ -10467,7 +10465,7 @@ export namespace Prisma {
 
   export type TaskMaxAggregateOutputType = {
     id: bigint | null
-    groupId: bigint | null
+    groupId: string | null
     task: string | null
     started: Date | null
     completed: Date | null
@@ -10487,12 +10485,10 @@ export namespace Prisma {
 
   export type TaskAvgAggregateInputType = {
     id?: true
-    groupId?: true
   }
 
   export type TaskSumAggregateInputType = {
     id?: true
-    groupId?: true
   }
 
   export type TaskMinAggregateInputType = {
@@ -10611,7 +10607,7 @@ export namespace Prisma {
 
   export type TaskGroupByOutputType = {
     id: bigint
-    groupId: bigint
+    groupId: string
     task: string
     dependencies: string[]
     started: Date | null
@@ -12153,7 +12149,7 @@ export namespace Prisma {
     OR?: Enumerable<TaskWhereInput>
     NOT?: Enumerable<TaskWhereInput>
     id?: BigIntFilter | bigint | number
-    groupId?: BigIntFilter | bigint | number
+    groupId?: StringFilter | string
     task?: StringFilter | string
     dependencies?: StringNullableListFilter
     started?: DateTimeNullableFilter | Date | string | null
@@ -12195,7 +12191,7 @@ export namespace Prisma {
     OR?: Enumerable<TaskScalarWhereWithAggregatesInput>
     NOT?: Enumerable<TaskScalarWhereWithAggregatesInput>
     id?: BigIntWithAggregatesFilter | bigint | number
-    groupId?: BigIntWithAggregatesFilter | bigint | number
+    groupId?: StringWithAggregatesFilter | string
     task?: StringWithAggregatesFilter | string
     dependencies?: StringNullableListFilter
     started?: DateTimeNullableWithAggregatesFilter | Date | string | null
@@ -12954,7 +12950,7 @@ export namespace Prisma {
 
   export type TaskCreateInput = {
     id?: bigint | number
-    groupId: bigint | number
+    groupId: string
     task: string
     dependencies?: TaskCreatedependenciesInput | Enumerable<string>
     started?: Date | string | null
@@ -12964,7 +12960,7 @@ export namespace Prisma {
 
   export type TaskUncheckedCreateInput = {
     id?: bigint | number
-    groupId: bigint | number
+    groupId: string
     task: string
     dependencies?: TaskCreatedependenciesInput | Enumerable<string>
     started?: Date | string | null
@@ -12974,7 +12970,7 @@ export namespace Prisma {
 
   export type TaskUpdateInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
-    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: StringFieldUpdateOperationsInput | string
     task?: StringFieldUpdateOperationsInput | string
     dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
     started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -12984,7 +12980,7 @@ export namespace Prisma {
 
   export type TaskUncheckedUpdateInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
-    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: StringFieldUpdateOperationsInput | string
     task?: StringFieldUpdateOperationsInput | string
     dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
     started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -12994,7 +12990,7 @@ export namespace Prisma {
 
   export type TaskCreateManyInput = {
     id?: bigint | number
-    groupId: bigint | number
+    groupId: string
     task: string
     dependencies?: TaskCreatedependenciesInput | Enumerable<string>
     started?: Date | string | null
@@ -13004,7 +13000,7 @@ export namespace Prisma {
 
   export type TaskUpdateManyMutationInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
-    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: StringFieldUpdateOperationsInput | string
     task?: StringFieldUpdateOperationsInput | string
     dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
     started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13014,7 +13010,7 @@ export namespace Prisma {
 
   export type TaskUncheckedUpdateManyInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
-    groupId?: BigIntFieldUpdateOperationsInput | bigint | number
+    groupId?: StringFieldUpdateOperationsInput | string
     task?: StringFieldUpdateOperationsInput | string
     dependencies?: TaskUpdatedependenciesInput | Enumerable<string>
     started?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13841,7 +13837,6 @@ export namespace Prisma {
 
   export type TaskAvgOrderByAggregateInput = {
     id?: SortOrder
-    groupId?: SortOrder
   }
 
   export type TaskMaxOrderByAggregateInput = {
@@ -13862,7 +13857,6 @@ export namespace Prisma {
 
   export type TaskSumOrderByAggregateInput = {
     id?: SortOrder
-    groupId?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {

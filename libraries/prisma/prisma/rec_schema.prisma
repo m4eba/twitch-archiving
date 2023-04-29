@@ -168,7 +168,7 @@ model RetryLog {
 
 model Task {
   id           BigInt    @id @default(autoincrement())
-  groupId      BigInt    @map("group_id")
+  groupId      String    @map("group_id")
   task         String
   dependencies String[]
   started      DateTime? @db.Timestamptz(6)
@@ -177,6 +177,8 @@ model Task {
 
   @@index([groupId])
   @@index([task])
+  @@index([completed])
+  @@index([started])
   @@map("task")
 }
 
