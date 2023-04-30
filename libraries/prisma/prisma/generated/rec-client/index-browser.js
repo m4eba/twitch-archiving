@@ -195,15 +195,27 @@ exports.Prisma.SortOrder = makeEnum({
   desc: 'desc'
 });
 
-exports.Prisma.StoryboardScalarFieldEnum = makeEnum({
-  recordingId: 'recordingId',
+exports.Prisma.StoryboardFileScalarFieldEnum = makeEnum({
+  id: 'id',
+  storyboardId: 'storyboardId',
   index: 'index',
   firstSequence: 'firstSequence',
+  firstScreenshot: 'firstScreenshot',
+  length: 'length',
   timeOffset: 'timeOffset',
+  slug: 'slug',
+  data: 'data'
+});
+
+exports.Prisma.StoryboardScalarFieldEnum = makeEnum({
+  id: 'id',
+  name: 'name',
+  recordingId: 'recordingId',
   interval: 'interval',
   rows: 'rows',
   columns: 'columns',
-  slug: 'slug',
+  width: 'width',
+  height: 'height',
   data: 'data'
 });
 
@@ -262,7 +274,8 @@ exports.Prisma.ModelName = makeEnum({
   Clips: 'Clips',
   ClipsViews: 'ClipsViews',
   RetryLog: 'RetryLog',
-  Task: 'Task'
+  Task: 'Task',
+  StoryboardFile: 'StoryboardFile'
 });
 
 /**

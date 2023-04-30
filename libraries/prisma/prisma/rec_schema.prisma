@@ -84,19 +84,18 @@ model Recording {
 }
 
 model Storyboard {
-  recordingId   BigInt  @map("recording_id")
-  index         Int     @db.SmallInt
-  firstSequence Int     @map("first_sequence")
-  timeOffset    Decimal @map("time_offset") @db.Decimal
-  interval      Int     @db.SmallInt
-  rows          Int     @db.SmallInt
-  columns       Int     @db.SmallInt
-  slug          String
-  data          Json
+  id          BigInt @id @default(autoincrement())
+  name        String
+  recordingId BigInt @map("recording_id")
+  interval    Int    @db.SmallInt
+  rows        Int    @db.SmallInt
+  columns     Int    @db.SmallInt
+  width       Int
+  height      Int
+  data        Json
 
-  @@id([recordingId, index])
-  @@index([slug])
-  @@index([timeOffset])
+  @@index([name])
+  @@index([recordingId])
   @@map("storyboard")
 }
 
@@ -180,6 +179,23 @@ model Task {
   @@index([completed])
   @@index([started])
   @@map("task")
+}
+
+model StoryboardFile {
+  id               BigInt  @id @default(autoincrement())
+  storyboardId     BigInt  @map("storyboard_id")
+  index            Int     @db.SmallInt
+  firstSequence    Int     @map("first_sequence")
+  firstScreenshot  Int     @map("first_screenshot")
+  length           Int
+  timeOffset       Decimal @map("time_offset") @db.Decimal
+  slug             String
+  data             Json
+
+  @@index([slug])
+  @@index([storyboardId])
+  @@index([timeOffset])
+  @@map("storyboard_file")
 }
 
 enum EmoteSource {

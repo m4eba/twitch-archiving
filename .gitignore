@@ -63,3 +63,4 @@ dist
 tsconfg.tsbuildinfo
 *.tsbuildinfo
 example
+example*

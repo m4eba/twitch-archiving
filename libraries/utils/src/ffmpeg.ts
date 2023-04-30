@@ -4,16 +4,16 @@ import { initLogger } from './logger.js';
 
 const logger: Logger = initLogger('ffmpeg-utils');
 
-export async function execFfmpeg(command: FfmpegCommand): Promise<void> {
-  const p = new Promise<void>((resolve, reject) => {
+export async function execFfmpeg(command: FfmpegCommand): Promise<string> {
+  const p = new Promise<string>((resolve, reject) => {
     command.on('start', (c) => {
-      logger.trace({ command: c }, 'ffmpeg command');
+      console.log('ffmpeg command', c);
     });
     command.on('error', (err: Error) => {
       reject(err);
     });
-    command.on('end', () => {
-      resolve();
+    command.on('end', (out, err) => {
+      resolve(err);
     });
     command.run();
   });

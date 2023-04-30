@@ -6,6 +6,8 @@ import {
   PostgresConfigOpt,
   FileConfig,
   FileConfigOpt,
+  RetryConfigOpt,
+  RetryConfig,
 } from '@twitch-archiving/config';
 import type { Logger } from 'pino';
 import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
@@ -13,28 +15,34 @@ import { ArgumentConfig, parse } from 'ts-command-line-args';
 import path from 'path';
 import child_process from 'child_process';
 import util from 'util';
-import { initLogger } from '@twitch-archiving/utils';
+import { fileExists, initLogger } from '@twitch-archiving/utils';
 import {
   storyboard as sb,
   screenshot as ss,
   initPostgres,
+  getRecPrismaClient,
 } from '@twitch-archiving/database';
 import type {
   ScreenshotDoneMessage,
   StoryboardDoneMessage,
+  StoryboardFileData,
+  StoryboardRequestMessage,
 } from '@twitch-archiving/messages';
+import { retry } from '@twitch-archiving/retry';
 
 const exec = util.promisify(child_process.exec);
 
 interface StoryboardConfig {
   inputTopic: string;
-  outputTopic: string;
+  taskDoneTopic: string;
+  screenshotFolder: string;
   storyboardFolder: string;
 }
 
 const StoryboardConfigOpt: ArgumentConfig<StoryboardConfig> = {
-  inputTopic: { type: String, defaultValue: 'tw-screenshot-minimized' },
-  outputTopic: { type: String, defaultValue: 'tw-storyboard' },
+  inputTopic: { type: String, defaultValue: 'tw-storyboard-request' },
+  taskDoneTopic: { type: String, defaultValue: 'tw-task-done' },
+  screenshotFolder: { type: String },
   storyboardFolder: { type: String },
 };
 
@@ -42,6 +50,7 @@ interface Config
   extends StoryboardConfig,
     KafkaConfig,
     PostgresConfig,
+    RetryConfig,
     FileConfig {}
 
 const config: Config = parse<Config>(
@@ -49,6 +58,7 @@ const config: Config = parse<Config>(
     ...KafkaConfigOpt,
     ...StoryboardConfigOpt,
     ...PostgresConfigOpt,
+    ...RetryConfigOpt,
     ...FileConfigOpt,
   },
   {
@@ -76,88 +86,109 @@ await consumer.subscribe({ topic: config.inputTopic, fromBeginning: true });
 const producer: Producer = kafka.producer();
 await producer.connect();
 
+const client = getRecPrismaClient();
+
 await consumer.run({
   partitionsConsumedConcurrently: 3,
-  eachMessage: async ({ message }) => {
-    if (!message.key) return;
-    if (!message.value) return;
+  eachMessage: async ({ message, partition, topic }) => {
+    await retry(
+      async () => {
+        if (!message.key) return;
+        if (!message.value) return;
 
-    const msg: ScreenshotDoneMessage = JSON.parse(message.value.toString());
-    const output = path.join(config.storyboardFolder, msg.recordingId);
+        const msg: StoryboardRequestMessage = JSON.parse(
+          message.value.toString()
+        );
 
-    await fs.promises.mkdir(output, { recursive: true });
+        const output = path.join(
+          config.storyboardFolder,
+          msg.recordingId,
+          msg.name
+        );
 
-    const board = await sb.getStoryboard(msg.recordingId, msg.index);
-    if (board === undefined) {
-      logger.error({ msg }, 'board not found');
-      return;
-    }
-    const filesPerBoard = board.rows * board.columns;
+        await fs.promises.mkdir(output, { recursive: true });
 
-    const sbIndex = Math.floor(msg.index / filesPerBoard);
-    logger.debug({ msg, filesPerBoard, sbIndex }, 'msg');
+        const board = await client.storyboard.findFirst({
+          where: {
+            recordingId: BigInt(msg.recordingId),
+            name: msg.name,
+          },
+        });
 
-    board.data.images.sort();
-
-    // skip, if the image is not last
-    // or second to last - needed if screenshot of last segment of stream is skipped
-    const last = board.data.images[board.data.images.length - 1];
-    if (board.data.images.length > 1) {
-      const slast = board.data.images[board.data.images.length - 2];
-      if (msg.filename !== last && msg.filename !== slast) {
-        logger.debug({ msg }, 'skip montage call');
-        return;
-      }
-    } else {
-      if (msg.filename !== last) {
-        logger.debug({ msg }, 'skip montage call');
-        return;
-      }
-    }
-
-    // build arument list
-    const args: string[] = [];
-    for (let i = 0; i < board.data.images.length; ++i) {
-      if (board.data.images[i] !== null) {
-        args.push('"' + path.join(msg.path, board.data.images[i]) + '"');
-        // we only add args up to the filename in the message
-        // the other files could not be processed yet
-        if (board.data.images[i] === msg.filename) {
-          break;
+        if (!board) {
+          throw new Error('storyboard not found');
         }
-      } else {
-        args.push('null:');
+
+        const filesPerBoard = board.rows * board.columns;
+
+        const file = await client.storyboardFile.findFirst({
+          where: {
+            storyboardId: board.id,
+            index: msg.storyboard_idx,
+          },
+        });
+
+        if (!file) {
+          throw new Error('storyboard file not found');
+        }
+
+        if (!file.data) {
+          throw new Error('storyboard file as no data');
+        }
+        const data: StoryboardFileData = file.data as any;
+
+        const seq = data.screenshots.map((v) => v.screenshot_idx).sort();
+        logger.trace({ seq }, 'screenshot sequences');
+
+        const args: string[] = [];
+        for (let i = 0; i < seq.length; ++i) {
+          const filename = seq[i].toString().padStart(5, '0') + '.png';
+          const image = path.join(
+            config.screenshotFolder,
+            msg.recordingId,
+            msg.name,
+            filename
+          );
+          logger.trace({ image }, 'test screenshot image');
+          if (await fileExists(image)) {
+            args.push(`"${image}"`);
+          } else {
+            args.push('null:');
+          }
+        }
+
+        logger.trace({ msg, args }, 'montage file args');
+
+        const filename = file.index.toString().padStart(5, '0') + '.png';
+        await fs.promises.mkdir(output, { recursive: true });
+
+        let command = 'montage ' + args.join(' ');
+        command += ` -tile ${board.columns}x${board.rows}`;
+        command += ' -geometry +0+0';
+        command += ` ${path.join(output, filename)}`;
+        logger.debug({ msg, command }, 'montage command');
+        await exec(command);
+
+        await sendData(config.taskDoneTopic, {
+          key: msg.groupId,
+          value: JSON.stringify(msg),
+          timestamp: new Date().getTime().toString(),
+        });
+
+        // TODO clear
+      },
+      {
+        //retryConfig: config,
+        retryConfig: {
+          retries: 10000,
+          failedTopic: config.failedTopic,
+        },
+        message,
+        partition,
+        producer,
+        topic,
       }
-    }
-    logger.trace({ msg, args }, 'montage file args');
-
-    const filename = board.index.toString().padStart(5, '0') + '.png';
-    await fs.promises.mkdir(output, { recursive: true });
-
-    let command = 'montage ' + args.join(' ');
-    command += ` -tile ${board.columns}x${board.rows}`;
-    command += ' -geometry +0+0';
-    command += ` ${path.join(output, filename)}`;
-    logger.debug({ msg, command }, 'montage command');
-    await exec(command);
-
-    const outMsg: StoryboardDoneMessage = {
-      recordingId: msg.recordingId,
-      index: board.index,
-      count: args.length,
-      rows: board.rows,
-      columns: board.columns,
-      path: output,
-      filename,
-    };
-
-    await sendData(config.outputTopic, {
-      key: message.key,
-      value: JSON.stringify(outMsg),
-      timestamp: new Date().getTime().toString(),
-    });
-
-    // TODO clear
+    );
   },
 });
 

@@ -1,0 +1,14 @@
+{
+ "extends": "@twitch-archiving/config-tsconfig/microservice.json",
+ "include": [
+  "."
+ ],
+ "exclude": [
+  "dist",
+  "build",
+  "node_modules"
+ ],
+ "compilerOptions": {
+  "outDir": "./dist"
+ }
+}

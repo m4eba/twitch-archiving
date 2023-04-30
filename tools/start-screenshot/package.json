@@ -1,5 +1,5 @@
 {
-  "name": "@twitch-archiving/ms-screenshot-storyboard",
+  "name": "@twitch-archiving/tools-start-screenshots",
   "version": "0.0.1",
   "bin": "dist/index.js",
   "license": "MIT",
@@ -21,9 +21,9 @@
     "kafkajs": "~1.16.0",
     "pino": "~7.10.0",
     "ts-command-line-args": "~2.2.1",
-    "redis": "~4.0.6",
     "@twitch-archiving/utils": "*",
-    "@twitch-archiving/retry": "*",
-    "@twitch-archiving/database": "*"
+    "@twitch-archiving/prisma": "*",
+    "@twitch-archiving/database": "*",
+    "@twitch-archiving/ms-playlist-storyboard": "*"
   }
 }

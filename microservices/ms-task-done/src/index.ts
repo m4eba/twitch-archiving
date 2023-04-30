@@ -21,7 +21,7 @@ import { ArgumentConfig, parse } from 'ts-command-line-args';
 import { initLogger, randomStr } from '@twitch-archiving/utils';
 import fs from 'fs';
 import path from 'path';
-import { getRecPrismaClient } from '@twitch-archiving/database';
+import { getRecPrismaClient, task as t } from '@twitch-archiving/database';
 import { retry } from '@twitch-archiving/retry';
 import { Task } from '@twitch-archiving/prisma/prisma/generated/rec-client';
 
@@ -30,7 +30,7 @@ interface ServiceConfig {
 }
 
 const ServiceConfigOpt: ArgumentConfig<ServiceConfig> = {
-  inputTopic: { type: String, defaultValue: 'tw-task-completed' },
+  inputTopic: { type: String, defaultValue: 'tw-task-done' },
 };
 
 interface Config
@@ -95,6 +95,8 @@ await consumer.run({
         if (!task) {
           throw new Error('task not found with id ' + msg.taskId);
         }
+
+        await t.complete(BigInt(msg.taskId));
 
         const all = await client.task.findMany({
           where: {

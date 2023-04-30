@@ -1,5 +1,6 @@
 import fs from 'fs';
 import * as crypto from 'crypto';
+import { TaskData, TaskRequestMsg } from '@twitch-archiving/messages';
 export * from './FileWriter.js';
 export * from './logger.js';
 export * from './download.js';

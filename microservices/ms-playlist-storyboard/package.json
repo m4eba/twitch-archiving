@@ -1,7 +1,8 @@
 {
-  "name": "@twitch-archiving/ms-screenshot-storyboard",
+  "name": "@twitch-archiving/ms-playlist-storyboard",
   "version": "0.0.1",
   "bin": "dist/index.js",
+  "main": "dist/lib.js",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -11,6 +12,7 @@
   "devDependencies": {
     "@types/node": "~17.0.18",
     "eslint": "~8.10.0",
+    "@types/fluent-ffmpeg": "~2.1.20",
     "@twitch-archiving/config-tsconfig": "*",
     "@twitch-archiving/config-eslint-custom": "*"
   },
@@ -23,7 +25,7 @@
     "ts-command-line-args": "~2.2.1",
     "redis": "~4.0.6",
     "@twitch-archiving/utils": "*",
-    "@twitch-archiving/retry": "*",
-    "@twitch-archiving/database": "*"
+    "@twitch-archiving/database": "*",
+    "fluent-ffmpeg": "~2.1.2"
   }
 }

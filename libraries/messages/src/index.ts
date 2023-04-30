@@ -1,5 +1,18 @@
 import { TwitchClip, AccessToken } from '@twitch-archiving/model';
 
+export interface TaskRequestMsg {
+  groupId: string;
+  taskId: string;
+}
+
+export interface TaskDoneMsg extends TaskRequestMsg {}
+
+export interface TaskData<T extends TaskRequestMsg> {
+  topic: string;
+  key: string;
+  data: T;
+}
+
 export interface WebsocketMessage {
   data: string;
 }
@@ -81,6 +94,34 @@ export interface SegmentDownloadedMessage extends PlaylistMessage {
   status: SegmentDownloadedStatus;
 }
 
+export interface ScreenshotRequestMessage extends TaskRequestMsg {
+  recordingId: string;
+  name: string;
+  storyboard_idx: number;
+  screenshot_idx: number;
+  seq: number;
+  offset: number;
+  width: number;
+}
+
+export interface StoryboardRequestMessage extends TaskRequestMsg {
+  recordingId: string;
+  name: string;
+  storyboard_idx: number;
+}
+
+export interface StoryboardData {
+  currentOffset: number;
+  currentIdx: number;
+  lastSegmentSeq: number;
+  lastScreenshotIndex: number;
+  segments: SegmentDownloadedMessage[];
+}
+
+export interface StoryboardFileData {
+  screenshots: ScreenshotRequestMessage[];
+}
+
 export interface ScreenshotMessage {
   segment: SegmentDownloadedMessage;
   index: number;
@@ -117,16 +158,4 @@ export interface ClipsList {
 export interface ClipDownload {
   channel: string;
   clip: TwitchClip;
-}
-
-export interface TaskRequestMsg {
-  groupId: string;
-  taskId: string;
-}
-
-export interface TaskDoneMsg extends TaskRequestMsg {}
-
-export interface TaskData<T extends TaskRequestMsg> {
-  topic: string;
-  data: T;
 }
