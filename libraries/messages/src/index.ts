@@ -115,7 +115,6 @@ export interface StoryboardData {
   currentIdx: number;
   lastSegmentSeq: number;
   lastScreenshotIndex: number;
-  segments: SegmentDownloadedMessage[];
 }
 
 export interface StoryboardFileData {

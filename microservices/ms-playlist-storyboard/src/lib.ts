@@ -67,7 +67,6 @@ export async function processMessage(
       currentOffset: 0,
       lastSegmentSeq: -1,
       lastScreenshotIndex: -1,
-      segments: [],
     };
     const storyboard = await client.storyboard.create({
       data: {
@@ -200,7 +199,6 @@ export async function processMessage(
     }
 
     // update board data
-    boardData.segments.push(msg);
     boardData.lastSegmentSeq = msg.sequenceNumber;
 
     if (offset > -1) {
