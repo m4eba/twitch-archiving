@@ -16,7 +16,12 @@ import { Kafka, Producer, Consumer, TopicMessages, Message } from 'kafkajs';
 import { ArgumentConfig, parse } from 'ts-command-line-args';
 import path from 'path';
 import Ffmpeg from 'fluent-ffmpeg';
-import { execFfmpeg, initLogger, randomStr } from '@twitch-archiving/utils';
+import {
+  execFfmpeg,
+  fileExists,
+  initLogger,
+  randomStr,
+} from '@twitch-archiving/utils';
 import {
   getRecPrismaClient,
   initPostgres,
@@ -132,6 +137,7 @@ await consumer.run({
         await fs.promises.mkdir(output, { recursive: true });
 
         for (let i = 0; i < 3; ++i) {
+          logger.trace({ retry: i }, 'starting ffmpeg');
           const command = Ffmpeg()
             .input(input)
             .seek(msg.offset)
@@ -146,9 +152,31 @@ await consumer.run({
             )
             .output(path.join(output, filename));
 
-          const err = await execFfmpeg(command);
+          let retry = false;
+          let err = '';
+          try {
+            err = await execFfmpeg(command);
+          } catch (e) {
+            logger.error({ error: e }, 'ffmpeg error');
+            retry = true;
+          }
 
-          if (err.indexOf('Output file is empty, nothing was encoded') > -1) {
+          logger.trace({ out: err }, 'ffmpeg output');
+
+          if (
+            err.indexOf('Output file is empty, nothing was encoded') > -1 ||
+            err.indexOf('Output file #0 does not contain any stream') > -1
+          ) {
+            retry = true;
+          }
+
+          if (!retry) {
+            if (!fileExists(path.join(output, filename))) {
+              retry = true;
+            }
+          }
+
+          if (retry) {
             if (msg.offset < 0.05) {
               // just skip this
               return;
