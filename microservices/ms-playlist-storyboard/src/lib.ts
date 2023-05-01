@@ -46,7 +46,22 @@ export async function processMessage(
 ): Promise<void> {
   const recordingId = BigInt(playMsg.recordingId);
 
+  const board = await client.storyboard.findFirst({
+    where: {
+      recordingId,
+      name: config.name,
+    },
+    orderBy: {
+      id: 'desc',
+    },
+  });
+
   if (playMsg.type === PlaylistMessageType.START) {
+    // do noting if board already exists
+    if (board) {
+      logger.debug({ board }, 'storyboard already exist');
+      return;
+    }
     const data: StoryboardData = {
       currentIdx: 0,
       currentOffset: 0,
@@ -86,15 +101,7 @@ export async function processMessage(
     return;
   }
 
-  const board = await client.storyboard.findFirst({
-    where: {
-      recordingId,
-      name: config.name,
-    },
-    orderBy: {
-      id: 'desc',
-    },
-  });
+  // need the board from here on
   if (!board) {
     throw new Error('storyboard not initialized');
   }
