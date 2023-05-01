@@ -50,6 +50,7 @@ export async function createTask<T extends TaskRequestMsg>(
       },
     });
     for (let i = 0; i < tasks.length; ++i) {
+      if (tasks[i].completed === null) continue;
       deps.delete(tasks[i].task);
     }
     if (deps.size === 0) {
