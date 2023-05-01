@@ -131,34 +131,34 @@ await consumer.run({
 
         await fs.promises.mkdir(output, { recursive: true });
 
-        const command = Ffmpeg()
-          .input(input)
-          .seek(msg.offset)
-          //.outputOptions('-vframes', '1', '-q:v', '2')
-          .outputOptions(
-            '-frames:v',
-            '1',
-            '-vf',
-            `scale=${msg.width}:-1`,
-            '-q:v',
-            '2'
-          )
-          .output(path.join(output, filename));
+        for (let i = 0; i < 3; ++i) {
+          const command = Ffmpeg()
+            .input(input)
+            .seek(msg.offset)
+            //.outputOptions('-vframes', '1', '-q:v', '2')
+            .outputOptions(
+              '-frames:v',
+              '1',
+              '-vf',
+              `scale=${msg.width}:-1`,
+              '-q:v',
+              '2'
+            )
+            .output(path.join(output, filename));
 
-        const err = await execFfmpeg(command);
-        if (err.indexOf('Output file is empty, nothing was encoded') > -1) {
-          if (msg.offset < 0.05) {
-            // just skip this
-            return;
+          const err = await execFfmpeg(command);
+
+          if (err.indexOf('Output file is empty, nothing was encoded') > -1) {
+            if (msg.offset < 0.05) {
+              // just skip this
+              return;
+            }
+            // reduce the offset a little and try again
+            msg.offset = msg.offset - 0.05;
+          } else {
+            // success
+            break;
           }
-          // reduce the offset a little and try again
-          msg.offset = msg.offset - 0.05;
-          await sendData(config.inputTopic, {
-            key: randomStr(),
-            value: JSON.stringify(msg),
-            timestamp: new Date().getTime().toString(),
-          });
-          return;
         }
 
         // make sure file exists
