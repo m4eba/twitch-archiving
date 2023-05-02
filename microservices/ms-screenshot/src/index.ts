@@ -179,7 +179,7 @@ await consumer.run({
           if (retry) {
             if (msg.offset < 0.05) {
               // just skip this
-              return;
+              break;
             }
             // reduce the offset a little and try again
             msg.offset = msg.offset - 0.05;
@@ -188,10 +188,6 @@ await consumer.run({
             break;
           }
         }
-
-        // make sure file exists
-        const sr = await fs.promises.stat(path.join(output, filename));
-        logger.trace({ stat: sr }, 'stat result on screenshot');
 
         const doneMsg: TaskDoneMsg = {
           groupId: msg.groupId,
