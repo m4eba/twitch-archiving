@@ -137,7 +137,9 @@ await consumer.run({
         }
         const data: StoryboardFileData = file.data as any;
 
-        const seq = data.screenshots.map((v) => v.screenshot_idx).sort();
+        const seq = data.screenshots
+          .map((v) => v.screenshot_idx)
+          .sort((a, b) => a - b);
         logger.trace({ seq }, 'screenshot sequences');
 
         const args: string[] = [];
