@@ -17,10 +17,17 @@ const GLOBAL_EMOTES = (prefix: string): string => {
 export async function insertMessage(msg: ChatMessage): Promise<void> {
   const client = getRecPrismaClient();
 
-  await client.chatMessage.create({
-    data: {
+  await client.chatMessage.upsert({
+    create: {
       ...msg,
       data: msg.data as Prisma.InputJsonObject,
+      emotes: msg.emotes as any,
+    },
+    where: {
+      id: msg.id,
+    },
+    update: {
+      ...msg,
       emotes: msg.emotes as any,
     },
   });
