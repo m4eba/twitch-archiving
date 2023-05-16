@@ -85,13 +85,13 @@ await consumer.run({
     const user = message.key.toString();
     const recording = await dl.getRunningRecording(user);
     if (recording === undefined) {
-      await forcePlaylistUpdate(user);
+      await forcePlaylistUpdate(user, 'recording undefined');
       return;
     }
     const playlist: dl.RecordingData | null = recording.data;
     logger.debug({ playlist, user }, 'playlist');
     if (playlist === null) {
-      await forcePlaylistUpdate(user);
+      await forcePlaylistUpdate(user, 'playlist null');
       return;
     }
     logger.trace({ url: playlist.bestUrl, user }, 'fetch playlist');
@@ -103,7 +103,7 @@ await consumer.run({
     );
     if (resp.status !== 200) {
       logger.debug({ code: resp.status }, 'invalid status code');
-      await forcePlaylistUpdate(user);
+      await forcePlaylistUpdate(user, 'invalid status code');
       return;
     }
     logger.trace({ data }, 'playlist text');
@@ -198,11 +198,12 @@ await consumer.run({
   },
 });
 
-async function forcePlaylistUpdate(user: string): Promise<void> {
+async function forcePlaylistUpdate(user: string, msg: string): Promise<void> {
   await sendData(config.playlistReloadOutputTopic, {
     key: user,
     value: JSON.stringify({
       forceReload: true,
+      msg,
     }),
     timestamp: new Date().getTime().toString(),
   });

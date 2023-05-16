@@ -83,7 +83,7 @@ async function testUser(user: string) {
   if (stream !== null) {
     sendData(config.outputTopic, {
       key: user,
-      value: JSON.stringify({ forceReload: true }),
+      value: JSON.stringify({ forceReload: true, msg: 'api live test' }),
       timestamp: new Date().getTime().toString(),
     });
   }
