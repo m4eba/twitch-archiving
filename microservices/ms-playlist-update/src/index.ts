@@ -85,12 +85,14 @@ await consumer.run({
     const user = message.key.toString();
     const recording = await dl.getRunningRecording(user);
     if (recording === undefined) {
+      logger.debug({ user }, 'force reload - no recording');
       await forcePlaylistUpdate(user, 'recording undefined');
       return;
     }
     const playlist: dl.RecordingData | null = recording.data;
     logger.debug({ playlist, user }, 'playlist');
     if (playlist === null) {
+      logger.debug({ user }, 'force reload - empty playlist');
       await forcePlaylistUpdate(user, 'playlist null');
       return;
     }
