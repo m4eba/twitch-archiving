@@ -78,7 +78,7 @@ const apiClient = new ApiClient({ authProvider });
 async function testUser(user: string) {
   const recording = await dl.getRunningRecording(user);
   logger.trace({ recording, user }, 'test recording');
-  if (!recording) return;
+  if (recording) return;
   const stream = await apiClient.streams.getStreamByUserName(user);
   logger.debug({ stream, user }, 'test user');
   if (stream !== null) {
