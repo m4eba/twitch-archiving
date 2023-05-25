@@ -160,12 +160,12 @@ export async function processMessage(
       return;
     }
     if (msg.sequenceNumber > expected) {
-      throw new Error(
-        'inconsitent sequencenumber expected ' +
-          expected.toString() +
-          '!=' +
-          msg.sequenceNumber.toString()
+      // there is no recovering from this
+      logger.error(
+        { sequence: msg.sequenceNumber, expected },
+        'inconsistent sequencenumber'
       );
+      return;
     }
 
     // calculate offset
