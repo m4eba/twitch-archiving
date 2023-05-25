@@ -248,8 +248,10 @@ export async function getLatestFile(
 ): Promise<File | undefined> {
   const { pool } = getP();
 
+  // increase limit from 1 to 50
+  // see https://stackoverflow.com/questions/21385555/postgresql-query-very-slow-with-limit-1
   const result = await pool.query(
-    'select * from file where recording_id = $1 order by seq desc limit 1',
+    'select * from file where recording_id = $1 order by seq desc limit 50',
     [recordingId]
   );
 
