@@ -39,7 +39,8 @@ export async function getAccessToken(
     },
   ];
   const headers: { [key: string]: string } = {
-    'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+    //'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+    'Client-ID': 'ue6666qo983tsx6so1t0vnawi233wa',
     Accept: 'application/vnd.twitchtv.v5+json',
   };
   if (oauthVideo.length > 0) {
