@@ -1,4 +1,6 @@
 
+create index on file(time_offset);
+
 create table storyboard (
   id BIGSERIAL primary key,
   name text not null,
