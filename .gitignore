@@ -58,6 +58,8 @@ jspm_packages/
 # OS X temporary files
 .DS_Store
 
+env.source
+
 dist
 .turbo
 tsconfg.tsbuildinfo

@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run generate && tsc",
     "start": "tsc && node dist/index.js",
     "pull": "prisma db pull --schema prisma/rec_schema.prisma",
     "generate": "prisma generate --schema prisma/rec_schema.prisma",

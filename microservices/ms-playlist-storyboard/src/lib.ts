@@ -78,6 +78,7 @@ export async function processMessage(
         width: config.width,
         height: 0,
         data: data as any,
+        modified: new Date(),
       },
     });
     logger.trace({ storyboard }, 'init storyboard');
@@ -296,6 +297,7 @@ export async function processMessage(
       },
       data: {
         data: boardData as any,
+        modified: new Date(),
       },
     });
   }

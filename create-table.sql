@@ -10,7 +10,8 @@ create table storyboard (
   columns smallint not null,
   width int not null,
   height int not null,
-  data jsonb not null
+  data jsonb not null,
+  modified timestamptz not null
 );
 
 create index on storyboard(name);
