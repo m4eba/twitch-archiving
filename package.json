@@ -6,7 +6,8 @@
     "config/*",
     "libraries/*",
     "tools/*",
-    "microservices/*"
+    "microservices/*",
+    "api"
   ],
   "scripts": {
     "build": "turbo run build",
