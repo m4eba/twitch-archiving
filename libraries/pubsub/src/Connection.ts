@@ -25,6 +25,10 @@ export class Connection extends WebSocketConnection<string> {
   }
 
   protected listen(): void {
+    logger.debug(
+      { token: this.token, topics: this.topics },
+      'listen to topics'
+    );
     if (!this.ws) return;
     if (!this.token) return;
     for (let i = 0; i < this.topics.length; ++i) {
