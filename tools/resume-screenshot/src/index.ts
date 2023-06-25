@@ -103,7 +103,7 @@ async function start(storyboardId: number): Promise<void> {
     await processMessage(config, producer, startMsg);
   }
   //offset = data.lastSegmentSeq > -1 ? data.lastScreenshotIndex : 0;
-  offset = data.lastSegmentSeq;
+  offset = data.lastSegmentSeq > -1 ? data.lastSegmentSeq : 0;
 
   while (true) {
     const files = await client.file.findMany({
