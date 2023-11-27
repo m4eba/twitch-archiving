@@ -111,7 +111,7 @@ async function update(): Promise<void> {
       ce = ce.concat(emotes);
     }
     {
-      const { data, emotes } = await seventv.channelEmotes(channel);
+      const { data, emotes } = await seventv.channelEmotes(id);
       ce = ce.concat(emotes);
     }
     {
