@@ -233,8 +233,22 @@ async function initStream(
 
   const best: HLS.types.Variant = list.variants.reduce((prev, curr) => {
     let result = prev;
-    if (prev.bandwidth < curr.bandwidth) {
-      result = curr;
+    if (prev.resolution && curr.resolution) {
+      // select current if resolution is higher
+      if (prev.resolution.width < curr.resolution.width) {
+        result = curr;
+      }
+      // if resolution is same select on bandwidth
+      if (prev.resolution.width === curr.resolution.width) {
+        if (prev.bandwidth < curr.bandwidth) {
+          result = curr;
+        }
+      }
+    } else {
+      // select based on bandwidth if there is no resolution
+      if (prev.bandwidth < curr.bandwidth) {
+        result = curr;
+      }
     }
     logger.debug({ user, url: result }, 'best format');
     return result;
