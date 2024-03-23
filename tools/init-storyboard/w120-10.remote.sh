@@ -1,1 +1,0 @@
-LOG_LEVEL=trace REC_DATABASE_URL=postgres://postgres:password@10.5.0.8:5454/tw_stats2 node dist/index.js --kafkaBroker=10.5.0.8:9092 --name "w120-10" --interval 10 --rows 10 --columns 5 --width 120 --recording $1
