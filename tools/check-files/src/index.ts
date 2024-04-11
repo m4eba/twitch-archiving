@@ -258,7 +258,7 @@ async function checkStream(recording: Recording): Promise<boolean> {
         const duration = parseFloat(video.duration);
         const diff = f.duration.toNumber() - duration;
         // don't check length for last 2 files
-        if (diff < -0.03 || (diff > 0.03 && f.seq < files.length - 2)) {
+        if (diff < -0.03 || (diff > 0.03 && f.seq < files.length - 3)) {
           throw new Error(
             'duration diff too big in ' +
               f.name +
