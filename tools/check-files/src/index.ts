@@ -17,6 +17,10 @@ import {
   fileExists,
   ffprobe,
   getVideoProbeStream,
+  getAudioProbeStream,
+  VideoProbe,
+  AudioProbeStream,
+  VideoProbeStream,
 } from '@twitch-archiving/utils';
 import { getP, initPostgres } from '@twitch-archiving/database';
 import {
@@ -130,6 +134,30 @@ async function checkFileIntegrity(filePath: string): Promise<IntegrityResult> {
   });
 }
 
+function findMatchingDuration(
+  video: VideoProbeStream | null,
+  audio: AudioProbeStream | null,
+  duration: number
+): number {
+  let vd = 99999;
+  let vl = 0;
+  if (video && video.duration) {
+    vl = parseFloat(video.duration);
+    vd = vl - duration;
+  }
+  let ad = 99999;
+  let al = 0;
+  if (audio && audio.duration) {
+    al = parseFloat(audio.duration);
+    ad = al - duration;
+  }
+  if (Math.abs(vd) < Math.abs(ad)) {
+    return vl;
+  } else {
+    return al;
+  }
+}
+
 async function checkStream(recording: Recording): Promise<boolean> {
   console.log('check stream', recording.site_id);
   const outputPath = path.join(config.reportPath, recording.site_id);
@@ -234,31 +262,37 @@ async function checkStream(recording: Recording): Promise<boolean> {
           JSON.stringify(probe, null, ' ')
         );
         const video = getVideoProbeStream(probe);
-        if (video === null) {
-          throw new Error('no video stream found in ' + f.name);
+        const audio = getAudioProbeStream(probe);
+
+        if (video === null && audio === null) {
+          throw new Error('no stream found in ' + f.name);
         }
 
-        if (
-          (video.width !== config.expectedWidth ||
-            video.height !== config.expectedHeight) &&
-          f.seq < files.length - 1 // pass wrong resolution on last file
-        ) {
-          throw new Error(
-            'resolution error in ' +
-              f.name +
-              ' ' +
-              video.width +
-              'x' +
-              video.height
-          );
+        if (video) {
+          if (
+            (video.width !== config.expectedWidth ||
+              video.height !== config.expectedHeight) &&
+            f.seq < files.length - 1 // pass wrong resolution on last file
+          ) {
+            throw new Error(
+              'resolution error in ' +
+                f.name +
+                ' ' +
+                video.width +
+                'x' +
+                video.height
+            );
+          }
         }
-        if (!video.duration) {
-          throw new Error('no video duration in ' + f.name);
-        }
-        const duration = parseFloat(video.duration);
+        const duration = findMatchingDuration(
+          video,
+          audio,
+          f.duration.toNumber()
+        );
         const diff = f.duration.toNumber() - duration;
         // don't check length for last 2 files
-        if (diff < -0.03 || (diff > 0.03 && f.seq < files.length - 3)) {
+        //if ((diff < -0.03 || diff > 0.03) && f.seq < files.length - 2) {
+        if (diff < -0.03 || diff > 0.03) {
           throw new Error(
             'duration diff too big in ' +
               f.name +
