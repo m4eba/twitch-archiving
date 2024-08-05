@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import readline from 'readline';
 import {
   KafkaConfig,
   KafkaConfigOpt,
@@ -158,6 +159,61 @@ function findMatchingDuration(
   }
 }
 
+async function findTimeForSeq(
+  playlistPath: string,
+  seq: number
+): Promise<{ seq: number; time: number }> {
+  const fileStream = fs.createReadStream(playlistPath);
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity,
+  });
+
+  let currentSequence: number | null = null;
+  let currentElapsedTime: number | null = null;
+
+  for await (const line of rl) {
+    if (line.startsWith('#EXT-X-TWITCH-LIVE-SEQUENCE:')) {
+      currentSequence = parseInt(line.split(':')[1], 10);
+    } else if (line.startsWith('#EXT-X-TWITCH-ELAPSED-SECS:')) {
+      currentElapsedTime = parseFloat(line.split(':')[1]);
+
+      // Check if we have found the target sequence number
+      if (currentSequence !== null && currentSequence >= seq) {
+        return { seq: currentSequence, time: currentElapsedTime };
+      }
+    }
+  }
+
+  return { seq: -1, time: -1 };
+}
+async function checkPlaylist(
+  recording: Recording,
+  seq: number
+): Promise<boolean> {
+  console.log('checkplaylist recording', recording, seq);
+  const outputPath = path.join(config.reportPath, recording.site_id);
+  const playlistPath = path.join(outputPath, 'playlist.log');
+  if (!(await fileExists(playlistPath))) return false;
+
+  const seqtime = await findTimeForSeq(playlistPath, seq);
+
+  const file = await client.file.findFirst({
+    where: {
+      recordingId: recording.id,
+      seq: seqtime.seq,
+    },
+  });
+
+  console.log('seqtime', seqtime);
+  console.log('file', file);
+  if (file && file.timeOffset.toNumber() === seqtime.time) {
+    return true;
+  }
+
+  return false;
+}
+
 async function checkStream(recording: Recording): Promise<boolean> {
   console.log('check stream', recording.site_id);
   const outputPath = path.join(config.reportPath, recording.site_id);
@@ -292,7 +348,11 @@ async function checkStream(recording: Recording): Promise<boolean> {
         const diff = f.duration.toNumber() - duration;
         // don't check length for last 2 files
         //if ((diff < -0.03 || diff > 0.03) && f.seq < files.length - 2) {
-        if (diff < -0.03 || diff > 0.03) {
+        console.log('duration diff', Math.abs(diff));
+        if (
+          (diff < -0.03 || diff > 0.03) &&
+          !(await checkPlaylist(recording, f.seq))
+        ) {
           throw new Error(
             'duration diff too big in ' +
               f.name +
