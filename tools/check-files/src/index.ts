@@ -255,6 +255,18 @@ async function checkStream(recording: Recording): Promise<boolean> {
 
       console.log('files', files.length);
 
+      const okFilename = path.join(outputPath, 'ok.txt');
+      const okFiles = new Set<string>();
+
+      if (await fileExists(okFilename)) {
+        const lines = (
+          await fs.promises.readFile(okFilename, { encoding: 'utf8' })
+        ).split('\n');
+        lines.forEach((l) => {
+          if (l.length > 0) okFiles.add(l.trim());
+        });
+      }
+
       const fileLogFilename = path.join(outputPath, 'files.log');
       interface FileTestData {
         seq: number;
@@ -298,6 +310,9 @@ async function checkStream(recording: Recording): Promise<boolean> {
         if (f.seq !== i) {
           throw new Error('sequence error ' + f.seq + ' != ' + i);
         }
+        const manualPass = okFiles.has(f.name);
+        if (manualPass) continue;
+
         const name = path.join(segmentPath, f.name);
         if (!(await fileExists(name))) {
           throw new Error('missing file ' + f.name);
