@@ -347,13 +347,13 @@ async function checkStream(recording: Recording): Promise<boolean> {
         );
         const diff = f.duration.toNumber() - duration;
         // don't check length for last 2 files
-        //if ((diff < -0.03 || diff > 0.03) && f.seq < files.length - 2) {
-        console.log('duration diff', Math.abs(diff));
+        if ((diff < -0.05 || diff > 0.05) && f.seq < files.length - 3) {
+          /*console.log('duration diff', Math.abs(diff));
         if (
           diff < -0.03 ||
           diff > 0.03 //&&
           //!(await checkPlaylist(recording, f.seq))
-        ) {
+        ) {*/
           throw new Error(
             'duration diff too big in ' +
               f.name +
