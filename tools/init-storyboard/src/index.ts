@@ -38,6 +38,7 @@ interface PlaylistConfig {
   rows: number;
   columns: number;
   width: number;
+  height: number;
 }
 
 const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
@@ -47,6 +48,7 @@ const PlaylistConfigOpt: ArgumentConfig<PlaylistConfig> = {
   rows: { type: Number },
   columns: { type: Number },
   width: { type: Number },
+  height: { type: Number },
 };
 
 console.log(process.env.REC_DATABASE_URL);
@@ -93,6 +95,7 @@ const serviceConfig: ServiceConfig = {
   rows: config.rows,
   columns: config.columns,
   width: config.width,
+  height: config.height,
   name: config.name,
 };
 let msg: PlaylistMessage = {

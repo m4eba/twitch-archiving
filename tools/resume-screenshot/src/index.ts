@@ -87,6 +87,7 @@ async function start(storyboardId: number): Promise<void> {
     interval: storyboard.interval,
     name: storyboard.name,
     width: storyboard.width,
+    height: storyboard.height,
     inputTopic: '',
     screenshotTopic: '',
     user: [],

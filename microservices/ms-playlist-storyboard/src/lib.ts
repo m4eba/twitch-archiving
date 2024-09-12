@@ -23,6 +23,7 @@ export interface ServiceConfig {
   rows: number;
   columns: number;
   width: number;
+  height: number;
 }
 
 export const ServiceConfigOpt: ArgumentConfig<ServiceConfig> = {
@@ -33,6 +34,7 @@ export const ServiceConfigOpt: ArgumentConfig<ServiceConfig> = {
   rows: { type: Number },
   columns: { type: Number },
   width: { type: Number },
+  height: { type: Number },
   name: { type: String },
 };
 
@@ -76,7 +78,7 @@ export async function processMessage(
         rows: config.rows,
         interval: config.interval,
         width: config.width,
-        height: 0,
+        height: config.height,
         data: data as any,
         modified: new Date(),
       },
