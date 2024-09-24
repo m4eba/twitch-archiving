@@ -18,30 +18,17 @@ export async function fetchWithTimeoutText(
       headers,
     })
       .then((resp: Response) => {
-        resp
-          .text()
-          .then((d) => resolve({ data: d, resp }))
-          .catch((e) => {
-            if (retries === 0) {
-              reject(e);
-              return;
-            }
-            fetchWithTimeoutText(url, retries - 1, timeout, headers)
-              .then(resolve)
-              .catch(reject);
-          })
-          .finally(() => {
-            clearTimeout(timer);
-          });
+        return resp.text().then((d) => ({ data: d, resp }));
       })
+      .then(resolve)
       .catch((e) => {
-        if (retries === 0) {
+        if (retries > 0) {
+          fetchWithTimeoutText(url, retries - 1, timeout, headers)
+            .then(resolve)
+            .catch(reject);
+        } else {
           reject(e);
-          return;
         }
-        fetchWithTimeoutText(url, retries - 1, timeout, headers)
-          .then(resolve)
-          .catch(reject);
       })
       .finally(() => {
         clearTimeout(timer);
