@@ -183,15 +183,16 @@ model Task {
 }
 
 model StoryboardFile {
-  id              BigInt  @id @default(autoincrement())
-  storyboardId    BigInt  @map("storyboard_id")
-  index           Int     @db.SmallInt
-  firstSequence   Int     @map("first_sequence")
-  firstScreenshot Int     @map("first_screenshot")
+  id              BigInt    @id @default(autoincrement())
+  storyboardId    BigInt    @map("storyboard_id")
+  index           Int       @db.SmallInt
+  firstSequence   Int       @map("first_sequence")
+  firstScreenshot Int       @map("first_screenshot")
   length          Int
-  timeOffset      Decimal @map("time_offset") @db.Decimal
+  timeOffset      Decimal   @map("time_offset") @db.Decimal
   slug            String
   data            Json
+  created         DateTime? @db.Timestamptz(6)
 
   @@index([slug])
   @@index([storyboardId])
