@@ -117,7 +117,7 @@ await consumer.run({
         }
 
         const filename =
-          msg.screenshot_idx.toString().padStart(5, '0') + '.png';
+          msg.screenshot_idx.toString().padStart(5, '0') + '.webp';
         const output = path.join(
           config.screenshotFolder,
           msg.recordingId,
@@ -147,8 +147,8 @@ await consumer.run({
               '1',
               '-vf',
               `scale=${msg.width}:-1`,
-              '-q:v',
-              '2'
+              '-c:v',
+              'libwebp'
             )
             .output(path.join(output, filename));
 

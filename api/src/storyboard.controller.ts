@@ -60,7 +60,7 @@ export class StoryboardController {
     return info;
   }
 
-  @Get('/:id/:name/:file.png')
+  @Get(['/:id/:name/:file.png', '/:id/:name/:file.webp', '/:id/:name/:file'])
   @Header('Cache-Control', 'public,max-age=2592000')
   async file(
     @Param('id') id,
@@ -87,17 +87,29 @@ export class StoryboardController {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
 
-    const filename = path.join(
+    let filename = path.join(
       process.env.STORYBOARD_PATH,
       recording.id.toString(),
       name,
       file + '.png',
     );
+    let contentType = 'image/png';
+
+    if (!(await fileExists(filename))) {
+      filename = path.join(
+        process.env.STORYBOARD_PATH,
+        recording.id.toString(),
+        name,
+        file + '.webp',
+      );
+      contentType = 'image/webp';
+    }
 
     if (!(await fileExists(filename))) {
       throw new NotFoundException();
     }
 
+    response.setHeader('Content-Type', contentType);
     const fst = createReadStream(filename);
     fst.pipe(response);
   }

@@ -144,7 +144,7 @@ await consumer.run({
 
         const args: string[] = [];
         for (let i = 0; i < seq.length; ++i) {
-          const filename = seq[i].toString().padStart(5, '0') + '.png';
+          const filename = seq[i].toString().padStart(5, '0') + '.webp';
           const image = path.join(
             config.screenshotFolder,
             msg.recordingId,
@@ -161,7 +161,7 @@ await consumer.run({
 
         logger.trace({ msg, args }, 'montage file args');
 
-        const filename = file.index.toString().padStart(5, '0') + '.png';
+        const filename = file.index.toString().padStart(5, '0') + '.webp';
         await fs.promises.mkdir(output, { recursive: true });
 
         let command = 'montage ' + args.join(' ');
