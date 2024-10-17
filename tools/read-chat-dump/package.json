@@ -15,12 +15,12 @@
   "@twitch-archiving/config-eslint-custom": "*"
  },
  "dependencies": {
-  "typescript": "~4.5.5",
+  "typescript": "~5.6.3",
   "@twitch-archiving/config": "*",
   "@twitch-archiving/messages": "*",
   "kafkajs": "~1.16.0",
   "pino": "~7.10.0",
-  "ts-command-line-args": "~2.2.1",
+  "ts-command-line-args": "~2.5.1",
   "@twitch-archiving/utils": "*",
   "irc-message-ts": "~3.0.6",
   "line-reader": "~0.4.0",

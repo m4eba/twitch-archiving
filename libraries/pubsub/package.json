@@ -14,7 +14,7 @@
   "@twitch-archiving/config-eslint-custom": "*"
  },
  "dependencies": {
-  "typescript": "~4.5.5",
+  "typescript": "~5.6.3",
   "@twitch-archiving/websocket": "*",
   "pino": "~7.10.0",
   "@types/ws": "~8.5.3",

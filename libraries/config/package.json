@@ -14,7 +14,7 @@
   "@twitch-archiving/config-eslint-custom": "*"
  },
  "dependencies": {
-  "typescript": "~4.5.5",
-  "ts-command-line-args": "~2.2.1"
+  "typescript": "~5.6.3",
+  "ts-command-line-args": "~2.5.1"
  }
 }
