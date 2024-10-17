@@ -1,0 +1,32 @@
+{
+  "name": "@twitch-archiving/tools",
+  "version": "0.0.2",
+  "bin": "dist/index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "typescript": "~5.6.3",
+    "@twitch-archiving/config": "*",
+    "@twitch-archiving/messages": "*",
+    "@twitch-archiving/database": "*",
+    "kafkajs": "~1.16.0",
+    "pino": "~7.10.0",
+    "ts-command-line-args": "~2.5.1",
+    "@twitch-archiving/utils": "*",
+    "@twitch-archiving/prisma": "*",
+    "@twitch-archiving/microservices": "*",
+    "irc-message-ts": "~3.0.6",
+    "line-reader": "~0.4.0",
+    "@types/line-reader": "~0.0.34"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.18",
+    "eslint": "~8.10.0",
+    "@twitch-archiving/config-tsconfig": "*",
+    "@twitch-archiving/config-eslint-custom": "*"
+  }
+}

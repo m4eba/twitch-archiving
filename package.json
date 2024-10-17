@@ -5,7 +5,7 @@
   "workspaces": [
     "config/*",
     "libraries/*",
-    "tools/*",
+    "tools",
     "microservices",
     "api"
   ],
