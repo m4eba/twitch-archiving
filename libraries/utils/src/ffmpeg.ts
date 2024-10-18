@@ -15,7 +15,7 @@ export async function execFfmpeg(command: FfmpegCommand): Promise<string> {
       reject(err);
     });
     command.on('end', (out, err) => {
-      resolve(err);
+      resolve(err ? err : 'error');
     });
     command.run();
   });
