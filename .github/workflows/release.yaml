@@ -3,7 +3,9 @@ name: release
 on:
   push:
     branches:
-      - main
+      - dev/**
+    tags:
+      - 'v*'
 
 jobs:
   release:
@@ -33,12 +35,15 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF/refs\/tags\//}
             VERSION_TAG="docker.io/m4eba/twitch-archiving-${{ matrix.name }}:${VERSION}"
+            LATEST_TAG="docker.io/m4eba/twitch-archiving-${{ matrix.name }}:latest"
           else
             VERSION_TAG=""
+            LATEST_TAG=""
           fi
-          echo ::set-output name=BUILD_DATE::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          echo ::set-output name=VERSION::${VERSION}
-          echo ::set-output name=VERSION_TAG::${VERSION_TAG}
+          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
+          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV
 
       - name: Publish image
         uses: docker/build-push-action@v2
@@ -49,13 +54,13 @@ jobs:
           file: ./${{ matrix.name }}/Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: |
-            docker.io/m4eba/twitch-archiving-${{ matrix.name }}:latest
-            ${{ steps.prep.outputs.VERSION_TAG }}
+            ${{ env.VERSION_TAG }}
+            ${{ env.LATEST_TAG }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
             org.opencontainers.image.url=${{ github.event.repository.html_url }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ steps.prep.outputs.VERSION }}
-            org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
+            org.opencontainers.image.version=${{ env.VERSION }}
+            org.opencontainers.image.created=${{ env.BUILD_DATE }}
