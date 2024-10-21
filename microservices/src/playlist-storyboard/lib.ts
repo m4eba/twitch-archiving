@@ -171,40 +171,10 @@ export async function processMessage(
       return;
     }
 
-    // calculate offset
-    let offset = -1;
-
-    // make screenshot for first segment
-    if (boardData.lastSegmentSeq === -1) {
-      offset = 0;
-      boardData.currentOffset = msg.duration;
-    } else {
-      logger.trace(
-        {
-          currentOffset: boardData.currentOffset,
-          duration: msg.duration,
-          interval: config.interval,
-        },
-        'checking for interval fit'
-      );
-      // check if we hit the bounds
-      if (boardData.currentOffset + msg.duration > config.interval) {
-        offset = config.interval - boardData.currentOffset;
-        boardData.currentOffset =
-          boardData.currentOffset + msg.duration - config.interval;
-        logger.trace(
-          { currentOffset: boardData.currentOffset, offset },
-          'match'
-        );
-      } else {
-        boardData.currentOffset = boardData.currentOffset + msg.duration;
+    const req = async (offset: number) => {
+      if (!file) {
+        throw new Error('storyboard file not found');
       }
-    }
-
-    // update board data
-    boardData.lastSegmentSeq = msg.sequenceNumber;
-
-    if (offset > -1) {
       boardData.lastScreenshotIndex++;
 
       // make screenshot
@@ -267,6 +237,8 @@ export async function processMessage(
         screenshotRequest.storyboard_idx = boardData.currentIdx;
         screenshotRequest.groupId = `storyboard-${board.id}-${boardData.currentIdx}`;
       } else {
+        logger.trace({ request: screenshotRequest }, 'screenshot request');
+
         fileData.screenshots.push(screenshotRequest);
         // update file data
         await client.storyboardFile.update({
@@ -289,7 +261,30 @@ export async function processMessage(
         'screenshot-' + screenshotRequest.screenshot_idx,
         []
       );
+    };
+
+    // make screenshot for first segment
+    if (boardData.lastSegmentSeq === -1) {
+      await req(0);
     }
+    boardData.currentOffset += msg.duration;
+
+    while (boardData.currentOffset > config.interval) {
+      logger.trace(
+        {
+          currentOffset: boardData.currentOffset,
+          duration: msg.duration,
+          interval: config.interval,
+        },
+        'interval fit'
+      );
+      const offset = msg.duration - boardData.currentOffset + config.interval;
+      boardData.currentOffset -= config.interval;
+      await req(offset);
+    }
+
+    // update board data
+    boardData.lastSegmentSeq = msg.sequenceNumber;
 
     logger.trace({ ...boardData, segments: [] }, 'updated board data');
     // save board data

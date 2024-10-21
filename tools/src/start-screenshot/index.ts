@@ -17,7 +17,7 @@ import {
   ServiceConfig,
   ServiceConfigOpt,
   processMessage,
-} from '@twitch-archiving/microservices/src/playlist-storyboard/lib.js';
+} from '@twitch-archiving/microservices/dist/playlist-storyboard/lib.js';
 import { getRecPrismaClient } from '@twitch-archiving/database';
 import { Kafka, Producer } from 'kafkajs';
 import {
