@@ -41,9 +41,7 @@ export async function channelEmotes(
 }
 
 export async function globalEmotes(): Promise<{ data: any; emotes: Emote[] }> {
-  const resp = await fetch(
-    'https://7tv.io/v3/emote-sets/62cdd34e72a832540de95857'
-  );
+  const resp = await fetch('https://7tv.io/v3/emote-sets/global');
   const data = (await resp.json()) as any;
   const result: Array<Emote> = extractEmoteSet(data);
   return { data, emotes: result };
