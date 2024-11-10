@@ -18,7 +18,7 @@
   "ws": "~8.5.0",
   "pino": "~7.10.0",
   "@types/ws": "~8.5.3",
-  "kafkajs": "~1.16.0",
+  "kafkajs": "~2.2.4",
   "@twitch-archiving/messages": "*"
  }
 }

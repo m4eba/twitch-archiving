@@ -13,7 +13,7 @@
     "@twitch-archiving/config": "*",
     "@twitch-archiving/messages": "*",
     "@twitch-archiving/database": "*",
-    "kafkajs": "~1.16.0",
+    "kafkajs": "~2.2.4",
     "pino": "~7.10.0",
     "ts-command-line-args": "~2.5.1",
     "@twitch-archiving/utils": "*",

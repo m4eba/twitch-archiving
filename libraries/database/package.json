@@ -20,7 +20,7 @@
     "pg": "~8.7.3",
     "@twitch-archiving/config": "*",
     "redis": "~4.1.0",
-    "kafkajs": "~1.16.0",
+    "kafkajs": "~2.2.4",
     "@twitch-archiving/messages": "*",
     "@twitch-archiving/utils": "*",
     "@twitch-archiving/chat": "*",
