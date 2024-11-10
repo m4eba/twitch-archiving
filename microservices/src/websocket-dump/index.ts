@@ -39,6 +39,9 @@ export default async function main(args: string[]) {
   const kafka: Kafka = new Kafka({
     clientId: config.kafkaClientId,
     brokers: config.kafkaBroker,
+    retry: {
+      retries: 100,
+    },
   });
 
   logger.info({ topic: config.topic }, 'subscribe');
