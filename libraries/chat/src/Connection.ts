@@ -14,7 +14,7 @@ export class Connection extends WebSocketConnection<IRCMessage> {
   private joinTimer: NodeJS.Timer | undefined = undefined;
 
   public constructor(username: string, oauth: string) {
-    super('ws://irc-ws.chat.twitch.tv:80');
+    super('wss://irc-ws.chat.twitch.tv:443');
     this.username = username;
     this.oauth = oauth;
   }
