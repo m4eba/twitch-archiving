@@ -25,6 +25,18 @@ export async function getAccessToken(
     p.playerType = DEFAULT_PLAYER_TYPE;
   }
 
+  try {
+    return await getAccessTokenPersisted(p, oauthVideo);
+  } catch (e) {
+    logger.debug({ err: e }, 'persisted access token query failed, falling back to template');
+    return await getAccessTokenTemplate(p, oauthVideo);
+  }
+}
+
+async function getAccessTokenPersisted(
+  p: AccessTokenParams,
+  oauthVideo: string
+): Promise<AccessToken> {
   const req = [
     {
       operationName: 'PlaybackAccessToken',
@@ -38,6 +50,29 @@ export async function getAccessToken(
       },
     },
   ];
+  return await postAccessToken(req, oauthVideo);
+}
+
+async function getAccessTokenTemplate(
+  p: AccessTokenParams,
+  oauthVideo: string
+): Promise<AccessToken> {
+  const req = [
+    {
+      operationName: 'PlaybackAccessToken_Template',
+      variables: { ...p, platform: 'web' },
+      query:
+        'query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}',
+    },
+  ];
+  return await postAccessToken(req, oauthVideo);
+}
+
+async function postAccessToken(
+  // eslint-disable-next-line
+  req: any,
+  oauthVideo: string
+): Promise<AccessToken> {
   const headers: { [key: string]: string } = {
     //'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
     'Client-ID': 'ue6666qo983tsx6so1t0vnawi233wa',
